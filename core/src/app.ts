@@ -3282,8 +3282,8 @@ function calculateUIScale() {
 		1.25;
 }
 function drawMenuBackground() {}
-function isImageOk(a) {
-	if (a.complete && a.naturalWidth !== 0) {
+function isImageOk(img: HTMLImageElement) {
+	if (img.complete && img.naturalWidth !== 0) {
 		return true;
 	} else {
 		return false;
@@ -3594,7 +3594,7 @@ function stopAllSounds() {
 var spritesLoaded = false;
 var spriteIndex = 0;
 var tmpPicture = null;
-function getSprite(a) {
+function getSprite(fileName: string) {
 	var b = new Image();
 	b.index = spriteIndex;
 	b.flipped = false;
@@ -3605,10 +3605,10 @@ function getSprite(a) {
 	};
 	b.onerror = () => {
 		b.isLoaded = false;
-		console.log(`File not Found: ${a}.png`);
+		console.log(`File not Found: ${fileName}.png`);
 	};
 	try {
-		tmpPicture = localStorage.getItem(`${a}.png`);
+		tmpPicture = localStorage.getItem(`${fileName}.png`);
 		b.src = tmpPicture;
 		b.crossOrigin = "anonymous";
 	} catch (d) {
@@ -4341,41 +4341,56 @@ function updateCamosList(a, b) {
 }
 window.updateCamosList = updateCamosList;
 var animLength = 3;
-var tmpSprite = null;
 var classSpriteSheets = [];
-function loadPlayerSprites(a) {
+function loadPlayerSprites(base: string) {
 	classSpriteSheets = [];
-	loadPlayerSpriteArray(a, characterClasses);
-	loadPlayerSpriteArray(a, specialClasses);
+	loadPlayerSpriteArray(base, characterClasses);
+	loadPlayerSpriteArray(base, specialClasses);
 	resize();
 }
-function loadPlayerSpriteArray(a, b) {
-	for (let i = 0; i < b.length; ++i) {
+function loadPlayerSpriteArray(base: string, classes: object[]) {
+	for (let i = 0; i < classes.length; ++i) {
 		let upSprites = [];
 		let downSprites = [];
 		let leftSprites = [];
 		let rightSprites = [];
-		upSprites.push(getSprite(`${a}characters/${b[i].folderName}/up`));
-		downSprites.push(getSprite(`${a}characters/${b[i].folderName}/down`));
-		leftSprites.push(getSprite(`${a}characters/${b[i].folderName}/left`));
-		rightSprites.push(getSprite(`${a}characters/${b[i].folderName}/left`));
+		upSprites.push(getSprite(`${base}characters/${classes[i].folderName}/up`));
+		downSprites.push(
+			getSprite(`${base}characters/${classes[i].folderName}/down`),
+		);
+		leftSprites.push(
+			getSprite(`${base}characters/${classes[i].folderName}/left`),
+		);
+		rightSprites.push(
+			getSprite(`${base}characters/${classes[i].folderName}/left`),
+		);
 		for (let j = 0; j < animLength; ++j) {
 			let tmpIndex = j;
 			upSprites.push(
-				getSprite(`${a}characters/${b[i].folderName}/up${tmpIndex + 1}`),
+				getSprite(
+					`${base}characters/${classes[i].folderName}/up${tmpIndex + 1}`,
+				),
 			);
-			tmpSprite = b[i].hasDown
-				? getSprite(`${a}characters/${b[i].folderName}/down${tmpIndex + 1}`)
-				: getSprite(`${a}characters/${b[i].folderName}/up${tmpIndex + 1}`);
+			let tmpSprite = classes[i].hasDown
+				? getSprite(
+						`${base}characters/${classes[i].folderName}/down${tmpIndex + 1}`,
+					)
+				: getSprite(
+						`${base}characters/${classes[i].folderName}/up${tmpIndex + 1}`,
+					);
 			downSprites.push(tmpSprite);
 			if (tmpIndex >= 2) {
 				tmpIndex = 0;
 			}
 			leftSprites.push(
-				getSprite(`${a}characters/${b[i].folderName}/left${tmpIndex + 1}`),
+				getSprite(
+					`${base}characters/${classes[i].folderName}/left${tmpIndex + 1}`,
+				),
 			);
 			rightSprites.push(
-				getSprite(`${a}characters/${b[i].folderName}/left${tmpIndex + 1}`),
+				getSprite(
+					`${base}characters/${classes[i].folderName}/left${tmpIndex + 1}`,
+				),
 			);
 		}
 		classSpriteSheets.push({
@@ -4383,35 +4398,41 @@ function loadPlayerSpriteArray(a, b) {
 			downSprites,
 			leftSprites,
 			rightSprites,
-			arm: getSprite(`${a}characters/${b[i].folderName}/arm`),
-			hD: getSprite(`${a}characters/${b[i].folderName}/hd`),
-			hU: getSprite(`${a}characters/${b[i].folderName}/hu`),
-			hL: getSprite(`${a}characters/${b[i].folderName}/hl`),
-			hR: getSprite(`${a}characters/${b[i].folderName}/hl`),
+			arm: getSprite(`${base}characters/${classes[i].folderName}/arm`),
+			hD: getSprite(`${base}characters/${classes[i].folderName}/hd`),
+			hU: getSprite(`${base}characters/${classes[i].folderName}/hu`),
+			hL: getSprite(`${base}characters/${classes[i].folderName}/hl`),
+			hR: getSprite(`${base}characters/${classes[i].folderName}/hl`),
 		});
 	}
 }
-var flagSprites = [];
-var clutterSprites = [];
-var cachedWalls = [];
-var floorSprites = [];
-var cachedFloors = [];
+var flagSprites: HTMLImageElement[] = [];
+var clutterSprites: HTMLImageElement[] = [];
+var cachedWalls: Record<string, HTMLCanvasElement> = {};
+var floorSprites: HTMLImageElement[] = [];
+var cachedFloors: Record<string, HTMLCanvasElement> = {};
 var sideWalkSprite = null;
 var lightSprite = null;
-var ambientSprites = [];
-var wallSpritesSeg = [];
-var particleSprites = [];
-var weaponSpriteSheet = [];
-var bulletSprites = [];
-var cachedShadows = [];
-var cachedWeaponSprites = [];
+var ambientSprites: HTMLImageElement[] = [];
+var wallSpritesSeg: HTMLImageElement[] = [];
+var particleSprites: HTMLImageElement[] = [];
+var weaponSpriteSheet: {
+	upSprite: HTMLImageElement;
+	downSprite: HTMLImageElement;
+	leftSprite: HTMLImageElement;
+	rightSprite: HTMLImageElement;
+	icon: HTMLImageElement;
+}[] = [];
+var bulletSprites: HTMLImageElement[] = [];
+var cachedShadows: HTMLCanvasElement[] = [];
+var cachedWeaponSprites: Record<string, HTMLCanvasElement> = {};
 var wallSprite = null;
 var darkFillerSprite = null;
 var healthPackSprite = null;
 var lootCrateSprite = null;
 var weaponWidth = 27;
 var weaponHeight = 54;
-function loadDefaultSprites(a) {
+function loadDefaultSprites(base: string) {
 	cachedShadows = [];
 	flagSprites = [];
 	clutterSprites = [];
@@ -4423,58 +4444,58 @@ function loadDefaultSprites(a) {
 	particleSprites = [];
 	bulletSprites = [];
 	cachedWeaponSprites = [];
-	flagSprites.push(getSprite(`${a}flags/flagb1`));
-	flagSprites.push(getSprite(`${a}flags/flagb2`));
-	flagSprites.push(getSprite(`${a}flags/flagb3`));
-	flagSprites.push(getSprite(`${a}flags/flagr1`));
-	flagSprites.push(getSprite(`${a}flags/flagr2`));
-	flagSprites.push(getSprite(`${a}flags/flagr3`));
-	clutterSprites.push(getSprite(`${a}clutter/crate1`));
-	clutterSprites.push(getSprite(`${a}clutter/barrel1`));
-	clutterSprites.push(getSprite(`${a}clutter/barrel2`));
-	clutterSprites.push(getSprite(`${a}clutter/bottle1`));
-	clutterSprites.push(getSprite(`${a}clutter/spike1`));
-	wallSprite = getSprite(`${a}wall1`);
-	ambientSprites.push(getSprite(`${a}ambient1`));
-	darkFillerSprite = getSprite(`${a}darkfiller`);
-	lightSprite = getSprite(`${a}lighting`);
-	floorSprites.push(getSprite(`${a}ground1`));
-	floorSprites.push(getSprite(`${a}ground2`));
-	floorSprites.push(getSprite(`${a}ground3`));
-	sideWalkSprite = getSprite(`${a}sidewalk1`);
-	wallSpritesSeg.push(getSprite(`${a}wallSegment1`));
-	wallSpritesSeg.push(getSprite(`${a}wallSegment2`));
-	wallSpritesSeg.push(getSprite(`${a}wallSegment3`));
-	particleSprites.push(getSprite(`${a}particles/blood/blood`));
-	particleSprites.push(getSprite(`${a}particles/oil/oil`));
-	particleSprites.push(getSprite(`${a}particles/wall`));
-	particleSprites.push(getSprite(`${a}particles/hole`));
-	particleSprites.push(getSprite(`${a}particles/blood/splatter1`));
-	particleSprites.push(getSprite(`${a}particles/blood/splatter2`));
-	particleSprites.push(getSprite(`${a}particles/explosion`));
-	healthPackSprite = getSprite(`${a}healthpack`);
-	lootCrateSprite = getSprite(`${a}lootCrate1`);
+	flagSprites.push(getSprite(`${base}flags/flagb1`));
+	flagSprites.push(getSprite(`${base}flags/flagb2`));
+	flagSprites.push(getSprite(`${base}flags/flagb3`));
+	flagSprites.push(getSprite(`${base}flags/flagr1`));
+	flagSprites.push(getSprite(`${base}flags/flagr2`));
+	flagSprites.push(getSprite(`${base}flags/flagr3`));
+	clutterSprites.push(getSprite(`${base}clutter/crate1`));
+	clutterSprites.push(getSprite(`${base}clutter/barrel1`));
+	clutterSprites.push(getSprite(`${base}clutter/barrel2`));
+	clutterSprites.push(getSprite(`${base}clutter/bottle1`));
+	clutterSprites.push(getSprite(`${base}clutter/spike1`));
+	wallSprite = getSprite(`${base}wall1`);
+	ambientSprites.push(getSprite(`${base}ambient1`));
+	darkFillerSprite = getSprite(`${base}darkfiller`);
+	lightSprite = getSprite(`${base}lighting`);
+	floorSprites.push(getSprite(`${base}ground1`));
+	floorSprites.push(getSprite(`${base}ground2`));
+	floorSprites.push(getSprite(`${base}ground3`));
+	sideWalkSprite = getSprite(`${base}sidewalk1`);
+	wallSpritesSeg.push(getSprite(`${base}wallSegment1`));
+	wallSpritesSeg.push(getSprite(`${base}wallSegment2`));
+	wallSpritesSeg.push(getSprite(`${base}wallSegment3`));
+	particleSprites.push(getSprite(`${base}particles/blood/blood`));
+	particleSprites.push(getSprite(`${base}particles/oil/oil`));
+	particleSprites.push(getSprite(`${base}particles/wall`));
+	particleSprites.push(getSprite(`${base}particles/hole`));
+	particleSprites.push(getSprite(`${base}particles/blood/splatter1`));
+	particleSprites.push(getSprite(`${base}particles/blood/splatter2`));
+	particleSprites.push(getSprite(`${base}particles/explosion`));
+	healthPackSprite = getSprite(`${base}healthpack`);
+	lootCrateSprite = getSprite(`${base}lootCrate1`);
 	weaponSpriteSheet = [];
 	for (let i = 0; i < weaponNames.length; ++i) {
 		weaponSpriteSheet.push({
-			upSprite: getSprite(`${a}weapons/${weaponNames[i]}/up`),
-			downSprite: getSprite(`${a}weapons/${weaponNames[i]}/up`),
-			leftSprite: getSprite(`${a}weapons/${weaponNames[i]}/left`),
-			rightSprite: getSprite(`${a}weapons/${weaponNames[i]}/left`),
-			icon: getSprite(`${a}weapons/${weaponNames[i]}/icon`),
+			upSprite: getSprite(`${base}weapons/${weaponNames[i]}/up`),
+			downSprite: getSprite(`${base}weapons/${weaponNames[i]}/up`),
+			leftSprite: getSprite(`${base}weapons/${weaponNames[i]}/left`),
+			rightSprite: getSprite(`${base}weapons/${weaponNames[i]}/left`),
+			icon: getSprite(`${base}weapons/${weaponNames[i]}/icon`),
 		});
 	}
-	bulletSprites.push(getSprite(`${a}weapons/bullet`));
-	bulletSprites.push(getSprite(`${a}weapons/grenade`));
-	bulletSprites.push(getSprite(`${a}weapons/flame`));
+	bulletSprites.push(getSprite(`${base}weapons/bullet`));
+	bulletSprites.push(getSprite(`${base}weapons/grenade`));
+	bulletSprites.push(getSprite(`${base}weapons/flame`));
 	resize();
 }
 var mainTitleText = document.getElementById("mainTitleText");
 function updateMenuInfo(a) {
 	mainTitleText.innerHTML = a;
 }
-function isURL(a) {
-	return a.indexOf(".") > 0;
+function isURL(str: string) {
+	return str.indexOf(".") > 0;
 }
 var linkedMod = location.hash.replace("#", "");
 loadModPack(linkedMod, linkedMod == "");
@@ -4673,28 +4694,29 @@ function loadModPack(a, b) {
 		setModInfoText("Mod could not be loaded");
 	}
 }
-function getPlayerSprite(a, b, d) {
-	let tmpSpriteCollection = classSpriteSheets[a];
-	if (tmpSpriteCollection == undefined) {
+function getPlayerSprite(classIdx: number, angle: number, animIdx: number) {
+	let tmpSprite;
+	let tmpSpriteCollection = classSpriteSheets[classIdx];
+	if (!tmpSpriteCollection) {
 		return null;
 	}
-	if (b == 90) {
-		tmpSprite = tmpSpriteCollection.leftSprites[d];
-	} else if (b == 180) {
-		tmpSprite = tmpSpriteCollection.upSprites[d];
-	} else if (b == 270) {
+	if (angle === 90) {
+		tmpSprite = tmpSpriteCollection.leftSprites[animIdx];
+	} else if (angle === 180) {
+		tmpSprite = tmpSpriteCollection.upSprites[animIdx];
+	} else if (angle === 270) {
 		if (
-			!tmpSpriteCollection.rightSprites[d].flipped &&
-			tmpSpriteCollection.rightSprites[d].isLoaded
+			!tmpSpriteCollection.rightSprites[animIdx].flipped &&
+			tmpSpriteCollection.rightSprites[animIdx].isLoaded
 		) {
-			tmpSpriteCollection.rightSprites[d] = flipSprite(
-				tmpSpriteCollection.rightSprites[d],
+			tmpSpriteCollection.rightSprites[animIdx] = flipSprite(
+				tmpSpriteCollection.rightSprites[animIdx],
 				true,
 			);
 		}
-		tmpSprite = tmpSpriteCollection.rightSprites[d];
+		tmpSprite = tmpSpriteCollection.rightSprites[animIdx];
 	} else {
-		tmpSprite = tmpSpriteCollection.downSprites[d];
+		tmpSprite = tmpSpriteCollection.downSprites[animIdx];
 	}
 	return tmpSprite;
 }
@@ -4703,7 +4725,7 @@ function getHatSprite(a, b) {
 	let tmpAcc = a.account;
 	if (tmpAcc != undefined) {
 		if (tmpAcc.hat != null) {
-			tmpSprite = cachedHats[tmpAcc.hat.id];
+			let tmpSprite = cachedHats[tmpAcc.hat.id];
 			if (tmpSprite == undefined) {
 				let d = {
 					lS: null,
@@ -4770,6 +4792,7 @@ function getHatSprite(a, b) {
 				}
 			}
 		} else {
+			let tmpSprite;
 			let tmpSpriteCollection = classSpriteSheets[a.classIndex];
 			if (tmpSpriteCollection == undefined) {
 				return null;
@@ -4798,7 +4821,7 @@ var cachedShirts = [];
 function getShirtSprite(a, b) {
 	let tmpAcc = a.account;
 	if (tmpAcc != undefined && tmpAcc.shirt != null && a.classIndex != 8) {
-		tmpSprite = cachedShirts[tmpAcc.shirt.id];
+		let tmpSprite = cachedShirts[tmpAcc.shirt.id];
 		if (tmpSprite == undefined) {
 			let d = {
 				lS: null,
@@ -4867,19 +4890,18 @@ function getShirtSprite(a, b) {
 	}
 	return null;
 }
-tmpSprite = null;
-function getWeaponSprite(a, b, d) {
-	let tmpIndex = `${a}${b}${d}`;
-	tmpSprite = cachedWeaponSprites[tmpIndex];
+function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
+	let tmpIndex = `${weaponIndex}${camo}${angle}`;
+	let tmpSprite = cachedWeaponSprites[tmpIndex];
 	if (tmpSprite == undefined) {
 		var e = null;
-		var e = weaponSpriteSheet[a];
+		var e = weaponSpriteSheet[weaponIndex];
 		if (e != undefined && e != null) {
-			if (d == 90) {
+			if (angle == 90) {
 				e = e.leftSprite;
-			} else if (d == 180) {
+			} else if (angle == 180) {
 				e = e.upSprite;
-			} else if (d == 270) {
+			} else if (angle == 270) {
 				if (!e.rightSprite.flipped && e.rightSprite.isLoaded) {
 					e.rightSprite = flipSprite(e.rightSprite, true);
 				}
@@ -4887,20 +4909,20 @@ function getWeaponSprite(a, b, d) {
 			} else {
 				e = e.downSprite;
 			}
-			d = document.createElement("canvas");
-			a = d.getContext("2d");
-			a.imageSmoothingEnabled = false;
-			d.width = e.width;
-			d.height = e.height;
-			a.drawImage(e, 0, 0, d.width, d.height);
-			tmpSprite = d;
+			let canvasElem = document.createElement("canvas");
+			let ctx = canvasElem.getContext("2d");
+			ctx.imageSmoothingEnabled = false;
+			canvasElem.width = e.width;
+			canvasElem.height = e.height;
+			ctx.drawImage(e, 0, 0, canvasElem.width, canvasElem.height);
+			tmpSprite = canvasElem;
 			cachedWeaponSprites[tmpIndex] = tmpSprite;
-			if (b >= 0) {
-				d = new Image();
-				d.wpnImg = tmpSprite;
-				d.flip = e.flipped;
-				d.tmpInx = tmpIndex;
-				d.onload = function () {
+			if (camo >= 0) {
+				let img = new Image();
+				img.wpnImg = tmpSprite;
+				img.flip = e.flipped;
+				img.tmpInx = tmpIndex;
+				img.onload = function () {
 					var a = document.createElement("canvas");
 					var b = a.getContext("2d");
 					b.imageSmoothingEnabled = false;
@@ -4919,11 +4941,11 @@ function getWeaponSprite(a, b, d) {
 					);
 					cachedWeaponSprites[this.tmpInx] = a;
 				};
-				d.src = getCamoURL(b);
+				img.src = getCamoURL(camo);
 			}
 		}
 	}
-	return tmpSprite;
+	return cachedWeaponSprites[tmpIndex];
 }
 var playerCanvas = document.createElement("canvas");
 var playerContext = playerCanvas.getContext("2d");
@@ -4945,7 +4967,7 @@ function drawGameObjects(delta: number) {
 				!tmpObject.dead &&
 				(tmpObject.index === player.index || tmpObject.onScreen)
 			) {
-				if (tmpObject.jumpY == undefined) {
+				if (tmpObject.jumpY === undefined) {
 					tmpObject.jumpY = 0;
 				}
 				playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
@@ -5539,15 +5561,15 @@ function getCachedFloor(tile) {
 	}
 	return cachedFloors[tmpIndex];
 }
-function renderSideWalks(a, b, d, e, f, h, g, l) {
+function renderSideWalks(ctx: CanvasRenderingContext2D, b, d, e, f, h, g, l) {
 	for (let i = 0; i < b; ++i) {
-		a.drawImage(sideWalkSprite, f, h, d, d);
+		ctx.drawImage(sideWalkSprite, f, h, d, d);
 		if (e != null) {
-			a.save();
-			a.translate(f + d / 2, h + d / 2);
-			a.rotate(e);
-			a.drawImage(ambientSprites[0], -(d / 2), -(d / 2), d, d);
-			a.restore();
+			ctx.save();
+			ctx.translate(f + d / 2, h + d / 2);
+			ctx.rotate(e);
+			ctx.drawImage(ambientSprites[0], -(d / 2), -(d / 2), d, d);
+			ctx.restore();
 		}
 		f += g;
 		h += l;
@@ -5673,59 +5695,75 @@ function drawMap(layer: number) {
 		}
 	}
 }
-var tmpShadow = null;
-function drawSprite(a, b, d, e, f, h, g, l, m, k, p) {
-	if (b != null && b !== undefined && b.width > 0) {
-		d = Math.floor(d);
-		e = Math.floor(e);
-		f = Math.floor(f);
-		h = Math.floor(h);
+function drawSprite(
+	ctx: CanvasRenderingContext2D,
+	sprite: HTMLImageElement,
+	dx: number,
+	dy: number,
+	dw: number,
+	dh: number,
+	angle: number,
+	l,
+	m,
+	k,
+	p,
+) {
+	if (sprite != null && sprite !== undefined && sprite.width > 0) {
+		dx = Math.floor(dx);
+		dy = Math.floor(dy);
+		dw = Math.floor(dw);
+		dh = Math.floor(dh);
 		m = Math.floor(m);
-		a.rotate(g);
-		a.drawImage(b, d, e, f, h);
+		ctx.rotate(angle);
+		ctx.drawImage(sprite, dx, dy, dw, dh);
 		if (l && showShadows) {
-			a.globalAlpha = 1;
-			a.translate(0, m);
-			tmpShadow = getCachedShadow(b, f, h + p, k);
-			if (tmpShadow != null && tmpShadow !== undefined) {
-				a.drawImage(tmpShadow, d, e + h);
+			ctx.globalAlpha = 1;
+			ctx.translate(0, m);
+			let tmpShadow = getCachedShadow(sprite, dw, dh + p, k);
+			if (tmpShadow) {
+				ctx.drawImage(tmpShadow, dx, dy + dh);
 			}
-			a.rotate(-g);
-			a.translate(0, -m);
+			ctx.rotate(-angle);
+			ctx.translate(0, -m);
 		}
 	}
 }
 var shadowIntensity = 0.16;
-function getCachedShadow(a, b, d, e) {
+function getCachedShadow(
+	sprite: HTMLImageElement,
+	width: number,
+	height: number,
+	e,
+) {
 	if (
-		cachedShadows[a.index] === undefined &&
-		b !== 0 &&
-		a !== undefined &&
-		a.isLoaded
+		cachedShadows[sprite.index] === undefined &&
+		width !== 0 &&
+		sprite !== undefined &&
+		sprite.isLoaded
 	) {
 		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		ctx.imageSmoothingEnabled = false;
 
-		tmpCanvas.width = b;
-		tmpCanvas.height = d;
+		tmpCanvas.width = width;
+		tmpCanvas.height = height;
 		ctx.globalAlpha = e === 0.5 ? shadowIntensity : shadowIntensity * 0.75;
 		ctx.scale(1, -e);
 		ctx.transform(1, 0, 0, 1, 0, 0);
-		ctx.drawImage(a, 0, -d, b, d);
-		b = ctx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
-		d = b.data;
+		ctx.drawImage(sprite, 0, -height, width, height);
+		let imgData = ctx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
+		let pixelArray = imgData.data;
 
-		for (let i = 0; i < d.length; i += 4) {
-			d[i] = 0;
-			d[i + 1] = 0;
-			d[i + 2] = 0;
-			d[i + 3] = d[i + 3];
+		for (let i = 0; i < pixelArray.length; i += 4) {
+			pixelArray[i] = 0;
+			pixelArray[i + 1] = 0;
+			pixelArray[i + 2] = 0;
+			pixelArray[i + 3] = pixelArray[i + 3]; // ??
 		}
-		ctx.putImageData(b, 0, 0);
-		cachedShadows[a.index] = tmpCanvas;
+		ctx.putImageData(imgData, 0, 0);
+		cachedShadows[sprite.index] = tmpCanvas;
 	}
-	return cachedShadows[a.index];
+	return cachedShadows[sprite.index];
 }
 function canSee(a, b, d, e) {
 	return a + d > 0 && b + e > 0 && a < maxScreenWidth && b < maxScreenHeight;
@@ -5880,7 +5918,7 @@ function updateNotifications(delta: number) {
 	}
 	graph.globalAlpha = 1;
 }
-var animTexts = [];
+var animTexts: AnimText[] = [];
 for (let i = 0; i < 20; i++) {
 	animTexts.push(new AnimText());
 }
