@@ -317,7 +317,7 @@ io.on("connection", (socket: Socket) => {
 				}
 				bullet.deactivate();
 				for (let i = 0; i < destPlayers.length; i++) {
-					if (destPlayers[i].dead) return;
+					if (destPlayers[i] && destPlayers[i].dead) return;
 					io.emit("1", {
 						dID: sourcePlayer.index,
 						gID: destPlayers[i].index,
