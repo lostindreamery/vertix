@@ -9,6 +9,10 @@
 			},
 			"suspicious": {
 				// "noVar": "warn"
+			},
+			"correctness": {
+				"noUnusedVariables": "info",
+				"useParseIntRadix": "off"
 			}
 		}
 	}

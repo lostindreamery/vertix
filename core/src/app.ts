@@ -17,26 +17,20 @@ const {
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
-	getAngleDifference,
-	jsonByteCount,
-	byteCount,
 	getDistance,
 	getAngle,
 	shadeColor,
 	randomFloat,
 	randomInt,
-	linearInterpolate,
 } = utils;
 
 let playerName: string | undefined;
 var playerClassIndex: number | undefined;
 var playerType;
-var healthBarWidth;
 var playerNameInput: HTMLInputElement =
 	document.getElementById("playerNameInput");
 var socket: Socket | undefined;
-var reason;
-var animLoopHandle;
+var reason: string | undefined;
 var mobile = false;
 var room;
 var currentFPS = 0;
@@ -46,20 +40,18 @@ var delta = 0;
 var horizontalDT = 0;
 var verticalDT = 0;
 var roomNum = 0;
-var currentTime;
+var currentTime: number | undefined;
 var oldTime = Date.now();
 var FRAME_STEP = 1000 / 60;
 var count = -1;
 var clientPrediction = true;
 var inputNumber = 0;
 var clientSpeed = 12;
-var temp = 1;
 var thisInput = [];
 var keyd = 1;
 var tabbed = 0;
 var timeSinceLastUpdate = 0;
 var timeOfLastUpdate = 0;
-var port;
 
 window.settingShowNames = settingShowNames;
 
@@ -282,7 +274,7 @@ window.onload = () => {
 			window.open("/leaderboards.html", "_blank");
 		};
 		$.get("/getIP", (a) => {
-			port = a.port;
+			let port = a.port;
 			if (!socket) {
 				socket = io(`http://${devTest ? "localhost" : a.ip}:${a.port}`, {
 					reconnection: true,
@@ -292,8 +284,8 @@ window.onload = () => {
 				setupSocket(socket);
 			}
 			socket.once("connect", () => {
-				var a = getCookie("logKey");
-				var d = getCookie("userName");
+				var a = localStorage.getItem("logKey");
+				var d = localStorage.getItem("userName");
 				if (a && a !== "" && d && d !== "") {
 					socket.emit("dbLogin", {
 						lgKey: a,
@@ -338,8 +330,8 @@ window.onload = () => {
 					resetHatList();
 					resetShirtList();
 					d = a = "";
-					setCookie("logKey", "");
-					setCookie("userName", "");
+					localStorage.setItem("logKey", "");
+					localStorage.setItem("userName", "");
 					socket.emit("dbLogout");
 				};
 				recoverButton.onclick = () => {
@@ -439,21 +431,21 @@ window.onload = () => {
 									}
 								});
 							});
-							s.on("connect_error", (a) => {
+							s.on("connect_error", (_) => {
 								lobbyMessage.textContent = "No Server Found.";
 								changingLobby = false;
 								s.close();
 							});
 						} else {
 							lobbyMessage.style.display = "block";
-							lobbyMessage.innerHTML = "Please enter a valid IP";
+							lobbyMessage.textContent = "Please enter a valid IP";
 						}
 					}
 				};
 			});
 		});
 		hideUI(true);
-		$(".noRightClick").bind("contextmenu", (a) => false);
+		$(".noRightClick").bind("contextmenu", (_) => false);
 		resize();
 		$("#loadingWrapper").fadeOut(200, () => {});
 	}
@@ -613,13 +605,12 @@ var targetChanged = true;
 function focusGame() {
 	mainCanvas.focus();
 }
-let lastTarget;
-function gameInput(a) {
-	a.preventDefault();
-	a.stopPropagation();
+function gameInput(event: MouseEvent) {
+	event.preventDefault();
+	event.stopPropagation();
 	var b = getCurrentWeapon(player)?.yOffset ?? 0;
-	mouseX = a.clientX;
-	mouseY = a.clientY;
+	mouseX = event.clientX;
+	mouseY = event.clientY;
 	lastAngle = target.f;
 	lastDist = target.d;
 	target.d = Math.sqrt(
@@ -640,31 +631,28 @@ function gameInput(a) {
 	if (lastAngle != target.f || lastDist != target.d) {
 		targetChanged = true;
 	}
-	lastTarget = target.f;
+	// lastTarget = target.f;
 }
-function mouseDown(a) {
-	a.preventDefault();
-	a.stopPropagation();
+function mouseDown(event: MouseEvent) {
+	event.preventDefault();
+	event.stopPropagation();
 	keys.lm = 1;
 }
-function mouseUp(a) {
-	a.preventDefault();
-	a.stopPropagation();
+function mouseUp(event: MouseEvent) {
+	event.preventDefault();
+	event.stopPropagation();
 	keys.lm = 0;
 }
-if (mainCanvas.addEventListener) {
-	mainCanvas.addEventListener("mousewheel", gameScroll, false);
-	mainCanvas.addEventListener("DOMMouseScroll", gameScroll, false);
-} else {
-	mainCanvas.attachEvent("onmousewheel", gameScroll);
-}
+mainCanvas.addEventListener("mousewheel", gameScroll, false);
+mainCanvas.addEventListener("DOMMouseScroll", gameScroll, false);
 var userScroll = 0;
-function gameScroll(a) {
-	a = window.event || a;
-	a.preventDefault();
-	a.stopPropagation();
-	userScroll = Math.max(-1, Math.min(1, a.wheelDelta || -a.detail)) * -1;
+function gameScroll(event) {
+	event.preventDefault();
+	event.stopPropagation();
+	userScroll =
+		Math.max(-1, Math.min(1, event.wheelDelta || -event.detail)) * -1;
 }
+// todo: redo input handling to not use keycodes
 var keyMap = [];
 var showingScoreBoard = false;
 var keyToChange = null;
@@ -724,7 +712,7 @@ function inputReset(a) {
 	};
 	updateKeysUI();
 	if (a) {
-		setCookie("customControls", JSON.stringify(keysList));
+		localStorage.setItem("customControls", JSON.stringify(keysList));
 	}
 }
 inputReset(false);
@@ -747,63 +735,68 @@ function getKeyName(a) {
 	return b;
 }
 function saveKeysToCookie() {
-	setCookie("customControls", JSON.stringify(keysList));
+	localStorage.setItem("customControls", JSON.stringify(keysList));
 }
-if (getCookie("customControls") != "") {
+if (localStorage.getItem("customControls")) {
 	try {
-		keysList = JSON.parse(getCookie("customControls"));
-	} catch (a) {}
-	if (keysList != undefined) {
+		keysList = JSON.parse(localStorage.getItem("customControls"));
+	} catch (_) {}
+	if (keysList) {
 		updateKeysUI();
 	}
 }
 function updateKeysUI() {
-	document.getElementById("upKeyCh").innerHTML = getKeyName(keysList.upKey);
-	document.getElementById("downKeyCh").innerHTML = getKeyName(keysList.downKey);
-	document.getElementById("leftKeyCh").innerHTML = getKeyName(keysList.leftKey);
-	document.getElementById("rightKeyCh").innerHTML = getKeyName(
+	document.getElementById("upKeyCh").textContent = getKeyName(keysList.upKey);
+	document.getElementById("downKeyCh").textContent = getKeyName(
+		keysList.downKey,
+	);
+	document.getElementById("leftKeyCh").textContent = getKeyName(
+		keysList.leftKey,
+	);
+	document.getElementById("rightKeyCh").textContent = getKeyName(
 		keysList.rightKey,
 	);
-	document.getElementById("reloadKeyCh").innerHTML = getKeyName(
+	document.getElementById("reloadKeyCh").textContent = getKeyName(
 		keysList.reloadKey,
 	);
-	document.getElementById("jumpKeyCh").innerHTML = getKeyName(keysList.jumpKey);
-	document.getElementById("sprayKeyCh").innerHTML = getKeyName(
+	document.getElementById("jumpKeyCh").textContent = getKeyName(
+		keysList.jumpKey,
+	);
+	document.getElementById("sprayKeyCh").textContent = getKeyName(
 		keysList.sprayKey,
 	);
-	document.getElementById("leaderboardKeyCh").innerHTML = getKeyName(
+	document.getElementById("leaderboardKeyCh").textContent = getKeyName(
 		keysList.leaderboardKey,
 	);
-	document.getElementById("chatToggleKeyCh").innerHTML = getKeyName(
+	document.getElementById("chatToggleKeyCh").textContent = getKeyName(
 		keysList.chatToggleKey,
 	);
-	document.getElementById("incWeapKeyCh").innerHTML = getKeyName(
+	document.getElementById("incWeapKeyCh").textContent = getKeyName(
 		keysList.incWeapKey,
 	);
-	document.getElementById("decWeapKeyCh").innerHTML = getKeyName(
+	document.getElementById("decWeapKeyCh").textContent = getKeyName(
 		keysList.decWeapKey,
 	);
 }
 window.addEventListener("keydown", keyDown, false);
-function keyDown(a) {
-	a = a || event;
+function keyDown(event: KeyboardEvent) {
 	if (keyToChange != null) {
-		var b = keyCodeMap[a.keyCode];
+		var b = keyCodeMap[event.keyCode];
 		if (b == undefined || !b.trim()) {
-			b = String.fromCharCode(a.keyCode);
+			b = String.fromCharCode(event.keyCode);
 		}
 		if (b.trim()) {
 			keyChangeElement.innerHTML = b.charAt(0).toUpperCase() + b.slice(1);
-			keysList[keyToChange] = a.keyCode;
+			keysList[keyToChange] = event.keyCode;
 		} else {
 			keyChangeElement.innerHTML = previousKeyElementContent;
 		}
 		keyChangeElement = keyToChange = null;
 		saveKeysToCookie();
-	} else if (mainCanvas == document.activeElement) {
-		a.preventDefault();
-		keyMap[a.keyCode] = a.type == "keydown";
-		if (a.keyCode == 27 && gameStart) {
+	} else if (mainCanvas === document.activeElement) {
+		event.preventDefault();
+		keyMap[event.keyCode] = event.type === "keydown";
+		if (event.keyCode === 27 && gameStart) {
 			showESCMenu();
 		}
 		if (keyMap[keysList.upKey] && !keys.u) {
@@ -832,7 +825,7 @@ function keyDown(a) {
 		if (keyMap[keysList.reloadKey] && !keys.rl) {
 			keys.rl = 1;
 		}
-		if (a.keyCode == keysList.chatToggleKey) {
+		if (event.keyCode === keysList.chatToggleKey) {
 			document.getElementById("chatInput").focus();
 		}
 		if (
@@ -848,39 +841,38 @@ function keyDown(a) {
 	}
 }
 mainCanvas.addEventListener("keyup", keyUp, false);
-function keyUp(a) {
-	a = a || event;
-	a.preventDefault();
-	keyMap[a.keyCode] = a.type == "keydown";
-	if (a.keyCode == keysList.upKey) {
+function keyUp(event: KeyboardEvent) {
+	event.preventDefault();
+	keyMap[event.keyCode] = event.type === "keydown";
+	if (event.keyCode === keysList.upKey) {
 		keys.u = 0;
 	}
-	if (a.keyCode == keysList.downKey) {
+	if (event.keyCode === keysList.downKey) {
 		keys.d = 0;
 	}
-	if (a.keyCode == keysList.leftKey) {
+	if (event.keyCode === keysList.leftKey) {
 		keys.l = 0;
 	}
-	if (a.keyCode == keysList.rightKey) {
+	if (event.keyCode === keysList.rightKey) {
 		keys.r = 0;
 	}
-	if (a.keyCode == keysList.jumpKey) {
+	if (event.keyCode === keysList.jumpKey) {
 		keys.s = 0;
 	}
-	if (a.keyCode == keysList.reloadKey) {
+	if (event.keyCode === keysList.reloadKey) {
 		keys.rl = 0;
 	}
-	if (a.keyCode == keysList.incWeapKey) {
+	if (event.keyCode === keysList.incWeapKey) {
 		playerSwapWeapon(findUserByIndex(player.index), 1);
 	}
-	if (a.keyCode == keysList.decWeapKey) {
+	if (event.keyCode === keysList.decWeapKey) {
 		playerSwapWeapon(findUserByIndex(player.index), -1);
 	}
-	if (a.keyCode == keysList.sprayKey) {
+	if (event.keyCode === keysList.sprayKey) {
 		sendSpray();
 	}
 	if (
-		a.keyCode == keysList.leaderboardKey &&
+		event.keyCode === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
 		!player.dead &&
 		!gameOver &&
@@ -933,12 +925,11 @@ function toggleTeamChat() {
 	mainCanvas.focus();
 }
 var profanityList = []; // emptied
-var tmpString = "";
 function checkProfanityString(a) {
 	if (showProfanity) {
 		for (let i = 0; i < profanityList.length; ++i) {
 			if (a.indexOf(profanityList[i]) > -1) {
-				tmpString = "";
+				let tmpString = "";
 				for (var d = 0; d < profanityList[i].length; ++d) {
 					tmpString += "*";
 				}
@@ -994,10 +985,9 @@ ChatManager.prototype.appendMessage = (msgElem: HTMLElement) => {
 	chatList.appendChild(msgElem);
 };
 var chat = new ChatManager();
-var tmpChatUser = null;
 function messageFromServer(a) {
 	try {
-		tmpChatUser = findUserByIndex(a[0]);
+		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
 			if (tmpChatUser.index === player.index) return;
 			chat.addChatLine(
@@ -1023,22 +1013,7 @@ mapCanvas.width = 200;
 mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
 
-function setCookie(a, b) {
-	if (typeof Storage !== "undefined") {
-		localStorage.setItem(a, b);
-	}
-}
-function getCookie(a) {
-	if (
-		typeof Storage !== "undefined" &&
-		((a = localStorage.getItem(a)), a != null)
-	) {
-		return a;
-	} else {
-		return "";
-	}
-}
-if (getCookie("showNames") != "false") {
+if (localStorage.getItem("showNames") !== "false") {
 	if (!document.getElementById("showNames").checked) {
 		document.getElementById("showNames").click();
 	}
@@ -1046,9 +1021,9 @@ if (getCookie("showNames") != "false") {
 var showNames = document.getElementById("showNames").checked;
 function settingShowNames(a) {
 	showNames = a.checked;
-	setCookie("showNames", showNames ? "true" : "false");
+	localStorage.setItem("showNames", showNames ? "true" : "false");
 }
-if (getCookie("showParticles") != "false") {
+if (localStorage.getItem("showParticles") !== "false") {
 	if (!document.getElementById("showParticles").checked) {
 		document.getElementById("showParticles").click();
 	}
@@ -1056,9 +1031,9 @@ if (getCookie("showParticles") != "false") {
 var showParticles = document.getElementById("showParticles").checked;
 function settingShowParticles(a) {
 	showParticles = a.checked;
-	setCookie("showParticles", showParticles ? "true" : "false");
+	localStorage.setItem("showParticles", showParticles ? "true" : "false");
 }
-if (getCookie("showTrippy") == "true") {
+if (localStorage.getItem("showTrippy") === "true") {
 	if (!document.getElementById("showTrippy").checked) {
 		document.getElementById("showTrippy").click();
 	}
@@ -1069,9 +1044,9 @@ var showTrippy = (document.getElementById("showTrippy") as HTMLInputElement)
 	.checked;
 function settingShowTrippy(elem: HTMLInputElement) {
 	showTrippy = elem.checked;
-	setCookie("showTrippy", showTrippy ? "true" : "false");
+	localStorage.setItem("showTrippy", showTrippy ? "true" : "false");
 }
-if (getCookie("showSprays") != "false") {
+if (localStorage.getItem("showSprays") !== "false") {
 	if (!document.getElementById("showSprays").checked) {
 		document.getElementById("showSprays").click();
 	}
@@ -1079,10 +1054,10 @@ if (getCookie("showSprays") != "false") {
 var showSprays = document.getElementById("showSprays").checked;
 function settingShowSprays(a) {
 	showSprays = a.checked;
-	setCookie("showSprays", showSprays ? "true" : "false");
+	localStorage.setItem("showSprays", showSprays ? "true" : "false");
 }
 if (
-	getCookie("showProfanity") != "false" &&
+	localStorage.getItem("showProfanity") !== "false" &&
 	document.getElementById("showProfanity").checked
 ) {
 	document.getElementById("showProfanity").click();
@@ -1090,9 +1065,9 @@ if (
 var showProfanity = document.getElementById("showProfanity").checked;
 function settingProfanity(a) {
 	showProfanity = a.checked;
-	setCookie("showProfanity", showProfanity ? "true" : "false");
+	localStorage.setItem("showProfanity", showProfanity ? "true" : "false");
 }
-if (getCookie("showFade") != "false") {
+if (localStorage.getItem("showFade") !== "false") {
 	if (!document.getElementById("showFade").checked) {
 		document.getElementById("showFade").click();
 	}
@@ -1100,9 +1075,9 @@ if (getCookie("showFade") != "false") {
 var showUIFade = document.getElementById("showFade").checked;
 function settingShowFade(a) {
 	showUIFade = a.checked;
-	setCookie("showFade", showUIFade ? "true" : "false");
+	localStorage.setItem("showFade", showUIFade ? "true" : "false");
 }
-if (getCookie("showShadows") != "false") {
+if (localStorage.getItem("showShadows") !== "false") {
 	if (!document.getElementById("showShadows").checked) {
 		document.getElementById("showShadows").click();
 	}
@@ -1110,9 +1085,9 @@ if (getCookie("showShadows") != "false") {
 var showShadows = document.getElementById("showShadows").checked;
 function settingShowShadows(a) {
 	showShadows = a.checked;
-	setCookie("showShadows", showShadows ? "true" : "false");
+	localStorage.setItem("showShadows", showShadows ? "true" : "false");
 }
-if (getCookie("showGlows") != "false") {
+if (localStorage.getItem("showGlows") !== "false") {
 	if (!document.getElementById("showGlows").checked) {
 		document.getElementById("showGlows").click();
 	}
@@ -1120,9 +1095,9 @@ if (getCookie("showGlows") != "false") {
 var showGlows = document.getElementById("showGlows").checked;
 function settingShowGlows(a) {
 	showGlows = a.checked;
-	setCookie("showGlows", showGlows ? "true" : "false");
+	localStorage.setItem("showGlows", showGlows ? "true" : "false");
 }
-if (getCookie("showBTrails") != "false") {
+if (localStorage.getItem("showBTrails") !== "false") {
 	if (!document.getElementById("showBTrails").checked) {
 		document.getElementById("showBTrails").click();
 	}
@@ -1130,9 +1105,9 @@ if (getCookie("showBTrails") != "false") {
 var showBTrails = document.getElementById("showBTrails").checked;
 function settingShowBTrails(a) {
 	showBTrails = a.checked;
-	setCookie("showBTrails", showBTrails ? "true" : "false");
+	localStorage.setItem("showBTrails", showBTrails ? "true" : "false");
 }
-if (getCookie("showChat") != "false") {
+if (localStorage.getItem("showChat") !== "false") {
 	if (!document.getElementById("showChat").checked) {
 		document.getElementById("showChat").click();
 	}
@@ -1147,9 +1122,9 @@ function settingShowChat(a) {
 	} else {
 		document.getElementById("chatbox").style.display = "none";
 	}
-	setCookie("showChat", showChat ? "true" : "false");
+	localStorage.setItem("showChat", showChat ? "true" : "false");
 }
-if (getCookie("hideUI") != "false") {
+if (localStorage.getItem("hideUI") !== "false") {
 	if (!document.getElementById("hideUI").checked) {
 		document.getElementById("hideUI").click();
 	}
@@ -1157,9 +1132,9 @@ if (getCookie("hideUI") != "false") {
 var showUIALL = document.getElementById("hideUI").checked;
 function settingHideUI(a) {
 	showUIALL = a.checked;
-	setCookie("hideUI", showUIALL ? "true" : "false");
+	localStorage.setItem("hideUI", showUIALL ? "true" : "false");
 }
-if (getCookie("showPINGFPS") != "false") {
+if (localStorage.getItem("showPINGFPS") !== "false") {
 	if (!document.getElementById("showPingFps").checked) {
 		document.getElementById("showPingFps").click();
 	}
@@ -1170,9 +1145,9 @@ function settingShowPingFps(a) {
 	if (!showPINGFPS) {
 		document.getElementById("conStatContainer").style.display = "none";
 	}
-	setCookie("showPINGFPS", showPINGFPS ? "true" : "false");
+	localStorage.setItem("showPINGFPS", showPINGFPS ? "true" : "false");
 }
-if (getCookie("showLeader") !== "false") {
+if (localStorage.getItem("showLeader") !== "false") {
 	if (!document.getElementById("showLeader").checked) {
 		document.getElementById("showLeader").click();
 	}
@@ -1187,9 +1162,9 @@ function settingShowLeader(a) {
 	} else {
 		document.getElementById("status").style.display = "none";
 	}
-	setCookie("showLeader", showLeader ? "true" : "false");
+	localStorage.setItem("showLeader", showLeader ? "true" : "false");
 }
-if (getCookie("selectChat") == "true") {
+if (localStorage.getItem("selectChat") === "true") {
 	if (!document.getElementById("selectChat").checked) {
 		document.getElementById("selectChat").click();
 	}
@@ -1198,19 +1173,17 @@ var selectChat = document.getElementById("selectChat").checked;
 settingSelectChat(document.getElementById("selectChat"));
 function settingSelectChat(elem: HTMLElement) {
 	selectChat = elem.checked;
-	setCookie("selectChat", selectChat ? "true" : "false");
-	if (selectChat) {
-		document.getElementById("chatList").style.pointerEvents = "auto";
-	} else {
-		document.getElementById("chatList").style.pointerEvents = "none";
-	}
+	localStorage.setItem("selectChat", selectChat ? "true" : "false");
+	document.getElementById("chatList").style.pointerEvents = selectChat
+		? "auto"
+		: "none";
 }
 var targetFPS = 30;
-if (getCookie("targetFPS") != "") {
-	targetFPS = getCookie("targetFPS");
+if (localStorage.getItem("targetFPS")) {
+	targetFPS = localStorage.getItem("targetFPS");
 	try {
-		targetFPS *= 1;
-	} catch (a) {
+		targetFPS = Number.parseInt(targetFPS);
+	} catch (_) {
 		targetFPS = 30;
 	}
 	const fpsSelect: HTMLSelectElement = document.getElementById("fpsSelect");
@@ -1220,11 +1193,11 @@ window.pickedFps = pickedFps;
 function pickedFps(elem: HTMLSelectElement) {
 	targetFPS = elem.options[elem.selectedIndex].value;
 	try {
-		targetFPS *= 1;
-	} catch (err) {
+		targetFPS = Number.parseInt(targetFPS);
+	} catch (_) {
 		targetFPS = 30;
 	}
-	setCookie("targetFPS", targetFPS);
+	localStorage.setItem("targetFPS", targetFPS);
 }
 function changeMenuTab(event: Event, tabId: string) {
 	const tabContents = document.getElementsByClassName("tabcontent");
@@ -1389,8 +1362,8 @@ function setupSocket(a: Socket) {
 			document.getElementById("playerNameInput").value = a.text;
 			tmpLogKey = a.logKey;
 			tmpUserName = a.text;
-			setCookie("logKey", a.logKey);
-			setCookie("userName", a.text);
+			localStorage.setItem("logKey", a.logKey);
+			localStorage.setItem("userName", a.text);
 			loggedIn = true;
 			player.loggedIn = true;
 			const user = findUserByIndex(player.index);
@@ -1487,7 +1460,7 @@ function setupSocket(a: Socket) {
 	});
 	a.on("dbChangeUserR", (a, d) => {
 		if (d) {
-			setCookie("userName", a);
+			localStorage.setItem("userName", a);
 			player.account.user_name = a;
 			editProfileMessage.innerHTML = "Success. Account Updated.";
 		} else {
@@ -1808,7 +1781,7 @@ function showESCMenu() {
 	document.getElementById("startMenuWrapper").style.display = "block";
 }
 var buttonCount = 0;
-function showStatTable(a, b, d, e, f, h) {
+function showStatTable(userList: object[], b, d, e, f, h) {
 	buttonCount = 0;
 	if (h) {
 		hideUI(false);
@@ -1849,29 +1822,29 @@ function showStatTable(a, b, d, e, f, h) {
 			}
 			if (b != null) {
 				document.getElementById("voteModeContainer").innerHTML = "";
-				for (var g = 0; g < b.length; ++g) {
-					d = document.createElement("button");
-					d.className = "modeVoteButton";
-					d.setAttribute("id", `votesText${g}`);
-					d.innerHTML = `${b[g].name}: ${b[g].votes}`;
-					document.getElementById("voteModeContainer").appendChild(d);
-					d.onclick = ((a, d) => () => {
+				for (let i = 0; i < b.length; ++i) {
+					let modeVoteBtn = document.createElement("button");
+					modeVoteBtn.className = "modeVoteButton";
+					modeVoteBtn.setAttribute("id", `votesText${i}`);
+					modeVoteBtn.innerHTML = `${b[i].name}: ${b[i].votes}`;
+					document.getElementById("voteModeContainer").appendChild(modeVoteBtn);
+					modeVoteBtn.onclick = ((a, d) => () => {
 						mainCanvas.focus();
 						socket.emit("modeVote", a.indx);
-						for (var e = 0; e < b.length; ++e) {
+						for (let j = 0; j < b.length; ++j) {
 							if (
-								d === e &&
-								document.getElementById(`votesText${e}`).className ===
+								d === j &&
+								document.getElementById(`votesText${j}`).className ===
 									"modeVoteButton"
 							) {
-								document.getElementById(`votesText${e}`).className =
+								document.getElementById(`votesText${j}`).className =
 									"modeVoteButtonA";
 							} else {
-								document.getElementById(`votesText${e}`).className =
+								document.getElementById(`votesText${j}`).className =
 									"modeVoteButton";
 							}
 						}
-					})(b[g], g);
+					})(b[i], i);
 				}
 			}
 		}
@@ -1923,78 +1896,77 @@ function showStatTable(a, b, d, e, f, h) {
 			],
 			true,
 		);
-		for (let g = 0; g < a.length; ++g) {
-			if (a[g].team !== "") {
-				addRowToStatTable(
-					[
-						{
-							text: a[g].name,
-							className: "contL",
-							canClick: a[g].loggedIn,
-							color:
-								a[g].index == player.index
-									? "#fff"
-									: a[g].team != player.team
-										? "#d95151"
-										: "#5151d9",
-							id: null,
-							userInfo: findUserByIndex(a[g].index),
-						},
-						{
-							text: a[g].score || 0,
-							className: "contC",
-							color: "#fff",
-							id: null,
-						},
-						{
-							text: a[g].kills || 0,
-							className: "contC",
-							color: "#fff",
-							id: null,
-						},
-						{
-							text: a[g].deaths || 0,
-							className: "contC",
-							color: "#fff",
-							id: null,
-						},
-						{
-							text: a[g].totalDamage || 0,
-							className: "contC",
-							color: "#fff",
-							id: null,
-						},
-						{
-							text:
-								gameMode.code == "zmtch"
-									? a[g].totalGoals || 0
-									: a[g].totalHealing || 0,
-							className: "contC",
-							color: "#fff",
-							id: null,
-						},
-						{
-							text: a[g].lastItem != null ? a[g].lastItem.name : "No Reward",
-							className: "rewardText",
-							color:
-								a[g].lastItem != null
-									? getItemRarityColor(a[g].lastItem.chance)
-									: "#fff",
-							id: null,
-							hoverInfo: a[g].lastItem,
-						},
-						{
-							text: a[g].likes || 0,
-							className: "contC",
-							color: "#fff",
-							pos: a[g].index,
-							id: `likeStat${a[g].index}`,
-							uID: a[g].id,
-						},
-					],
-					false,
-				);
-			}
+		for (let g = 0; g < userList.length; ++g) {
+			if (!userList[g].team) continue;
+			addRowToStatTable(
+				[
+					{
+						text: userList[g].name,
+						className: "contL",
+						canClick: userList[g].loggedIn,
+						color:
+							userList[g].index == player.index
+								? "#fff"
+								: userList[g].team != player.team
+									? "#d95151"
+									: "#5151d9",
+						id: null,
+						userInfo: findUserByIndex(userList[g].index),
+					},
+					{
+						text: userList[g].score || 0,
+						className: "contC",
+						color: "#fff",
+						id: null,
+					},
+					{
+						text: userList[g].kills || 0,
+						className: "contC",
+						color: "#fff",
+						id: null,
+					},
+					{
+						text: userList[g].deaths || 0,
+						className: "contC",
+						color: "#fff",
+						id: null,
+					},
+					{
+						text: userList[g].totalDamage || 0,
+						className: "contC",
+						color: "#fff",
+						id: null,
+					},
+					{
+						text:
+							gameMode.code == "zmtch"
+								? userList[g].totalGoals || 0
+								: userList[g].totalHealing || 0,
+						className: "contC",
+						color: "#fff",
+						id: null,
+					},
+					{
+						text: userList[g].lastItem != null ? userList[g].lastItem.name : "No Reward",
+						className: "rewardText",
+						color:
+							userList[g].lastItem != null
+								? getItemRarityColor(userList[g].lastItem.chance)
+								: "#fff",
+						id: null,
+						hoverInfo: userList[g].lastItem,
+					},
+					{
+						text: userList[g].likes || 0,
+						className: "contC",
+						color: "#fff",
+						pos: userList[g].index,
+						id: `likeStat${userList[g].index}`,
+						uID: userList[g].id,
+					},
+				],
+				false,
+			);
 		}
 		if (h) {
 			if (f) {
@@ -2098,47 +2070,47 @@ function addRowToStatTable(a, b) {
 			}
 			if (h.className == "contL" && a[f].canClick) {
 				h.userTarget = a[f].text;
-				h.addEventListener("click", (a) => {
-					showUserStatPage(a.target.userTarget);
+				h.addEventListener("click", (event) => {
+					showUserStatPage(event.target.userTarget);
 				});
 			}
 		} else {
-			var g = document.createElement("button");
-			var l = document.createTextNode(" NICE");
-			g.appendChild(l);
-			g.setAttribute("type", "button");
-			var m = a[f];
-			g.tmpCont = m;
-			g.onclick = function () {
+			let btn = document.createElement("button");
+			let btnText = document.createTextNode(" NICE");
+			btn.appendChild(btnText);
+			btn.setAttribute("type", "button");
+			let m = a[f];
+			btn.tmpCont = m;
+			btn.onclick = function () {
 				mainCanvas.focus();
 				likePlayerStat(m.pos);
-				for (var a = 0; a < buttonCount; ++a) {
+				for (let i = 0; i < buttonCount; ++i) {
 					document
-						.getElementById(`gameStatLikeButton${a}`)
+						.getElementById(`gameStatLikeButton${i}`)
 						.setAttribute("class", "gameStatLikeButton");
 				}
-				if (currentLikeButton != this.tmpCont.uID) {
+				if (currentLikeButton !== this.tmpCont.uID) {
 					currentLikeButton = this.tmpCont.uID;
 					this.setAttribute("class", "gameStatLikeButtonA");
 				} else {
 					currentLikeButton = "";
 				}
 			};
-			g.setAttribute("id", `gameStatLikeButton${buttonCount}`);
+			btn.setAttribute("id", `gameStatLikeButton${buttonCount}`);
 			buttonCount++;
-			if (m.uID == currentLikeButton) {
-				g.setAttribute("class", "gameStatLikeButtonA");
+			if (m.uID === currentLikeButton) {
+				btn.setAttribute("class", "gameStatLikeButtonA");
 			} else {
-				g.setAttribute("class", "gameStatLikeButton");
+				btn.setAttribute("class", "gameStatLikeButton");
 			}
-			g.style.display = m.pos == player.index ? "none" : "block";
-			e.appendChild(g);
-			l = document.createElement("div");
-			l.innerHTML = a[f].text;
+			btn.style.display = m.pos === player.index ? "none" : "block";
+			e.appendChild(btn);
+			btnText = document.createElement("div");
+			btnText.innerHTML = a[f].text;
 			if (a[f].id != null) {
-				l.setAttribute("id", a[f].id);
+				btnText.setAttribute("id", a[f].id);
 			}
-			h.appendChild(l);
+			h.appendChild(btnText);
 			h.className = a[f].className;
 			h.style.color = a[f].color;
 		}
@@ -2250,12 +2222,11 @@ function fetchUserWithIndex(a) {
 }
 function canPlaceFlag(a, b) {
 	if (b) {
-		return a != undefined && !a.wall && !a.hardPoint;
+		return a && !a.wall && !a.hardPoint;
 	} else {
-		return a != undefined && !a.hardPoint;
+		return a && !a.hardPoint;
 	}
 }
-var tmpNowTime = 0;
 function receiveServerData(a) {
 	let tmpNowTime = Date.now();
 	timeSinceLastUpdate = tmpNowTime - timeOfLastUpdate;
@@ -2419,9 +2390,9 @@ function showHatselector() {
 	hatSelector.style.display = "block";
 }
 function changeHat(a) {
-	if (socket != undefined) {
+	if (socket) {
 		socket.emit("cHat", a);
-		setCookie("previousHat", a);
+		localStorage.setItem("previousHat", a);
 		currentHat.innerHTML = document.getElementById(`hatItem${a}`).innerHTML;
 		currentHat.style.color = document.getElementById(`hatItem${a}`).style.color;
 		charSelectorCont.style.display = "block";
@@ -2486,9 +2457,9 @@ function showShirtselector() {
 	shirtSelector.style.display = "block";
 }
 function changeShirt(a) {
-	if (socket != undefined) {
+	if (socket) {
 		socket.emit("cShirt", a);
-		setCookie("previousShirt", a);
+		localStorage.setItem("previousShirt", a);
 		currentShirt.innerHTML = document.getElementById(`shirtItem${a}`).innerHTML;
 		currentShirt.style.color = document.getElementById(
 			`shirtItem${a}`,
@@ -2522,11 +2493,11 @@ function updateSpraysList(a) {
 			"' class='hoverTooltip' style='width:90px;height:90px;'></div></div>";
 	}
 	sprayList.innerHTML = b;
-	if (getCookie("previousSpray") != "") {
-		previousSpray = getCookie("previousSpray");
+	if (localStorage.getItem("previousSpray")) {
+		previousSpray = localStorage.getItem("previousSpray");
 		try {
 			changeSpray(previousSpray, a[parseInt(previousSpray) - 1].id);
-		} catch (e) {
+		} catch (_) {
 			changeSpray(1, a[1].id);
 		}
 	} else {
@@ -2549,7 +2520,7 @@ window.showSprayselector = showSprayselector;
 function changeSpray(a, b) {
 	if (socket != undefined) {
 		socket.emit("cSpray", a);
-		setCookie("previousSpray", a);
+		localStorage.setItem("previousSpray", a);
 		currentSpray.innerHTML = document.getElementById(`sprayItem${a}`).innerHTML;
 		currentSpray.style.color = document.getElementById(
 			`sprayItem${a}`,
@@ -2743,25 +2714,25 @@ function updateGameLoop() {
 	var doJump = 0;
 	if (keys.u === 1) {
 		verticalDT = -1;
-		temp = 0;
+		// temp = 0;
 	}
 	if (keys.d === 1) {
 		verticalDT = 1;
-		temp = 0;
+		// temp = 0;
 	}
 	if (keys.r === 1) {
 		horizontalDT = 1;
-		temp = 0;
+		// temp = 0;
 	}
 	if (keys.l === 1) {
 		horizontalDT = -1;
-		temp = 0;
+		// temp = 0;
 	} else {
 		keyd = 0;
 	}
 	if (keys.s === 1) {
 		doJump = 0;
-		temp = 0;
+		// temp = 0;
 	}
 	var b = horizontalDT;
 	var d = verticalDT;
@@ -3097,8 +3068,6 @@ class FlashGlow {
 	}
 }
 
-var tmpBulletGlowWidth = 0;
-var tmpBulletGlowHeight = 0;
 var lightX = 0;
 var lightY = 0;
 var glowIntensity = 0.2;
@@ -3108,13 +3077,12 @@ for (let i = 0; i < 30; ++i) {
 	flashGlows.push(new FlashGlow());
 }
 
-var tmpGlow = null;
 function createFlash(x: number, y: number, scale: number) {
 	glowIndex++;
 	if (glowIndex >= flashGlows.length) {
 		glowIndex = 0;
 	}
-	tmpGlow = flashGlows[glowIndex];
+	let tmpGlow = flashGlows[glowIndex];
 	tmpGlow.x = x;
 	tmpGlow.y = y;
 	tmpGlow.scale = 0;
@@ -3130,9 +3098,10 @@ function drawGameLights(delta: number) {
 		for (let i = 0; i < bullets.length; i++) {
 			let tmpObject = bullets[i];
 			if (showGlows && tmpObject.spriteIndex !== 2 && tmpObject.active) {
-				tmpBulletGlowWidth =
+				let tmpBulletGlowWidth =
 					tmpObject.glowWidth || Math.min(200, tmpObject.width * 14);
-				tmpBulletGlowHeight = tmpObject.glowHeight || tmpObject.height * 2.5;
+				let tmpBulletGlowHeight =
+					tmpObject.glowHeight || tmpObject.height * 2.5;
 				lightX = tmpObject.x - startX;
 				lightY = tmpObject.y - startY;
 				if (canSee(lightX, lightY, tmpBulletGlowWidth, tmpBulletGlowHeight)) {
@@ -3517,17 +3486,15 @@ var soundList = [
 		},
 	},
 ];
-var tmpSound = null;
-var tmpFormat = null;
 var doSounds = false;
-function loadSounds(a) {
+function loadSounds(base: string) {
 	if (!doSounds) {
 		return false;
 	}
 	tmpList = [];
 	for (let i = 0; i < soundList.length; ++i) {
-		tmpSound = localStorage.getItem(`${a + soundList[i].loc}data`);
-		tmpFormat = localStorage.getItem(`${a + soundList[i].loc}format`);
+		let tmpSound = localStorage.getItem(`${base + soundList[i].loc}data`);
+		let tmpFormat = localStorage.getItem(`${base + soundList[i].loc}format`);
 		loadSound(tmpSound, soundList[i], tmpFormat);
 	}
 }
@@ -3572,7 +3539,7 @@ function playSound(soundId: string, x: number, y: number) {
 		try {
 			let tmpDist = getDistance(player.x, player.y, x, y);
 			if (tmpDist <= maxHearDist) {
-				tmpSound = tmpList[soundId];
+				let tmpSound = tmpList[soundId];
 				if (tmpSound !== undefined) {
 					tmpSound = tmpSound.sound;
 					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
@@ -3594,7 +3561,6 @@ function stopAllSounds() {
 }
 var spritesLoaded = false;
 var spriteIndex = 0;
-var tmpPicture = null;
 function getSprite(fileName: string) {
 	var b = new Image();
 	b.index = spriteIndex;
@@ -3609,7 +3575,7 @@ function getSprite(fileName: string) {
 		console.log(`File not Found: ${fileName}.png`);
 	};
 	try {
-		tmpPicture = localStorage.getItem(`${fileName}.png`);
+		let tmpPicture = localStorage.getItem(`${fileName}.png`);
 		b.src = tmpPicture;
 		b.crossOrigin = "anonymous";
 	} catch (d) {
@@ -4219,8 +4185,8 @@ function showClassselector() {
 }
 window.showClassselector = showClassselector;
 function loadSavedClass() {
-	if (getCookie("previousClass") != "") {
-		previousClass = getCookie("previousClass");
+	if (localStorage.getItem("previousClass")) {
+		previousClass = localStorage.getItem("previousClass");
 		pickedCharacter(previousClass);
 	} else {
 		pickedCharacter(0);
@@ -4240,10 +4206,12 @@ function pickedCharacter(a) {
 		"<b>Secondary:</b><div class='hatSelectItem' style='display:inline-block'>" +
 		characterClasses[a].sWeapon +
 		"</div>";
-	setCookie("previousClass", a);
+	localStorage.setItem("previousClass", a);
 	if (loggedIn) {
 		for (let i = 0; i < characterClasses[a].weaponIndexes.length; ++i) {
-			let skinPref = getCookie(`wpnSkn${characterClasses[a].weaponIndexes[i]}`);
+			let skinPref = localStorage.getItem(
+				`wpnSkn${characterClasses[a].weaponIndexes[i]}`,
+			);
 			if (skinPref != "") {
 				changeCamo(
 					characterClasses[a].weaponIndexes[i],
@@ -4252,12 +4220,12 @@ function pickedCharacter(a) {
 				);
 			}
 		}
-		if (getCookie("previousHat") != "") {
-			previousHat = getCookie("previousHat");
+		if (localStorage.getItem("previousHat")) {
+			previousHat = localStorage.getItem("previousHat");
 			changeHat(previousHat);
 		}
-		if (getCookie("previousShirt") != "") {
-			previousShirt = getCookie("previousShirt");
+		if (localStorage.getItem("previousShirt")) {
+			previousShirt = localStorage.getItem("previousShirt");
 			changeShirt(previousShirt);
 		}
 	}
@@ -4323,7 +4291,7 @@ function changeCamo(a, b, d) {
 			camoID: b,
 		});
 		if (d) {
-			setCookie(`wpnSkn${a}`, b);
+			localStorage.setItem(`wpnSkn${a}`, b);
 			charSelectorCont.style.display = "block";
 			lobbySelectorCont.style.display = "block";
 			camoSelector.style.display = "none";
@@ -4722,108 +4690,12 @@ function getPlayerSprite(classIdx: number, angle: number, animIdx: number) {
 	return tmpSprite;
 }
 var cachedHats = [];
-function getHatSprite(a, b) {
-	let tmpAcc = a.account;
-	if (tmpAcc != undefined) {
-		if (tmpAcc.hat != null) {
-			let tmpSprite = cachedHats[tmpAcc.hat.id];
-			if (tmpSprite == undefined) {
-				let d = {
-					lS: null,
-					uS: null,
-					rS: null,
-					dS: null,
-					imgToLoad: 0,
-				};
-				if (tmpAcc.hat.left) {
-					d.imgToLoad++;
-					d.lS = new Image();
-					d.lS.index = spriteIndex;
-					spriteIndex++;
-					d.lS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
-					d.lS.onload = () => {
-						d.imgToLoad--;
-						d.lS.isLoaded = true;
-						d.lS.onload = null;
-					};
-					d.imgToLoad++;
-					d.rS = new Image();
-					d.rS.index = spriteIndex;
-					spriteIndex++;
-					d.rS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
-					d.rS.onload = () => {
-						d.rS = flipSprite(d.rS, true);
-						d.imgToLoad--;
-						d.rS.isLoaded = true;
-						d.rS.onload = null;
-					};
-				}
-				if (tmpAcc.hat.up) {
-					d.imgToLoad++;
-					d.uS = new Image();
-					d.uS.index = spriteIndex;
-					spriteIndex++;
-					d.uS.src = `.././images/hats/${tmpAcc.hat.id}/u.png`;
-					d.uS.onload = () => {
-						d.imgToLoad--;
-						d.uS.isLoaded = true;
-						d.uS.onload = null;
-					};
-				}
-				d.imgToLoad++;
-				d.dS = new Image();
-				d.dS.index = spriteIndex;
-				spriteIndex++;
-				d.dS.src = `.././images/hats/${tmpAcc.hat.id}/d.png`;
-				d.dS.onload = () => {
-					d.imgToLoad--;
-					d.dS.isLoaded = true;
-					d.dS.onload = null;
-				};
-				cachedHats[tmpAcc.hat.id] = d;
-			} else if (tmpSprite.imgToLoad <= 0) {
-				if (tmpAcc.hat.left && b == 90) {
-					return tmpSprite.lS;
-				} else if (tmpAcc.hat.up && b == 180) {
-					return tmpSprite.uS;
-				} else if (tmpAcc.hat.left && b == 270) {
-					return tmpSprite.rS;
-				} else {
-					return tmpSprite.dS;
-				}
-			}
-		} else {
-			let tmpSprite;
-			let tmpSpriteCollection = classSpriteSheets[a.classIndex];
-			if (tmpSpriteCollection == undefined) {
-				return null;
-			}
-			if (b == 90) {
-				tmpSprite = tmpSpriteCollection.hL;
-			} else if (b == 180) {
-				tmpSprite = tmpSpriteCollection.hU;
-			} else if (b == 270) {
-				if (
-					!tmpSpriteCollection.hR.flipped &&
-					tmpSpriteCollection.hR.isLoaded
-				) {
-					tmpSpriteCollection.hR = flipSprite(tmpSpriteCollection.hR, true);
-				}
-				tmpSprite = tmpSpriteCollection.hR;
-			} else {
-				tmpSprite = tmpSpriteCollection.hD;
-			}
-			return tmpSprite;
-		}
-	}
-	return null;
-}
-var cachedShirts = [];
-function getShirtSprite(a, b) {
-	let tmpAcc = a.account;
-	if (tmpAcc != undefined && tmpAcc.shirt != null && a.classIndex != 8) {
-		let tmpSprite = cachedShirts[tmpAcc.shirt.id];
-		if (tmpSprite == undefined) {
+function getHatSprite(playerObj, dir: number) {
+	let tmpAcc = playerObj.account;
+	if (!tmpAcc) return null;
+	if (tmpAcc.hat != null) {
+		let tmpSprite = cachedHats[tmpAcc.hat.id];
+		if (!tmpSprite) {
 			let d = {
 				lS: null,
 				uS: null,
@@ -4831,12 +4703,12 @@ function getShirtSprite(a, b) {
 				dS: null,
 				imgToLoad: 0,
 			};
-			if (tmpAcc.shirt.left) {
+			if (tmpAcc.hat.left) {
 				d.imgToLoad++;
 				d.lS = new Image();
 				d.lS.index = spriteIndex;
 				spriteIndex++;
-				d.lS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
+				d.lS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
 				d.lS.onload = () => {
 					d.imgToLoad--;
 					d.lS.isLoaded = true;
@@ -4846,7 +4718,7 @@ function getShirtSprite(a, b) {
 				d.rS = new Image();
 				d.rS.index = spriteIndex;
 				spriteIndex++;
-				d.rS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
+				d.rS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
 				d.rS.onload = () => {
 					d.rS = flipSprite(d.rS, true);
 					d.imgToLoad--;
@@ -4854,12 +4726,12 @@ function getShirtSprite(a, b) {
 					d.rS.onload = null;
 				};
 			}
-			if (tmpAcc.shirt.up) {
+			if (tmpAcc.hat.up) {
 				d.imgToLoad++;
 				d.uS = new Image();
 				d.uS.index = spriteIndex;
 				spriteIndex++;
-				d.uS.src = `.././images/shirts/${tmpAcc.shirt.id}/u.png`;
+				d.uS.src = `.././images/hats/${tmpAcc.hat.id}/u.png`;
 				d.uS.onload = () => {
 					d.imgToLoad--;
 					d.uS.isLoaded = true;
@@ -4870,31 +4742,120 @@ function getShirtSprite(a, b) {
 			d.dS = new Image();
 			d.dS.index = spriteIndex;
 			spriteIndex++;
-			d.dS.src = `.././images/shirts/${tmpAcc.shirt.id}/d.png`;
+			d.dS.src = `.././images/hats/${tmpAcc.hat.id}/d.png`;
 			d.dS.onload = () => {
 				d.imgToLoad--;
 				d.dS.isLoaded = true;
 				d.dS.onload = null;
 			};
-			cachedShirts[tmpAcc.shirt.id] = d;
+			cachedHats[tmpAcc.hat.id] = d;
 		} else if (tmpSprite.imgToLoad <= 0) {
-			if (tmpAcc.shirt.left && b == 90) {
+			if (tmpAcc.hat.left && dir === 90) {
 				return tmpSprite.lS;
-			} else if (tmpAcc.shirt.up && b == 180) {
+			} else if (tmpAcc.hat.up && dir === 180) {
 				return tmpSprite.uS;
-			} else if (tmpAcc.shirt.left && b == 270) {
+			} else if (tmpAcc.hat.left && dir === 270) {
 				return tmpSprite.rS;
 			} else {
 				return tmpSprite.dS;
 			}
 		}
+	} else {
+		let tmpSprite: CanvasImageSource;
+		let tmpSpriteCollection = classSpriteSheets[playerObj.classIndex];
+		if (!tmpSpriteCollection) {
+			return null;
+		}
+		if (dir === 90) {
+			tmpSprite = tmpSpriteCollection.hL;
+		} else if (dir === 180) {
+			tmpSprite = tmpSpriteCollection.hU;
+		} else if (dir === 270) {
+			if (!tmpSpriteCollection.hR.flipped && tmpSpriteCollection.hR.isLoaded) {
+				tmpSpriteCollection.hR = flipSprite(tmpSpriteCollection.hR, true);
+			}
+			tmpSprite = tmpSpriteCollection.hR;
+		} else {
+			tmpSprite = tmpSpriteCollection.hD;
+		}
+		return tmpSprite;
 	}
-	return null;
+}
+var cachedShirts = [];
+function getShirtSprite(playerObj, dir: number) {
+	let tmpAcc = playerObj.account;
+	if (!tmpAcc?.shirt || playerObj.classIndex === 8) return null;
+	let tmpSprite = cachedShirts[tmpAcc.shirt.id];
+	if (!tmpSprite) {
+		let d = {
+			lS: null,
+			uS: null,
+			rS: null,
+			dS: null,
+			imgToLoad: 0,
+		};
+		if (tmpAcc.shirt.left) {
+			d.imgToLoad++;
+			d.lS = new Image();
+			d.lS.index = spriteIndex;
+			spriteIndex++;
+			d.lS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
+			d.lS.onload = () => {
+				d.imgToLoad--;
+				d.lS.isLoaded = true;
+				d.lS.onload = null;
+			};
+			d.imgToLoad++;
+			d.rS = new Image();
+			d.rS.index = spriteIndex;
+			spriteIndex++;
+			d.rS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
+			d.rS.onload = () => {
+				d.rS = flipSprite(d.rS, true);
+				d.imgToLoad--;
+				d.rS.isLoaded = true;
+				d.rS.onload = null;
+			};
+		}
+		if (tmpAcc.shirt.up) {
+			d.imgToLoad++;
+			d.uS = new Image();
+			d.uS.index = spriteIndex;
+			spriteIndex++;
+			d.uS.src = `.././images/shirts/${tmpAcc.shirt.id}/u.png`;
+			d.uS.onload = () => {
+				d.imgToLoad--;
+				d.uS.isLoaded = true;
+				d.uS.onload = null;
+			};
+		}
+		d.imgToLoad++;
+		d.dS = new Image();
+		d.dS.index = spriteIndex;
+		spriteIndex++;
+		d.dS.src = `.././images/shirts/${tmpAcc.shirt.id}/d.png`;
+		d.dS.onload = () => {
+			d.imgToLoad--;
+			d.dS.isLoaded = true;
+			d.dS.onload = null;
+		};
+		cachedShirts[tmpAcc.shirt.id] = d;
+	} else if (tmpSprite.imgToLoad <= 0) {
+		if (tmpAcc.shirt.left && dir === 90) {
+			return tmpSprite.lS;
+		} else if (tmpAcc.shirt.up && dir === 180) {
+			return tmpSprite.uS;
+		} else if (tmpAcc.shirt.left && dir === 270) {
+			return tmpSprite.rS;
+		} else {
+			return tmpSprite.dS;
+		}
+	}
 }
 function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	let tmpIndex = `${weaponIndex}${camo}${angle}`;
 	let tmpSprite = cachedWeaponSprites[tmpIndex];
-	if (tmpSprite == undefined) {
+	if (!tmpSprite) {
 		var e = null;
 		var e = weaponSpriteSheet[weaponIndex];
 		if (e != undefined && e != null) {
@@ -5498,7 +5459,7 @@ function getCachedWall(tile) {
 }
 var tilesPerFloorTile = 8;
 function getCachedFloor(tile) {
-	var tmpIndex = `${tile.spriteIndex}${tile.left}${tile.right}${tile.top}${tile.bottom}${tile.topLeft}${tile.topRight}`;
+	let tmpIndex = `${tile.spriteIndex}${tile.left}${tile.right}${tile.top}${tile.bottom}${tile.topLeft}${tile.topRight}`;
 	if (
 		cachedFloors[tmpIndex] === undefined &&
 		sideWalkSprite != null &&
@@ -5704,7 +5665,7 @@ function drawSprite(
 	dw: number,
 	dh: number,
 	angle: number,
-	l,
+	hasShadows: boolean,
 	m,
 	k,
 	p,
@@ -5717,7 +5678,7 @@ function drawSprite(
 		m = Math.floor(m);
 		ctx.rotate(angle);
 		ctx.drawImage(sprite, dx, dy, dw, dh);
-		if (l && showShadows) {
+		if (hasShadows && showShadows) {
 			ctx.globalAlpha = 1;
 			ctx.translate(0, m);
 			let tmpShadow = getCachedShadow(sprite, dw, dh + p, k);
