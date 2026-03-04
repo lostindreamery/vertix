@@ -26,7 +26,7 @@ const {
 
 let playerName: string | undefined;
 var playerClassIndex: number | undefined;
-var playerType;
+var playerType: string | undefined;
 var playerNameInput: HTMLInputElement =
 	document.getElementById("playerNameInput");
 var socket: Socket | undefined;
@@ -781,7 +781,7 @@ function updateKeysUI() {
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
 	if (keyToChange != null) {
-		var b = keyCodeMap[event.keyCode];
+		let b = keyCodeMap[event.keyCode];
 		if (b == undefined || !b.trim()) {
 			b = String.fromCharCode(event.keyCode);
 		}
@@ -924,26 +924,26 @@ function toggleTeamChat() {
 	document.getElementById("chatType").innerHTML = currentChatType;
 	mainCanvas.focus();
 }
-var profanityList = []; // emptied
-function checkProfanityString(a) {
-	if (showProfanity) {
-		for (let i = 0; i < profanityList.length; ++i) {
-			if (a.indexOf(profanityList[i]) > -1) {
-				let tmpString = "";
-				for (var d = 0; d < profanityList[i].length; ++d) {
-					tmpString += "*";
-				}
-				a = a.replace(new RegExp(profanityList[i], "g"), tmpString);
-			}
-		}
-	}
-	return a;
-}
+// var profanityList = []; // emptied
+// function checkProfanityString(a) {
+// 	if (showProfanity) {
+// 		for (let i = 0; i < profanityList.length; ++i) {
+// 			if (a.indexOf(profanityList[i]) > -1) {
+// 				let tmpString = "";
+// 				for (var d = 0; d < profanityList[i].length; ++d) {
+// 					tmpString += "*";
+// 				}
+// 				a = a.replace(new RegExp(profanityList[i], "g"), tmpString);
+// 			}
+// 		}
+// 	}
+// 	return a;
+// }
 var chatLineCounter = 0;
 ChatManager.prototype.addChatLine = function (a, b, d, e) {
 	if (mobile) return;
 
-	b = checkProfanityString(b);
+	// b = checkProfanityString(b);
 	let listElem = document.createElement("li");
 	let source = "me";
 	if (d || e === "system" || e === "notif") {
@@ -1309,7 +1309,7 @@ function setupSocket(a: Socket) {
 	});
 	a.on("error", (errorMsg) => {
 		console.log("PLEASE NOTIFY THE DEVELOPER OF THE FOLLOWING ERROR");
-		console.log(`ERROR: ${errorMsg}`);
+		console.error(`ERROR: ${errorMsg}`);
 	});
 	a.on("welcome", (b, d) => {
 		player.id = b.id;
@@ -2001,79 +2001,78 @@ function hideStatTable() {
 	document.getElementById("gameStatWrapper").style.display = "none";
 	document.getElementById("linkBox").style.display = "none";
 }
-function addRowToStatTable(a, b) {
-	var d = document.getElementById("gameStatBoard");
-	var e = document.createElement("tr");
-	for (var f = 0; f < a.length; ++f) {
-		var h = document.createElement("td");
-		if (b || f != a.length - 1) {
-			l = document.createTextNode(a[f].text);
-			h.appendChild(l);
-			h.className = a[f].className;
-			h.style.color = a[f].color;
-			if (a[f].hoverInfo != undefined) {
-				var g = document.createElement("div");
-				g.className = "hoverTooltip";
+function addRowToStatTable(data, b) {
+	let trow = document.createElement("tr");
+	for (let f = 0; f < data.length; ++f) {
+		let tcell = document.createElement("td");
+		if (b || f !== data.length - 1) {
+			l = document.createTextNode(data[f].text);
+			tcell.appendChild(l);
+			tcell.className = data[f].className;
+			tcell.style.color = data[f].color;
+			if (data[f].hoverInfo) {
+				let tooltip = document.createElement("div");
+				tooltip.className = "hoverTooltip";
 				l = "";
 				l =
-					a[f].hoverInfo.type == "hat"
+					data[f].hoverInfo.type === "hat"
 						? "<image class='itemDisplayImage' src='.././images/hats/" +
-							a[f].hoverInfo.id +
+							data[f].hoverInfo.id +
 							"/d.png'></image><div style='color:" +
-							a[f].color +
+							data[f].color +
 							"; font-size:16px; margin-top:5px;'>" +
-							a[f].hoverInfo.name +
+							data[f].hoverInfo.name +
 							"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-							a[f].hoverInfo.chance +
+							data[f].hoverInfo.chance +
 							"%</div>" +
-							(a[f].hoverInfo.duplicate
+							(data[f].hoverInfo.duplicate
 								? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
 								: "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>wearable</i></div>") +
 							"<div style='font-size:12px; margin-top:5px;'>" +
-							a[f].hoverInfo.desc +
+							data[f].hoverInfo.desc +
 							"</div>" +
-							(a[f].hoverInfo.creator == "EatMyApples"
+							(data[f].hoverInfo.creator === "EatMyApples"
 								? ""
 								: "<div style='font-size:8px; color:#d8d8d8; margin-top:5px;'><i>Artist: " +
-									a[f].hoverInfo.creator +
+									data[f].hoverInfo.creator +
 									"</i></div>")
-						: a[f].hoverInfo.type == "shirt"
+						: data[f].hoverInfo.type === "shirt"
 							? "<image class='shirtDisplayImage' src='.././images/shirts/" +
-								a[f].hoverInfo.id +
+								data[f].hoverInfo.id +
 								"/d.png'></image><div style='color:" +
-								a[f].color +
+								data[f].color +
 								"; font-size:16px; margin-top:5px;'>" +
-								a[f].hoverInfo.name +
+								data[f].hoverInfo.name +
 								"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-								a[f].hoverInfo.chance +
+								data[f].hoverInfo.chance +
 								"%</div>" +
-								(a[f].hoverInfo.duplicate
+								(data[f].hoverInfo.duplicate
 									? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
 									: "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>shirt</i></div>") +
 								"<div style='font-size:12px; margin-top:5px;'>" +
-								a[f].hoverInfo.desc +
+								data[f].hoverInfo.desc +
 								"</div>"
 							: "<image class='camoDisplayImage' src='.././images/camos/" +
-								(a[f].hoverInfo.id + 1) +
+								(data[f].hoverInfo.id + 1) +
 								".png'></image><div style='color:" +
-								a[f].color +
+								data[f].color +
 								"; font-size:16px; margin-top:5px;'>" +
-								a[f].hoverInfo.name +
+								data[f].hoverInfo.name +
 								"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-								a[f].hoverInfo.chance +
+								data[f].hoverInfo.chance +
 								"%</div>" +
-								(a[f].hoverInfo.duplicate
+								(data[f].hoverInfo.duplicate
 									? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
 									: "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>weapon camo</i></div>") +
 								"<div style='font-size:12px; margin-top:5px;'>" +
-								a[f].hoverInfo.weaponName +
+								data[f].hoverInfo.weaponName +
 								"</div>";
-				g.innerHTML = l;
-				h.appendChild(g);
+				tooltip.innerHTML = l;
+				tcell.appendChild(tooltip);
 			}
-			if (h.className == "contL" && a[f].canClick) {
-				h.userTarget = a[f].text;
-				h.addEventListener("click", (event) => {
+			if (tcell.className === "contL" && data[f].canClick) {
+				tcell.userTarget = data[f].text;
+				tcell.addEventListener("click", (event) => {
 					showUserStatPage(event.target.userTarget);
 				});
 			}
@@ -2082,9 +2081,9 @@ function addRowToStatTable(a, b) {
 			let btnText = document.createTextNode(" NICE");
 			btn.appendChild(btnText);
 			btn.setAttribute("type", "button");
-			let m = a[f];
+			let m = data[f];
 			btn.tmpCont = m;
-			btn.onclick = function () {
+			btn.onclick = () => {
 				mainCanvas.focus();
 				likePlayerStat(m.pos);
 				for (let i = 0; i < buttonCount; ++i) {
@@ -2107,19 +2106,19 @@ function addRowToStatTable(a, b) {
 				btn.setAttribute("class", "gameStatLikeButton");
 			}
 			btn.style.display = m.pos === player.index ? "none" : "block";
-			e.appendChild(btn);
+			trow.appendChild(btn);
 			btnText = document.createElement("div");
-			btnText.innerHTML = a[f].text;
-			if (a[f].id != null) {
-				btnText.setAttribute("id", a[f].id);
+			btnText.innerHTML = data[f].text;
+			if (data[f].id != null) {
+				btnText.setAttribute("id", data[f].id);
 			}
-			h.appendChild(btnText);
-			h.className = a[f].className;
-			h.style.color = a[f].color;
+			tcell.appendChild(btnText);
+			tcell.className = data[f].className;
+			tcell.style.color = data[f].color;
 		}
-		e.appendChild(h);
+		trow.appendChild(tcell);
 	}
-	d.appendChild(e);
+	document.getElementById("gameStatBoard").appendChild(trow);
 }
 function addUser(a) {
 	a = JSON.parse(a);
@@ -2133,9 +2132,9 @@ function addUser(a) {
 		}
 	}
 }
-function removeUser(a) {
-	if (a !== player.index) {
-		tmpUser = findUserByIndex(a);
+function removeUser(userIndex: number) {
+	if (userIndex !== player.index) {
+		let tmpUser = findUserByIndex(userIndex);
 		if (tmpUser != null) {
 			gameObjects.splice(gameObjects.indexOf(tmpUser), 1);
 		}
@@ -2154,14 +2153,14 @@ function updateUiStats(player) {
 		document.getElementById("healthValue").style.color = "#fff";
 	}
 }
-function getItemRarityColor(a) {
-	if (a <= 1) {
+function getItemRarityColor(chance: number) {
+	if (chance <= 1) {
 		return "#ff8000";
-	} else if (a <= 6) {
+	} else if (chance <= 6) {
 		return "#a335ee";
-	} else if (a <= 18) {
+	} else if (chance <= 18) {
 		return "#0070dd";
-	} else if (a <= 45) {
+	} else if (chance <= 45) {
 		return "#1eff00";
 	} else {
 		return "#9d9d9d";
@@ -2412,38 +2411,37 @@ var currentShirt = document.getElementById("currentShirt");
 var shirtList = document.getElementById("shirtList");
 var shirtHeader = document.getElementById("shirtHeader");
 function updateShirtList(a, b) {
-	var d = `SELECT SHIRT: (${b.length}/${a})`;
-	shirtHeader.innerHTML = d;
-	var d =
+	shirtHeader.textContent = `SELECT SHIRT: (${b.length}/${a})`;
+	let listContent =
 		"<div class='hatSelectItem' id='shirtItem-1' onclick='changeShirt(-1);'>Default</div>";
-	for (var e = 0; e < b.length; ++e) {
-		d +=
+	for (let i = 0; i < b.length; ++i) {
+		listContent +=
 			"<div class='hatSelectItem' id='shirtItem" +
-			b[e].id +
+			b[i].id +
 			"' style='color:" +
-			getItemRarityColor(b[e].chance) +
+			getItemRarityColor(b[i].chance) +
 			";' onclick='changeShirt(" +
-			b[e].id +
+			b[i].id +
 			");'>" +
-			b[e].name +
+			b[i].name +
 			" x" +
-			(parseInt(b[e].count) + 1) +
+			(parseInt(b[i].count) + 1) +
 			"<div class='hoverTooltip'><image class='shirtDisplayImage' src='.././images/shirts/" +
-			b[e].id +
+			b[i].id +
 			"/d.png'></image><div style='color:" +
-			getItemRarityColor(b[e].chance) +
+			getItemRarityColor(b[i].chance) +
 			"; font-size:16px; margin-top:5px;'>" +
-			b[e].name +
+			b[i].name +
 			"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-			b[e].chance +
+			b[i].chance +
 			"%</div><div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>shirt</i></div><div style='font-size:12px; margin-top:5px;'>" +
-			b[e].desc +
+			b[i].desc +
 			"</div></div></div>";
 	}
-	shirtList.innerHTML = d;
+	shirtList.innerHTML = listContent;
 }
 function resetShirtList() {
-	shirtHeader.innerHTML = "SELECT SHIRT";
+	shirtHeader.textContent = "SELECT SHIRT";
 	shirtList.innerHTML =
 		"<div class='hatSelectItem' id='shirtItem-1' onclick='changeShirt(-1);'>Default</div>";
 	changeShirt(-1);
@@ -2480,22 +2478,22 @@ function changeShirt(a) {
 var currentSpray = document.getElementById("currentSpray");
 var sprayList = document.getElementById("sprayList");
 function updateSpraysList(a) {
-	var b = "";
-	for (var d = 0; d < a.length; ++d) {
-		b +=
+	let listContent = "";
+	for (let i = 0; i < a.length; ++i) {
+		listContent +=
 			"<div class='hatSelectItem' id='sprayItem" +
-			(d + 1) +
+			(i + 1) +
 			"' onclick='changeSpray(" +
-			(d + 1) +
+			(i + 1) +
 			"," +
-			a[d].id +
+			a[i].id +
 			");'>" +
-			a[d].name +
+			a[i].name +
 			"<div id='sprayHoverImage" +
-			(d + 1) +
+			(i + 1) +
 			"' class='hoverTooltip' style='width:90px;height:90px;'></div></div>";
 	}
-	sprayList.innerHTML = b;
+	sprayList.innerHTML = listContent;
 	if (localStorage.getItem("previousSpray")) {
 		previousSpray = localStorage.getItem("previousSpray");
 		try {
@@ -2588,72 +2586,74 @@ function sortUsersByPosition(a, b) {
 		return 0;
 	}
 }
-function updateLeaderboard(a) {
+function updateLeaderboard(data: number[]) {
 	try {
-		var b = '<span class="title">LEADERBOARD</span>';
-		var d = 1;
-		for (var e = 0; e < a.length; ++e) {
-			let tmpPlayer = findUserByIndex(a[0 + e]);
-			if (tmpPlayer != null) {
-				b += "<br />";
-				if (tmpPlayer.index == player.index) {
-					b +=
-						'<span class="me">' +
-						d +
-						". " +
-						player.name +
-						(player.account.clan != "" ? ` [${player.account.clan}]` : "") +
-						"</span>";
-				} else if (tmpPlayer.name != "") {
-					b +=
-						'<span class="' +
-						(tmpPlayer.team != player.team ? "red" : "blue") +
-						'">' +
-						d +
-						". " +
-						tmpPlayer.name +
-						"</span>" +
-						(tmpPlayer.account.clan != ""
-							? `<span class='me'> [${tmpPlayer.account.clan}]</span>`
-							: "");
-				}
-				d++;
+		let lbContent = '<span class="title">LEADERBOARD</span>';
+		for (let i = 0; i < data.length; i++) {
+			let tmpPlayer = findUserByIndex(data[0 + i]);
+			if (tmpPlayer == null) continue;
+			lbContent += "<br />";
+			if (tmpPlayer.index === player.index) {
+				lbContent +=
+					'<span class="me">' +
+					(i + 1) +
+					". " +
+					player.name +
+					(player.account.clan ? ` [${player.account.clan}]` : "") +
+					"</span>";
+			} else if (tmpPlayer.name) {
+				lbContent +=
+					'<span class="' +
+					(tmpPlayer.team !== player.team ? "red" : "blue") +
+					'">' +
+					(i + 1) +
+					". " +
+					tmpPlayer.name +
+					"</span>" +
+					(tmpPlayer.account.clan
+						? `<span class='me'> [${tmpPlayer.account.clan}]</span>`
+						: "");
 			}
 		}
-		document.getElementById("status").innerHTML = b;
-	} catch (f) {}
+		document.getElementById("status").innerHTML = lbContent;
+	} catch (err) {
+		// "throw it all in a try-catch, that'll fix it"
+		// - Sidney, probably
+		// I wonder what error was coming up here
+		console.error(err);
+	}
 }
 function updateTeamScores(a, b) {
-	var d = document.getElementById("redProgress");
-	var e = document.getElementById("blueText");
-	var f = document.getElementById("blueProgress");
-	var h = document.getElementById("redProgCont");
-	if (gameMode != undefined) {
-		try {
-			if (gameMode.teams) {
-				e.innerHTML = "A";
-				h.style.display = "";
-				if (player.team == "red") {
-					d.setAttribute("style", `display:block;width:${b}%`);
-					d.style.width = `${b}%`;
-					f.setAttribute("style", `display:block;width:${a}%`);
-					f.style.width = `${a}%`;
-				} else {
-					d.setAttribute("style", `display:block;width:${a}%`);
-					d.style.width = `${a}%`;
-					f.setAttribute("style", `display:block;width:${b}%`);
-					f.style.width = `${b}%`;
-				}
+	var redProgress = document.getElementById("redProgress");
+	var blueText = document.getElementById("blueText");
+	var blueProgress = document.getElementById("blueProgress");
+	var redProgCont = document.getElementById("redProgCont");
+	if (!gameMode) return;
+	try {
+		if (gameMode.teams) {
+			blueText.textContent = "A";
+			redProgCont.style.display = "";
+			if (player.team === "red") {
+				redProgress.setAttribute("style", `display:block;width:${b}%`);
+				redProgress.style.width = `${b}%`;
+				blueProgress.setAttribute("style", `display:block;width:${a}%`);
+				blueProgress.style.width = `${a}%`;
 			} else {
-				b = Math.round((player.score / a) * 100);
-				f.setAttribute("style", `display:block;width:${b}%`);
-				f.style.width = `${b}%`;
-				e.innerHTML = "YOU";
-				h.style.display = "none";
+				redProgress.setAttribute("style", `display:block;width:${a}%`);
+				redProgress.style.width = `${a}%`;
+				blueProgress.setAttribute("style", `display:block;width:${b}%`);
+				blueProgress.style.width = `${b}%`;
 			}
-		} catch (g) {
-			console.log(g);
+		} else {
+			b = Math.round((player.score / a) * 100);
+			blueProgress.setAttribute("style", `display:block;width:${b}%`);
+			blueProgress.style.width = `${b}%`;
+			blueText.innerHTML = "YOU";
+			redProgCont.style.display = "none";
 		}
+	} catch (err) {
+		// "throw it all in a try-catch, that'll fix it" pt 2
+		console.error(err);
 	}
 }
 function showUI() {
@@ -3016,7 +3016,7 @@ function resize() {
 	drawMenuBackground();
 }
 resize();
-var grd = null;
+var grd: CanvasGradient | null = null;
 function drawEdgeShader() {
 	try {
 		if (grd == null) {
@@ -3033,7 +3033,9 @@ function drawEdgeShader() {
 		}
 		graph.fillStyle = grd;
 		graph.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
-	} catch (a) {}
+	} catch (err) {
+		console.error(err);
+	}
 }
 
 class FlashGlow {
@@ -3575,7 +3577,7 @@ function getSprite(fileName: string) {
 	};
 	b.onerror = () => {
 		b.isLoaded = false;
-		console.log(`File not Found: ${fileName}.png`);
+		console.error(`File not Found: ${fileName}.png`);
 	};
 	try {
 		let tmpPicture = localStorage.getItem(`${fileName}.png`);
@@ -3617,7 +3619,9 @@ function flipSprite(sprite: HTMLImageElement, b) {
 		canvasElem.flipped = true;
 		canvasElem.isLoaded = true;
 		return canvasElem;
-	} catch (_) {}
+	} catch (err) {
+		console.error(err);
+	}
 	return false;
 }
 function Projectile() {
@@ -3819,7 +3823,7 @@ function Projectile() {
 		}
 		this.skipMove = false;
 	};
-	this.activate = function () {
+	this.activate = () => {
 		this.skipMove = true;
 		this.lastHit = ",";
 		this.active = true;
@@ -3830,10 +3834,10 @@ function Projectile() {
 		let h = Math.abs(this.cEndY - a.y);
 		return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
 	};
-	this.deactivate = function () {
+	this.deactivate = () => {
 		this.active = false;
 	};
-	this.hitSomething = function (a, b) {
+	this.hitSomething = (a, b) => {
 		if (this.spriteIndex !== 2) {
 			particleCone(
 				10,
@@ -3848,14 +3852,14 @@ function Projectile() {
 			);
 		}
 	};
-	this.bounceDir = function (a) {
+	this.bounceDir = (a) => {
 		this.dir = a ? Math.PI * 2 - this.dir : Math.PI - this.dir;
 		this.active = true;
 		this.speed *= 0.65;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
 	};
-	this.lineInRect = function (a, b, d, e, f) {
+	this.lineInRect = (a, b, d, e, f) => {
 		var g = this.x;
 		var h = this.y;
 		var k = g;
@@ -3903,7 +3907,7 @@ function Projectile() {
 	};
 	this.dotInRect = (a, b, d, e, f, h) =>
 		a >= d && a <= d + f && b >= e && b <= e + h;
-	this.adjustOnCollision = function (a, b, d, e) {
+	this.adjustOnCollision = (a, b, d, e) => {
 		let h = this.cEndX,
 			g = this.cEndY;
 		for (let f = 100; f > 0; ) {
@@ -3948,7 +3952,7 @@ function playerEquipWeapon(a, b) {
 	a.currentWeapon = b;
 }
 var actionBar = document.getElementById("actionBar");
-function updateWeaponUI(a, force) {
+function updateWeaponUI(a, force: boolean) {
 	if (weaponSpriteSheet[0] == undefined || a.weapons == undefined) {
 		return false;
 	}
@@ -3973,15 +3977,19 @@ function updateWeaponUI(a, force) {
 			}
 		}
 	} else {
-		for (let d = 0; d < a.weapons.length; ++d) {
-			let tmpDiv = document.getElementById(`actionContainer${d}`);
+		for (let i = 0; i < a.weapons.length; ++i) {
+			let tmpDiv = document.getElementById(`actionContainer${i}`);
 			tmpDiv.className =
-				d === a.currentWeapon ? "actionContainerActive" : "actionContainer";
+				i === a.currentWeapon ? "actionContainerActive" : "actionContainer";
 		}
 	}
 	updateUiStats(a);
 }
 function setCooldownAnimation(weaponIdx, time, d) {
+	// for some reason, the action cooldown elements sometimes aren't created?
+	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
+		updateWeaponUI(player, true);
+	}
 	let tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
 		tmpDiv.style.height = "100%";
@@ -4313,7 +4321,17 @@ function updateCamosList(a, b) {
 }
 window.updateCamosList = updateCamosList;
 var animLength = 3;
-var classSpriteSheets = [];
+var classSpriteSheets: {
+	upSprites: HTMLImageElement[];
+	downSprites: HTMLImageElement[];
+	leftSprites: HTMLImageElement[];
+	rightSprites: HTMLImageElement[];
+	arm: HTMLImageElement;
+	hD: HTMLImageElement;
+	hU: HTMLImageElement;
+	hL: HTMLImageElement;
+	hR: HTMLImageElement;
+}[] = [];
 function loadPlayerSprites(base: string) {
 	classSpriteSheets = [];
 	loadPlayerSpriteArray(base, characterClasses);
@@ -4322,10 +4340,10 @@ function loadPlayerSprites(base: string) {
 }
 function loadPlayerSpriteArray(base: string, classes: object[]) {
 	for (let i = 0; i < classes.length; ++i) {
-		let upSprites = [];
-		let downSprites = [];
-		let leftSprites = [];
-		let rightSprites = [];
+		let upSprites: HTMLImageElement[] = [];
+		let downSprites: HTMLImageElement[] = [];
+		let leftSprites: HTMLImageElement[] = [];
+		let rightSprites: HTMLImageElement[] = [];
 		upSprites.push(getSprite(`${base}characters/${classes[i].folderName}/up`));
 		downSprites.push(
 			getSprite(`${base}characters/${classes[i].folderName}/down`),
@@ -4487,12 +4505,12 @@ function loadModPack(a, b) {
 				this.numFiles;
 				this.progress;
 				this.reader;
-				this.init = function (a, b) {
+				this.init = (a, b) => {
 					this.numFiles = b;
 					this.progress = 0;
 					this.reader = a;
 				};
-				this.close = function () {
+				this.close = () => {
 					if (this.reader) {
 						this.progress++;
 						if (this.numFiles === this.progress) {
@@ -4511,22 +4529,21 @@ function loadModPack(a, b) {
 			}
 			function e(a) {
 				this.typeName = a;
-				var b = this;
 				this.process = (a) => {
 					try {
-						if (b.typeName.indexOf("modinfo") > -1) {
+						if (this.typeName.indexOf("modinfo") > -1) {
 							setModInfoText(a);
-						} else if (b.typeName.indexOf("cssmod") > -1) {
-							var d = document.createElement("style");
+						} else if (this.typeName.indexOf("cssmod") > -1) {
+							let d = document.createElement("style");
 							d.type = "text/css";
 							d.innerHTML = a;
 							document.getElementsByTagName("head")[0].appendChild(d);
-						} else if (b.typeName.indexOf("gameinfo") > -1) {
-							var e = a.replace(/(\r\n|\n|\r)/gm, "");
-							var f = JSON.parse(e);
+						} else if (this.typeName.indexOf("gameinfo") > -1) {
+							let e = a.replace(/(\r\n|\n|\r)/gm, "");
+							let f = JSON.parse(e);
 							updateMenuInfo(f.name);
-						} else if (b.typeName.indexOf("charinfo") > -1) {
-							var h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
+						} else if (this.typeName.indexOf("charinfo") > -1) {
+							let h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
 							let tmp = [];
 							for (a = 0; a < h.length; ++a) {
 								tmp.push(JSON.parse(h[a]));
@@ -4535,8 +4552,8 @@ function loadModPack(a, b) {
 							createClassList();
 							pickedCharacter(currentClassID);
 						}
-					} catch (t) {
-						console.log(`Script Read Error: ${t}`);
+					} catch (err) {
+						console.error(`Script Read Error: ${err}`);
 					}
 					zipFileCloser.close();
 				};
@@ -4545,41 +4562,40 @@ function loadModPack(a, b) {
 				this.filename = a;
 				this.soundAsDataURL = this.tmpLocation = "";
 				this.format = b;
-				var d = this;
-				this.process = function (a) {
-					if ((this.soundAsDataURL = URL.createObjectURL(a))) {
+				this.process = (a) => {
+					this.soundAsDataURL = URL.createObjectURL(a);
+					if (this.soundAsDataURL) {
 						try {
-							this.tmpLocation = d.filename;
+							this.tmpLocation = this.filename;
 							localStorage.setItem(
 								`${this.tmpLocation}data`,
 								this.soundAsDataURL,
 							);
-							localStorage.setItem(`${this.tmpLocation}format`, d.format);
-						} catch (r) {
-							console.log(`Storage failed: ${r}`);
+							localStorage.setItem(`${this.tmpLocation}format`, this.format);
+						} catch (err) {
+							console.error(`Storage failed: ${err}`);
 						}
 						zipFileCloser.close();
 					} else {
-						console.log(`failed to generate url: ${d.filename}`);
+						console.error(`failed to generate url: ${this.filename}`);
 					}
 				};
 			}
 			function h(a) {
 				this.filename = a;
 				this.imgAsDataURL = this.tmpLocation = "";
-				var b = this;
-				this.process = function (a) {
+				this.process = (a) => {
 					this.imgAsDataURL = URL.createObjectURL(a);
 					if (this.imgAsDataURL) {
 						try {
-							this.tmpLocation = b.filename;
+							this.tmpLocation = this.filename;
 							localStorage.setItem(this.tmpLocation, this.imgAsDataURL);
-						} catch (n) {
-							console.log(`Storage failed: ${n}`);
+						} catch (err) {
+							console.error(`Storage failed: ${err}`);
 						}
 						zipFileCloser.close();
 					} else {
-						console.log(`failed to generate url: ${b.filename}`);
+						console.error(`failed to generate url: ${this.filename}`);
 					}
 				};
 			}
@@ -4627,8 +4643,8 @@ function loadModPack(a, b) {
 									.then((a) => {
 										processor.process(a);
 									})
-									.catch((t) => {
-										console.log(`Script Read Error: ${t}`);
+									.catch((err) => {
+										console.error(`Script Read Error: ${err}`);
 									});
 							} else if (l == "sprites") {
 								let processor = new h(g.filename);
@@ -4636,8 +4652,8 @@ function loadModPack(a, b) {
 									.then((a) => {
 										processor.process(a);
 									})
-									.catch((n) => {
-										console.log(`Image Load Error: ${n}`);
+									.catch((err) => {
+										console.error(`Image Load Error: ${err}`);
 									});
 							} else if (l == "sounds") {
 								let processor = new f(
@@ -4648,8 +4664,8 @@ function loadModPack(a, b) {
 									.then((a) => {
 										processor.process(a);
 									})
-									.catch((r) => {
-										console.log(`Sound Load Error: ${r}`);
+									.catch((err) => {
+										console.error(`Sound Load Error: ${err}`);
 									});
 							} else {
 								loadingTexturePack = false;
@@ -4660,14 +4676,14 @@ function loadModPack(a, b) {
 				}
 			});
 		}
-	} catch (m) {
-		console.log(m);
+	} catch (err) {
+		console.error(err);
 		loadingTexturePack = false;
 		setModInfoText("Mod could not be loaded");
 	}
 }
 function getPlayerSprite(classIdx: number, angle: number, animIdx: number) {
-	let tmpSprite;
+	let tmpSprite: HTMLImageElement;
 	let tmpSpriteCollection = classSpriteSheets[classIdx];
 	if (!tmpSpriteCollection) {
 		return null;
@@ -4859,55 +4875,54 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	let tmpIndex = `${weaponIndex}${camo}${angle}`;
 	let tmpSprite = cachedWeaponSprites[tmpIndex];
 	if (!tmpSprite) {
-		var e = null;
-		var e = weaponSpriteSheet[weaponIndex];
-		if (e != undefined && e != null) {
-			if (angle == 90) {
-				e = e.leftSprite;
-			} else if (angle == 180) {
-				e = e.upSprite;
-			} else if (angle == 270) {
-				if (!e.rightSprite.flipped && e.rightSprite.isLoaded) {
-					e.rightSprite = flipSprite(e.rightSprite, true);
-				}
-				e = e.rightSprite;
-			} else {
-				e = e.downSprite;
+		let wepSprites = weaponSpriteSheet[weaponIndex];
+		if (!wepSprites) return;
+		let wepSprite: HTMLImageElement;
+		if (angle === 90) {
+			wepSprite = wepSprites.leftSprite;
+		} else if (angle === 180) {
+			wepSprite = wepSprites.upSprite;
+		} else if (angle === 270) {
+			if (!wepSprites.rightSprite.flipped && wepSprites.rightSprite.isLoaded) {
+				wepSprites.rightSprite = flipSprite(wepSprites.rightSprite, true);
 			}
-			let canvasElem = document.createElement("canvas");
-			let ctx = canvasElem.getContext("2d");
-			ctx.imageSmoothingEnabled = false;
-			canvasElem.width = e.width;
-			canvasElem.height = e.height;
-			ctx.drawImage(e, 0, 0, canvasElem.width, canvasElem.height);
-			tmpSprite = canvasElem;
-			cachedWeaponSprites[tmpIndex] = tmpSprite;
-			if (camo >= 0) {
-				let img = new Image();
-				img.wpnImg = tmpSprite;
-				img.flip = e.flipped;
-				img.tmpInx = tmpIndex;
-				img.onload = function () {
-					var a = document.createElement("canvas");
-					var b = a.getContext("2d");
-					b.imageSmoothingEnabled = false;
-					a.width = this.width;
-					a.height = this.height;
-					this.onload = null;
-					b.drawImage(this.wpnImg, 0, 0, this.width, this.height);
-					b.globalCompositeOperation = "source-atop";
-					b.globalAlpha = 0.75;
-					b.drawImage(
-						this.flip ? flipSprite(this, true) : this,
-						0,
-						0,
-						this.width,
-						this.height,
-					);
-					cachedWeaponSprites[this.tmpInx] = a;
-				};
-				img.src = getCamoURL(camo);
-			}
+			wepSprite = wepSprites.rightSprite;
+		} else {
+			wepSprite = wepSprites.downSprite;
+		}
+		let canvasElem = document.createElement("canvas");
+		let ctx = canvasElem.getContext("2d");
+		ctx.imageSmoothingEnabled = false;
+		canvasElem.width = wepSprite.width;
+		canvasElem.height = wepSprite.height;
+		ctx.drawImage(wepSprite, 0, 0, canvasElem.width, canvasElem.height);
+		tmpSprite = canvasElem;
+		cachedWeaponSprites[tmpIndex] = tmpSprite;
+		if (camo >= 0) {
+			let img = new Image();
+			img.wpnImg = tmpSprite;
+			img.flip = wepSprite.flipped;
+			img.tmpInx = tmpIndex;
+			img.onload = function () {
+				var a = document.createElement("canvas");
+				var b = a.getContext("2d");
+				b.imageSmoothingEnabled = false;
+				a.width = this.width;
+				a.height = this.height;
+				this.onload = null;
+				b.drawImage(this.wpnImg, 0, 0, this.width, this.height);
+				b.globalCompositeOperation = "source-atop";
+				b.globalAlpha = 0.75;
+				b.drawImage(
+					this.flip ? flipSprite(this, true) : this,
+					0,
+					0,
+					this.width,
+					this.height,
+				);
+				cachedWeaponSprites[this.tmpInx] = a;
+			};
+			img.src = getCamoURL(camo);
 		}
 	}
 	return cachedWeaponSprites[tmpIndex];
@@ -4942,8 +4957,8 @@ function drawGameObjects(delta: number) {
 					playerCanvas.width / 2,
 					playerCanvas.height / 2,
 				);
-				var m = (Math.PI / 180) * tmpObject.angle;
-				var k = Math.round((tmpObject.angle % 360) / 90) * 90;
+				let m = (Math.PI / 180) * tmpObject.angle;
+				let k = Math.round((tmpObject.angle % 360) / 90) * 90;
 				let h = tmpObject.x - startX;
 				let g = tmpObject.y - tmpObject.jumpY - startY;
 				if (tmpObject.animIndex === 1) {
@@ -5041,7 +5056,7 @@ function drawGameObjects(delta: number) {
 					);
 					playerContext.globalAlpha = 1;
 				}
-				var p = tmpObject.width * 0.833;
+				let p = tmpObject.width * 0.833;
 				d = getHatSprite(tmpObject, k);
 				if (d != null) {
 					drawSprite(
@@ -5213,14 +5228,6 @@ function drawGameObjects(delta: number) {
 	d = null;
 }
 function drawPlayerNames() {
-	var a = null;
-	var b;
-	var d;
-	var e;
-	var f;
-	var h = null;
-	var g;
-	let shapeX, shapeY;
 	graph.lineWidth = playerConfig.textBorderSize;
 	graph.fillStyle = playerConfig.textColor;
 	graph.miterLimit = 1;
@@ -5229,74 +5236,90 @@ function drawPlayerNames() {
 	for (let i = 0; i < gameObjects.length; i++) {
 		let tmpObject = gameObjects[i];
 		if (
-			tmpObject.type === "player" &&
-			!tmpObject.dead &&
-			(tmpObject.index === player.index || !!tmpObject.onScreen)
-		) {
-			d = tmpObject.height / 3.2;
-			e = Math.min(200, (tmpObject.maxHealth / 100) * 100);
-			shapeX = tmpObject.x - startX;
-			shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - startY;
-			if (tmpObject.account !== undefined && tmpObject.account.hat != null) {
-				shapeY -= tmpObject.account.hat.nameY;
-			}
-			b = tmpObject.name;
-			f = tmpObject.loggedIn ? tmpObject.account.rank : "";
-			h = graph.measureText(b);
-			g = tmpObject.team !== player.team ? "#d95151" : "#5151d9";
-			if (showNames) {
-				a = renderShadedAnimText(b, d * textSizeMult, "#ffffff", 5, "");
-				if (a != undefined) {
-					graph.drawImage(
-						a,
-						shapeX - a.width / 2,
-						shapeY - tmpObject.height * 1.4 - a.height / 2,
-						a.width,
-						a.height,
-					);
-				}
-				if (f != "") {
-					b = renderShadedAnimText(f, d * 1.6 * textSizeMult, "#ffffff", 6, "");
-					if (b != undefined) {
-						graph.drawImage(
-							b,
-							shapeX - a.width / 2 - b.width - textSizeMult * 5,
-							shapeY - tmpObject.height * 1.4 - (b.height - a.height / 2),
-							b.width,
-							b.height,
-						);
-					}
-				}
-				if (tmpObject.account?.clan != "") {
-					b = renderShadedAnimText(
-						` [${tmpObject.account?.clan}]`,
-						d * textSizeMult,
-						g,
-						5,
-						"",
-					);
-					if (b != undefined) {
-						graph.drawImage(
-							b,
-							shapeX + a.width / 2,
-							shapeY - tmpObject.height * 1.4 - a.height / 2,
-							b.width,
-							a.height,
-						);
-					}
-				}
-			}
-			graph.fillStyle = g;
-			graph.fillRect(
-				shapeX - (e / 2) * (tmpObject.health / tmpObject.maxHealth),
-				shapeY - tmpObject.height * 1.16,
-				(tmpObject.health / tmpObject.maxHealth) * e,
-				10,
-			);
+			tmpObject.type !== "player" ||
+			tmpObject.dead ||
+			(tmpObject.index !== player.index && !tmpObject.onScreen)
+		)
+			continue;
+
+		let d = tmpObject.height / 3.2;
+		let e = Math.min(200, (tmpObject.maxHealth / 100) * 100);
+		let shapeX = tmpObject.x - startX;
+		let shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - startY;
+		if (tmpObject.account !== undefined && tmpObject.account.hat != null) {
+			shapeY -= tmpObject.account.hat.nameY;
 		}
+		let playerName = tmpObject.name;
+		let rankText = tmpObject.loggedIn ? tmpObject.account.rank : "";
+		// h = graph.measureText(playerName);
+		let nameColor = tmpObject.team !== player.team ? "#d95151" : "#5151d9";
+		if (showNames) {
+			let renderedName = renderShadedAnimText(
+				playerName,
+				d * textSizeMult,
+				"#ffffff",
+				5,
+				"",
+			);
+			if (renderedName != undefined) {
+				graph.drawImage(
+					renderedName,
+					shapeX - renderedName.width / 2,
+					shapeY - tmpObject.height * 1.4 - renderedName.height / 2,
+					renderedName.width,
+					renderedName.height,
+				);
+			}
+			if (rankText != "") {
+				let renderedRank = renderShadedAnimText(
+					rankText,
+					d * 1.6 * textSizeMult,
+					"#ffffff",
+					6,
+					"",
+				);
+				if (renderedRank != undefined) {
+					graph.drawImage(
+						renderedRank,
+						shapeX -
+							renderedName.width / 2 -
+							renderedRank.width -
+							textSizeMult * 5,
+						shapeY -
+							tmpObject.height * 1.4 -
+							(renderedRank.height - renderedName.height / 2),
+						renderedRank.width,
+						renderedRank.height,
+					);
+				}
+			}
+			if (tmpObject.account?.clan != "") {
+				let renderedClan = renderShadedAnimText(
+					` [${tmpObject.account?.clan}]`,
+					d * textSizeMult,
+					nameColor,
+					5,
+					"",
+				);
+				if (renderedClan != undefined) {
+					graph.drawImage(
+						renderedClan,
+						shapeX + renderedName.width / 2,
+						shapeY - tmpObject.height * 1.4 - renderedName.height / 2,
+						renderedClan.width,
+						renderedName.height,
+					);
+				}
+			}
+		}
+		graph.fillStyle = nameColor;
+		graph.fillRect(
+			shapeX - (e / 2) * (tmpObject.health / tmpObject.maxHealth),
+			shapeY - tmpObject.height * 1.16,
+			(tmpObject.health / tmpObject.maxHealth) * e,
+			10,
+		);
 	}
-	h = null;
-	a = null;
 }
 function drawBackground() {
 	drawSprite(
@@ -5475,52 +5498,52 @@ function getCachedFloor(tile) {
 		tmpCanvas.width = tile.scale;
 		tmpCanvas.height = tile.scale * (tile.bottom ? 0.51 : 1);
 		ctx.drawImage(floorSprites[tile.spriteIndex], 0, 0, tile.scale, tile.scale);
-		var f = tile.scale / tilesPerFloorTile;
+		let s = tile.scale / tilesPerFloorTile;
 		if (tile.topLeft === 1) {
-			renderSideWalks(ctx, 1, f, 0, 0, 0, 0, 0);
+			renderSideWalks(ctx, 1, s, 0, 0, 0, 0, 0);
 		}
 		if (tile.topRight === 1) {
-			renderSideWalks(ctx, 1, f, Math.PI, tile.scale - f, 0, 0, 0);
+			renderSideWalks(ctx, 1, s, Math.PI, tile.scale - s, 0, 0, 0);
 		}
 		if (tile.left === 1) {
 			if (tile.top === 1) {
-				renderSideWalks(ctx, 2, f, null, 0, 0, 0, f);
-				renderSideWalks(ctx, tilesPerFloorTile - 2, f, 0, 0, f * 2, 0, f);
+				renderSideWalks(ctx, 2, s, null, 0, 0, 0, s);
+				renderSideWalks(ctx, tilesPerFloorTile - 2, s, 0, 0, s * 2, 0, s);
 			} else {
-				renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, 0, 0, f);
+				renderSideWalks(ctx, tilesPerFloorTile, s, 0, 0, 0, 0, s);
 			}
 		}
 		if (tile.right === 1) {
 			if (tile.top === 1) {
-				renderSideWalks(ctx, 2, f, null, tile.scale - f, 2, 0, f);
+				renderSideWalks(ctx, 2, s, null, tile.scale - s, 2, 0, s);
 				renderSideWalks(
 					ctx,
 					tilesPerFloorTile - 2,
-					f,
+					s,
 					Math.PI,
-					tile.scale - f,
-					f * 2,
+					tile.scale - s,
+					s * 2,
 					0,
-					f,
+					s,
 				);
 			} else {
 				renderSideWalks(
 					ctx,
 					tilesPerFloorTile,
-					f,
+					s,
 					Math.PI,
-					tile.scale - f,
+					tile.scale - s,
 					0,
 					0,
-					f,
+					s,
 				);
 			}
 		}
 		if (tile.top === 1) {
-			renderSideWalks(ctx, tilesPerFloorTile, f, Math.PI / 2, 0, 0, f, 0);
+			renderSideWalks(ctx, tilesPerFloorTile, s, Math.PI / 2, 0, 0, s, 0);
 		}
 		if (tile.bottom === 1) {
-			renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, tile.scale - f, f, 0);
+			renderSideWalks(ctx, tilesPerFloorTile, s, 0, 0, tile.scale - s, s, 0);
 		}
 		cachedFloors[tmpIndex] = tmpCanvas;
 	}
@@ -5671,7 +5694,7 @@ function drawSprite(
 	hasShadows: boolean,
 	m,
 	k,
-	p,
+	hOff: number,
 ) {
 	if (sprite != null && sprite !== undefined && sprite.width > 0) {
 		dx = Math.floor(dx);
@@ -5684,7 +5707,7 @@ function drawSprite(
 		if (hasShadows && showShadows) {
 			ctx.globalAlpha = 1;
 			ctx.translate(0, m);
-			let tmpShadow = getCachedShadow(sprite, dw, dh + p, k);
+			let tmpShadow = getCachedShadow(sprite, dw, dh + hOff, k);
 			if (tmpShadow) {
 				ctx.drawImage(tmpShadow, dx, dy + dh);
 			}
@@ -5753,7 +5776,7 @@ class AnimText {
 	removable = false;
 	textType = "";
 	color = "#fff";
-	cachedImage = null;
+	cachedImage: HTMLCanvasElement | null = null;
 
 	update(a) {
 		if (!this.active) return;
@@ -5785,19 +5808,17 @@ class AnimText {
 	}
 
 	draw() {
-		if (!this.active) return;
+		if (!this.active || !this.cachedImage) return;
 		graph.globalAlpha = this.alpha;
 		if (this.useStart) {
-			if (this.cachedImage !== undefined) {
-				graph.drawImage(
-					this.cachedImage,
-					this.x - startX - (this.cachedImage.width / 2) * this.scale,
-					this.y - startY - (this.cachedImage.height / 2) * this.scale,
-					this.cachedImage.width * this.scale,
-					this.cachedImage.height * this.scale,
-				);
-			}
-		} else if (this.cachedImage !== undefined) {
+			graph.drawImage(
+				this.cachedImage,
+				this.x - startX - (this.cachedImage.width / 2) * this.scale,
+				this.y - startY - (this.cachedImage.height / 2) * this.scale,
+				this.cachedImage.width * this.scale,
+				this.cachedImage.height * this.scale,
+			);
+		} else {
 			graph.drawImage(
 				this.cachedImage,
 				this.x - (this.cachedImage.width / 2) * this.scale,
@@ -5810,18 +5831,18 @@ class AnimText {
 }
 var notificationsSize = textSizeMult * 80;
 var notificationsGap = notificationsSize * 1.6;
-var notifications = [];
+var notifications: AnimText[] = [];
 for (let i = 0; i < 3; ++i) {
 	notifications.push(new AnimText());
 }
 var notificationIndex = 0;
-function showNotification(a) {
-	a = a.toUpperCase();
+function showNotification(text: string) {
+	text = text.toUpperCase();
 	notificationIndex++;
 	if (notificationIndex >= notifications.length) {
 		notificationIndex = 0;
 	}
-	notifications[notificationIndex].text = a;
+	notifications[notificationIndex].text = text;
 	notifications[notificationIndex].alpha = 1;
 	notifications[notificationIndex].x = maxScreenWidth / 2;
 	notifications[notificationIndex].fadeSpeed = 0.003;
@@ -5832,7 +5853,7 @@ function showNotification(a) {
 	notifications[notificationIndex].minScale = 1;
 	notifications[notificationIndex].maxScale = 1.5;
 	notifications[notificationIndex].cachedImage = renderShadedAnimText(
-		a,
+		text,
 		notificationsSize * viewMult,
 		"#ffffff",
 		7,
@@ -5864,7 +5885,7 @@ function positionNotifications() {
 		}
 	}
 }
-function sortByAlpha(a, b) {
+function sortByAlpha(a: AnimText, b: AnimText) {
 	if (a.alpha < b.alpha) {
 		return 1;
 	} else if (b.alpha < a.alpha) {
@@ -5911,74 +5932,72 @@ function getReadyAnimText() {
 }
 function startAnimText(a, b, d, e, f, h, g, l, m, k, p, n, r, u, v, t, w) {
 	var q = getReadyAnimText();
-	if (q != null) {
-		q.text = a.toUpperCase();
-		q.x = b;
-		q.y = d;
-		q.xSpeed = e;
-		q.ySpeed = f;
-		q.fadeSpeed = h;
-		q.fontSize = g * viewMult;
-		q.scale = 1;
-		q.maxScale = 1.6;
-		q.minScale = 1;
-		q.alpha = 1;
-		q.scaleSpeed = l;
-		q.useStart = m;
-		q.fadeDelay = k;
-		q.removable = p;
-		q.moveDelay = n;
-		q.alpha = u;
-		q.color = v;
-		q.textType = t;
-		q.cachedImage = renderShadedAnimText(q.text, q.fontSize, q.color, w, r);
-		q.active = true;
-	}
+	if (q == null) return;
+	q.text = a.toUpperCase();
+	q.x = b;
+	q.y = d;
+	q.xSpeed = e;
+	q.ySpeed = f;
+	q.fadeSpeed = h;
+	q.fontSize = g * viewMult;
+	q.scale = 1;
+	q.maxScale = 1.6;
+	q.minScale = 1;
+	q.alpha = 1;
+	q.scaleSpeed = l;
+	q.useStart = m;
+	q.fadeDelay = k;
+	q.removable = p;
+	q.moveDelay = n;
+	q.alpha = u;
+	q.color = v;
+	q.textType = t;
+	q.cachedImage = renderShadedAnimText(q.text, q.fontSize, q.color, w, r);
+	q.active = true;
 }
 function startBigAnimText(a, b, d, e, f, h, g, l) {
-	if (deactiveAnimTexts("big")) {
-		if (a.length > 0) {
-			startAnimText(
-				a,
-				maxScreenWidth / 2,
-				bigTextY,
-				0,
-				-0.1,
-				0.0025,
-				bigTextSize * l,
-				e ? 0.005 : 0,
-				false,
-				d,
-				g,
-				d,
-				"Italic ",
-				1,
-				f,
-				"big",
-				8,
-			);
-		}
-		if (b.length > 0) {
-			startAnimText(
-				b,
-				maxScreenWidth / 2,
-				bigTextY + textGap * viewMult * l,
-				0,
-				-0.04,
-				0.0025,
-				(medTextSize / 2) * l,
-				e ? 0.003 : 0,
-				false,
-				d,
-				g,
-				d,
-				"Italic ",
-				1,
-				h,
-				"big",
-				8,
-			);
-		}
+	if (!deactiveAnimTexts("big")) return;
+	if (a.length > 0) {
+		startAnimText(
+			a,
+			maxScreenWidth / 2,
+			bigTextY,
+			0,
+			-0.1,
+			0.0025,
+			bigTextSize * l,
+			e ? 0.005 : 0,
+			false,
+			d,
+			g,
+			d,
+			"Italic ",
+			1,
+			f,
+			"big",
+			8,
+		);
+	}
+	if (b.length > 0) {
+		startAnimText(
+			b,
+			maxScreenWidth / 2,
+			bigTextY + textGap * viewMult * l,
+			0,
+			-0.04,
+			0.0025,
+			(medTextSize / 2) * l,
+			e ? 0.003 : 0,
+			false,
+			d,
+			g,
+			d,
+			"Italic ",
+			1,
+			h,
+			"big",
+			8,
+		);
 	}
 }
 function startMovingAnimText(a, b, d, e, f) {
@@ -6020,9 +6039,15 @@ function deactiveAllAnimTexts() {
 		animTexts[i].active = false;
 	}
 }
-var cachedTextRenders = [];
-function renderShadedAnimText(a, b, d, e, f) {
-	let tmpIndex = `${a}${b}${d}${f}`;
+var cachedTextRenders: Record<string, HTMLCanvasElement> = [];
+function renderShadedAnimText(
+	text: string,
+	b,
+	color: string,
+	layerCount: number,
+	f,
+) {
+	let tmpIndex = `${text}${b}${color}${layerCount}${f}`;
 	let cachedText = cachedTextRenders[tmpIndex];
 	if (cachedText === undefined) {
 		let tmpCanvas = document.createElement("canvas");
@@ -6031,26 +6056,26 @@ function renderShadedAnimText(a, b, d, e, f) {
 
 		ctx.textAlign = "center";
 		ctx.font = `${f + b}px mainFont`;
-		tmpCanvas.width = ctx.measureText(a).width * 1.08;
-		tmpCanvas.height = b * 1.8 + e;
-		ctx.fillStyle = shadeColor(d, -18);
+		tmpCanvas.width = ctx.measureText(text).width * 1.08;
+		tmpCanvas.height = b * 1.8 + layerCount;
+		ctx.fillStyle = shadeColor(color, -18);
 		ctx.font = `${f + b}px mainFont`;
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "center";
-		for (let i = 1; i < e; ++i) {
-			ctx.fillText(a, tmpCanvas.width / 2, tmpCanvas.height / 2 + i);
+		for (let i = 1; i < layerCount; ++i) {
+			ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2 + i);
 		}
-		ctx.fillStyle = d;
+		ctx.fillStyle = color;
 		ctx.font = `${f + b}px mainFont`;
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "center";
-		ctx.fillText(a, tmpCanvas.width / 2, tmpCanvas.height / 2);
+		ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2);
 		cachedText = tmpCanvas;
 		cachedTextRenders[tmpIndex] = cachedText;
 	}
 	return cachedText;
 }
-var cachedParticles = [];
+var cachedParticles: Particle[] = [];
 var particleIndex = 0;
 for (let i = 0; i < 700; ++i) {
 	cachedParticles.push(new Particle());
@@ -6094,36 +6119,35 @@ function Particle() {
 	this.forceShow = this.checkCollisions = false;
 	this.tmpScale = this.maxDuration = this.duration = 0;
 	this.update = function (a) {
-		if (this.active) {
-			if (this.maxDuration > 0) {
-				this.duration += a;
-				this.tmpScale = 1 - this.duration / this.maxDuration;
-				this.tmpScale = this.tmpScale < 0 ? 0 : this.tmpScale;
-				this.scale = this.initScale * this.tmpScale;
-				if (this.scale < 1) {
-					this.active = false;
-				}
-				this.speed = this.initSpeed * this.tmpScale;
-				if (this.speed <= 0.01) {
-					this.speed = 0;
-				} else {
-					this.x += this.speed * a * Math.cos(this.dir);
-					this.y += this.speed * a * Math.sin(this.dir);
-				}
-				if (this.duration >= this.maxDuration) {
-					this.active = false;
-				}
-			}
-			if (this.alpha > 0) {
-				this.alpha -= this.fadeSpeed * a;
-			}
-			if (this.alpha <= 0) {
-				this.alpha = 0;
+		if (!this.active) return;
+		if (this.maxDuration > 0) {
+			this.duration += a;
+			this.tmpScale = 1 - this.duration / this.maxDuration;
+			this.tmpScale = this.tmpScale < 0 ? 0 : this.tmpScale;
+			this.scale = this.initScale * this.tmpScale;
+			if (this.scale < 1) {
 				this.active = false;
 			}
-			if (this.checkCollisions) {
-				this.checkInWall();
+			this.speed = this.initSpeed * this.tmpScale;
+			if (this.speed <= 0.01) {
+				this.speed = 0;
+			} else {
+				this.x += this.speed * a * Math.cos(this.dir);
+				this.y += this.speed * a * Math.sin(this.dir);
 			}
+			if (this.duration >= this.maxDuration) {
+				this.active = false;
+			}
+		}
+		if (this.alpha > 0) {
+			this.alpha -= this.fadeSpeed * a;
+		}
+		if (this.alpha <= 0) {
+			this.alpha = 0;
+			this.active = false;
+		}
+		if (this.checkCollisions) {
+			this.checkInWall();
 		}
 	};
 	this.draw = function () {
@@ -6133,7 +6157,7 @@ function Particle() {
 			isImageOk(particleSprites[this.spriteIndex])
 		) {
 			graph.globalAlpha = this.alpha;
-			if (this.rotation != 0) {
+			if (this.rotation !== 0) {
 				graph.save();
 				graph.translate(this.x - startX, this.y - startY);
 				graph.rotate(this.rotation);
@@ -6179,14 +6203,24 @@ function getReadyParticle() {
 	}
 	return cachedParticles[particleIndex];
 }
-function particleCone(a, b, d, e, f, h, g, l, m) {
+function particleCone(
+	count: number,
+	x: number,
+	y: number,
+	dir: number,
+	spread: number,
+	speed: number,
+	scale,
+	spriteIndex: number,
+	m,
+) {
 	if (!showParticles) return;
-	for (let i = 0; i < a; ++i) {
+	for (let i = 0; i < count; ++i) {
 		let tmpParticle = getReadyParticle();
 		tmpParticle.forceShow = false;
 		tmpParticle.checkCollisions = false;
-		tmpParticle.x = b;
-		tmpParticle.y = d;
+		tmpParticle.x = x;
+		tmpParticle.y = y;
 		tmpParticle.rotation = 0;
 		tmpParticle.alpha = 1;
 		tmpParticle.speed = 0;
@@ -6196,15 +6230,15 @@ function particleCone(a, b, d, e, f, h, g, l, m) {
 		tmpParticle.spriteIndex = 0;
 		tmpParticle.maxDuration = -1;
 		tmpParticle.duration = 0;
-		if (i === 0 && l === 2 && m) {
+		if (i === 0 && spriteIndex === 2 && m) {
 			tmpParticle.spriteIndex = 3;
 			tmpParticle.layer = 0;
 		} else {
-			tmpParticle.dir = e + randomFloat(-f, f);
-			tmpParticle.initScale = g * randomFloat(1.5, 1.8);
-			tmpParticle.initSpeed = h * randomFloat(0.3, 1.3);
+			tmpParticle.dir = dir + randomFloat(-spread, spread);
+			tmpParticle.initScale = scale * randomFloat(1.5, 1.8);
+			tmpParticle.initSpeed = speed * randomFloat(0.3, 1.3);
 			tmpParticle.maxDuration = randomFloat(0.8, 1.1) * 360;
-			tmpParticle.spriteIndex = l;
+			tmpParticle.spriteIndex = spriteIndex;
 			tmpParticle.layer = randomInt(0, 1);
 		}
 		tmpParticle.scale = tmpParticle.initScale;
@@ -6212,10 +6246,10 @@ function particleCone(a, b, d, e, f, h, g, l, m) {
 	}
 }
 var liquidSpread = 35;
-function createLiquid(a, b, d, e) {
+function createLiquid(x: number, y: number, _dir, spriteIndex: number) {
 	let tmpParticle = getReadyParticle();
-	tmpParticle.x = a + randomFloat(-liquidSpread, liquidSpread);
-	tmpParticle.y = b + randomFloat(-liquidSpread, liquidSpread);
+	tmpParticle.x = x + randomFloat(-liquidSpread, liquidSpread);
+	tmpParticle.y = y + randomFloat(-liquidSpread, liquidSpread);
 	tmpParticle.initSpeed = 0;
 	tmpParticle.maxDuration = -1;
 	tmpParticle.duration = 0;
@@ -6225,7 +6259,7 @@ function createLiquid(a, b, d, e) {
 	tmpParticle.alpha = randomFloat(0.3, 0.5);
 	tmpParticle.fadeSpeed = 0.00002;
 	tmpParticle.checkCollisions = false;
-	tmpParticle.spriteIndex = randomInt(e, e + 1);
+	tmpParticle.spriteIndex = randomInt(spriteIndex, spriteIndex + 1);
 	tmpParticle.layer = 0;
 	tmpParticle.forceShow = false;
 	tmpParticle.active = true;
@@ -6234,14 +6268,14 @@ var maxShakeDist = 2000;
 var maxExplosionDuration = 400;
 var maxShake = 9;
 
-function createExplosion(a, b, d) {
-	let tmpDist = getDistance(a, b, player.x, player.y);
+function createExplosion(x: number, y: number, scale: number) {
+	let tmpDist = getDistance(x, y, player.x, player.y);
 	if (tmpDist <= maxShakeDist) {
-		let tmpDir = getAngle(a, player.x, b, player.y);
-		screenShake(d * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
+		let tmpDir = getAngle(x, player.x, y, player.y);
+		screenShake(scale * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
 	}
-	playSound("explosion", a, b);
-	createSmokePuff(a, b, d, true, 1);
+	playSound("explosion", x, y);
+	createSmokePuff(x, y, scale, true, 1);
 }
 function createSmokePuff(
 	x: number,
