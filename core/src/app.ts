@@ -3646,7 +3646,7 @@ function Projectile() {
 	this.speed = this.trailWidth = this.trailMaxLength = this.trailAlpha = 0;
 	this.owner = null;
 	this.dmg = 0;
-	this.lastHit = "";
+	this.lastHit = [];
 	this.serverIndex = null;
 	this.skipMove = true;
 	this.startTime = 0;
@@ -3790,8 +3790,8 @@ function Projectile() {
 							if (this.spriteIndex !== 2) {
 								particleCone(
 									12,
-									k.x,
-									k.y - k.height / 2 - k.jumpY,
+									tmpObject.x,
+									tmpObject.y - tmpObject.height / 2 - tmpObject.jumpY,
 									this.dir + Math.PI,
 									Math.PI / randomInt(5, 7),
 									0.5,
@@ -3799,7 +3799,7 @@ function Projectile() {
 									0,
 									true,
 								);
-								createLiquid(k.x, k.y, this.dir, 4);
+								createLiquid(tmpObject.x, tmpObject.y, this.dir, 4);
 							}
 							if (this.pierceCount > 0) this.pierceCount--;
 							if (this.pierceCount <= 0) this.active = false;
@@ -3828,7 +3828,7 @@ function Projectile() {
 	};
 	this.activate = () => {
 		this.skipMove = true;
-		this.lastHit = ",";
+		this.lastHit = [];
 		this.active = true;
 		playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	};
