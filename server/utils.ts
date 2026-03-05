@@ -250,7 +250,7 @@ export class ServerProjectile {
 		this.x = this.cEndX;
 		this.y = this.cEndY;
 	}
-	lineInRect(a: number, b: number, d: number, e: number, f: boolean) {
+	lineInRect(rectX: number, rectY: number, rectW: number, rectH: number, adjust: boolean) {
 		var g = this.x;
 		var h = this.y;
 		var k = g;
@@ -259,11 +259,11 @@ export class ServerProjectile {
 			k = this.cEndX;
 			l = g;
 		}
-		if (l > a + d) {
-			l = a + d;
+		if (l > rectX + rectW) {
+			l = rectX + rectW;
 		}
-		if (k < a) {
-			k = a;
+		if (k < rectX) {
+			k = rectX;
 		}
 		if (k > l) {
 			return false;
@@ -282,46 +282,46 @@ export class ServerProjectile {
 			p = m;
 			m = k;
 		}
-		if (p > b + e) {
-			p = b + e;
+		if (p > rectY + rectH) {
+			p = rectY + rectH;
 		}
-		if (m < b) {
-			m = b;
+		if (m < rectY) {
+			m = rectY;
 		}
 		if (m > p) {
 			return false;
 		}
-		if (f) {
-			this.adjustOnCollision(a, b, d, e);
+		if (adjust) {
+			this.adjustOnCollision(rectX, rectY, rectW, rectH);
 		}
 		return true;
 	}
-	dotInRect(a: number, b: number, d: number, e: number, f: number, h: number) {
-		return a >= d && a <= d + f && b >= e && b <= e + h;
+	dotInRect(dotX: number, dotY: number, rectX: number, rectY: number, rectW: number, rectH: number) {
+		return dotX >= rectX && dotX <= rectX + rectW && dotY >= rectY && dotY <= rectY + rectH;
 	}
-	adjustOnCollision(a: number, b: number, d: number, e: number) {
-		let h = this.cEndX,
-			g = this.cEndY;
-		for (let f = 100; f > 0; ) {
-			f--;
-			if (this.dotInRect(h, g, a, b, d, e)) {
-				f = 0;
+	adjustOnCollision(rectX: number, rectY: number, rectW: number, rectH: number) {
+		let endX = this.cEndX;
+		let endY = this.cEndY;
+		for (let i = 100; i > 0; ) {
+			i--;
+			if (this.dotInRect(endX, endY, rectX, rectY, rectW, rectH)) {
+				i = 0;
 			} else {
-				h += Math.cos(this.dir + Math.PI) * 2;
-				g += Math.sin(this.dir + Math.PI) * 2;
+				endX += Math.cos(this.dir + Math.PI) * 2;
+				endY += Math.sin(this.dir + Math.PI) * 2;
 			}
 		}
 		for (let f = 100; f > 0; ) {
 			f--;
-			if (this.dotInRect(h, g, a, b, d, e)) {
-				h += Math.cos(this.dir + Math.PI) * 2;
-				g += Math.sin(this.dir + Math.PI) * 2;
+			if (this.dotInRect(endX, endY, rectX, rectY, rectW, rectH)) {
+				endX += Math.cos(this.dir + Math.PI) * 2;
+				endY += Math.sin(this.dir + Math.PI) * 2;
 			} else {
 				f = 0;
 			}
 		}
-		this.cEndX = h;
-		this.cEndY = g;
+		this.cEndX = endX;
+		this.cEndY = endY;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
 	}
