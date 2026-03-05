@@ -275,7 +275,7 @@ window.onload = () => {
 		leaderboardButton.onclick = () => {
 			window.open("/leaderboards.html", "_blank");
 		};
-		$.get("/getIP", (a) => {
+		$.get("http://localhost:1118/getIP", (a) => {
 			let port = a.port;
 			if (!socket) {
 				socket = io(`http://${devTest ? "localhost" : a.ip}:${a.port}`, {

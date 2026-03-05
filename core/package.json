@@ -2,7 +2,9 @@
 	"name": "core",
 	"version": "1.0.0",
 	"scripts": {
-		"dev": "rolldown -c rolldown.config.js --watch"
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
 	},
 	"devDependencies": {
 		"@types/howler": "^2.2.12",
@@ -10,8 +12,8 @@
 		"@zip.js/zip.js": "^2.7.62",
 		"howler": "^2.2.4",
 		"jquery": "^4.0.0",
-		"rolldown": "1.0.0-beta.23",
-		"socket.io-client": "^4.8.1"
+		"socket.io-client": "^4.8.1",
+		"vite": "8.0.0-beta.16"
 	},
 	"type": "module"
 }

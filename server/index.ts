@@ -1,7 +1,6 @@
-import path from "node:path";
 import { serve } from "@hono/node-server";
-import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { cors } from 'hono/cors'
 import { Server, type Socket } from "socket.io";
 import {
 	shootNextBullet,
@@ -15,8 +14,9 @@ import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 
 const app = new Hono();
-app.use(serveStatic({ root: path.join(import.meta.dirname, "..", "public") }));
-
+app.use(cors({
+	origin: ["http://localhost:5173"]
+}))
 app.get("/getIP", (c) => {
 	return c.json({ ip: "localhost", region: "...", port: "1119" });
 });
