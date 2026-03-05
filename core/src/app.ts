@@ -4524,7 +4524,7 @@ function setModInfoText(a) {
 }
 var fileFormat = "";
 window.loadModPack = loadModPack;
-function loadModPack(url: string, b) {
+function loadModPack(url: string, isBaseAssets: boolean) {
 	try {
 		if (loadingTexturePack) return;
 		function d() {
@@ -4626,7 +4626,7 @@ function loadModPack(url: string, b) {
 			};
 		}
 		let modPath = "";
-		if (b) {
+		if (isBaseAssets) {
 			doSounds = false;
 			modPath = "/res.zip";
 		} else {
@@ -4644,7 +4644,7 @@ function loadModPack(url: string, b) {
 				modPath = `https://dl.dropboxusercontent.com/s/${url}/vertixmod.zip`;
 			}
 		}
-		if (!b) {
+		if (!isBaseAssets) {
 			setModInfoText("Loading...");
 		}
 		zipFileCloser ||= new d();
