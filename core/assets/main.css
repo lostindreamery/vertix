@@ -1,7 +1,7 @@
 @font-face {
 	font-family: "mainFont";
 	font-size: 8px;
-	src: url("/css/fonts/font2.ttf");
+	src: url("./font2.ttf");
 }
 
 html,
@@ -66,7 +66,7 @@ select {
 
 canvas {
 	cursor:
-		url("/images/cursor_aim.png") 17 17,
+		url("./cursor_aim.png") 17 17,
 		default;
 	width: 100% !important;
 	height: 100% !important;
@@ -188,7 +188,7 @@ div {
 
 .rewardText {
 	cursor:
-		url("/images/cursor_aim.png") 17 17,
+		url("./cursor_aim.png") 17 17,
 		default;
 	pointer-events: all;
 	position: relative;
@@ -205,7 +205,7 @@ div {
 	margin-right: 10px;
 	width: 62px;
 	height: 62px;
-	background: url("/images/hats/display.png");
+	background: url("./hats/display.png");
 	background-size: 62px 62px;
 	background-repeat: no-repeat;
 }
@@ -216,7 +216,7 @@ div {
 	margin-right: 10px;
 	width: 62px;
 	height: 62px;
-	background: url("/images/shirts/display.png");
+	background: url("./shirts/display.png");
 	background-size: 62px 62px;
 	background-repeat: no-repeat;
 }
