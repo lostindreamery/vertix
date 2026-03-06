@@ -19,15 +19,10 @@ body {
 }
 
 * {
+	/* biome-ignore lint/a11y/useGenericFontNames: don't need a fallback here */
 	font-family: "mainFont";
 	font-size: 12px;
-	image-rendering: optimizeSpeed;
-	image-rendering: -moz-crisp-edges;
-	image-rendering: -o-crisp-edges;
-	image-rendering: -webkit-optimize-contrast;
 	image-rendering: pixelated;
-	image-rendering: optimize-contrast;
-	-ms-interpolation-mode: nearest-neighbor;
 }
 
 a {
@@ -79,24 +74,14 @@ canvas {
 	padding: 0;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
 	user-select: none;
 	outline: none;
 	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-	image-rendering: -moz-crisp-edges;
-	image-rendering: -webkit-crisp-edges;
-	-ms-interpolation-mode: nearest-neighbor;
 	image-rendering: pixelated;
-	image-rendering: optimizeSpeed;
 }
 
 div {
 	-webkit-user-select: none;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	-ms-user-select: none;
 	user-select: none;
 }
 
@@ -109,9 +94,6 @@ div {
 
 .lobbyKey {
 	-webkit-user-select: text;
-	-moz-user-select: text;
-	-khtml-user-select: text;
-	-ms-user-select: text;
 	user-select: text;
 	pointer-events: all;
 }
@@ -122,16 +104,8 @@ div {
 	height: 50px;
 	width: 50px;
 	vertical-align: middle;
-	image-rendering: -moz-crisp-edges;
-	image-rendering: -webkit-crisp-edges;
-	-ms-interpolation-mode: nearest-neighbor;
 	image-rendering: pixelated;
-	image-rendering: optimizeSpeed;
 	filter: blur(0);
-	-webkit-filter: blur(0px);
-	-moz-filter: blur(0px);
-	-ms-filter: blur(0px);
-	/* filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
 }
 
 .modeVoteText {
@@ -143,7 +117,6 @@ div {
 .dropUpLink {
 	position: relative;
 	display: inline-block;
-	cursor: pointer;
 	cursor: hand;
 	color: #5151d9;
 }
@@ -261,13 +234,7 @@ div {
 	width: 100%;
 	height: 100%;
 	opacity: 0.95;
-	image-rendering: optimizeSpeed;
-	image-rendering: -moz-crisp-edges;
-	image-rendering: -o-crisp-edges;
-	image-rendering: -webkit-optimize-contrast;
 	image-rendering: pixelated;
-	image-rendering: optimize-contrast;
-	-ms-interpolation-mode: nearest-neighbor;
 }
 
 .hoverTooltip {
@@ -316,9 +283,6 @@ div {
 	color: rgba(255, 255, 255, 0.7);
 	font-size: 16px;
 	-webkit-user-select: text;
-	-moz-user-select: text;
-	-khtml-user-select: text;
-	-ms-user-select: text;
 	user-select: text;
 }
 
@@ -609,8 +573,6 @@ div {
 		border 0.3s;
 	box-sizing: border-box;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	font-size: 14px;
 	margin-bottom: 10px;
 	outline: none;
@@ -655,8 +617,6 @@ div {
 		border 0.3s;
 	box-sizing: border-box;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	outline: none;
 	font-size: 12px;
 }
@@ -681,8 +641,6 @@ div {
 		border 0.3s;
 	box-sizing: border-box;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	margin-bottom: 4px;
 	outline: none;
 }
@@ -754,11 +712,8 @@ div {
 	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 	background: #76b3e3;
 	border: 0;
-	-webkit-box-shadow: inset 0 -3px #6fa9d6;
 	box-shadow: inset 0 -3px #6fa9d6;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	margin-bottom: 10px;
 	font-size: 15px;
 	color: rgba(255, 255, 255, 1);
@@ -773,7 +728,6 @@ div {
 	top: 1px;
 	background: #6fa9d6;
 	outline: none;
-	-webkit-box-shadow: none;
 	box-shadow: none;
 	font-size: 17px;
 }
@@ -790,11 +744,8 @@ div {
 	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 	background: #76b3e3;
 	border: 0;
-	-webkit-box-shadow: inset 0 -3px #6fa9d6;
 	box-shadow: inset 0 -3px #6fa9d6;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	margin-bottom: 10px;
 	font-size: 15px;
 	color: rgba(255, 255, 255, 1);
@@ -805,17 +756,12 @@ div {
 	top: 1px;
 	background: #6fa9d6;
 	outline: none;
-	-webkit-box-shadow: none;
 	box-shadow: none;
 	font-size: 17px;
 }
 
 #settings,
 #leaderboardWrapper {
-	-webkit-transition: max-height 0.2s;
-	-moz-transition: max-height 0.2s;
-	-ms-transition: max-height 0.2s;
-	-o-transition: max-height 0.2s;
 	transition: max-height 0.2s;
 	overflow: hidden;
 }
@@ -823,10 +769,6 @@ div {
 #rnkMessage {
 	padding: 0px;
 	max-height: 0;
-	-webkit-transition: max-height 0.1s;
-	-moz-transition: max-height 0.1s;
-	-ms-transition: max-height 0.1s;
-	-o-transition: max-height 0.1s;
 	transition: max-height 0.1s;
 	overflow: hidden;
 }
@@ -865,11 +807,8 @@ div {
 	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 	background: #76b3e3;
 	border: 0;
-	-webkit-box-shadow: inset 0 -3px #6fa9d6;
 	box-shadow: inset 0 -3px #6fa9d6;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	margin-bottom: 10px;
 	font-size: 15px;
 	color: rgba(255, 255, 255, 1);
@@ -880,16 +819,11 @@ div {
 	top: 1px;
 	background: #6fa9d6;
 	outline: none;
-	-webkit-box-shadow: none;
 	box-shadow: none;
 	font-size: 17px;
 }
 
 #instructions {
-	-webkit-transition: max-height 0.2s;
-	-moz-transition: max-height 0.2s;
-	-ms-transition: max-height 0.2s;
-	-o-transition: max-height 0.2s;
 	transition: max-height 0.2s;
 	overflow-y: scroll;
 	line-height: 200%;
@@ -910,11 +844,8 @@ div {
 	background: #76b3e3;
 	border: 0;
 	padding: 6px;
-	-webkit-box-shadow: inset 0 -3px #6fa9d6;
 	box-shadow: inset 0 -3px #6fa9d6;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	margin-bottom: 10px;
 	font-size: 12px;
 	color: rgba(255, 255, 255, 1);
@@ -944,7 +875,6 @@ div {
 	top: 1px;
 	background: #6fa9d6;
 	outline: none;
-	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
@@ -953,7 +883,6 @@ div {
 	top: 1px;
 	background: #6fa9d6;
 	outline: none;
-	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
@@ -978,10 +907,6 @@ div {
 	margin-right: -50%;
 	transform: translate(-50%, -50%) scale(1);
 	filter: blur(0);
-	-webkit-filter: blur(0px);
-	-moz-filter: blur(0px);
-	-ms-filter: blur(0px);
-	/* filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
 }
 
 #voteModeContainer {
@@ -1125,12 +1050,7 @@ div {
 	width: 100%;
 	height: 100%;
 	position: absolute;
-	-webkit-font-smoothing: subpixel-antialiased;
 	filter: blur(0);
-	-webkit-filter: blur(0px);
-	-moz-filter: blur(0px);
-	-ms-filter: blur(0px);
-	/* filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
 }
 #loadText {
 	color: #fff;
@@ -1151,12 +1071,7 @@ div {
 	padding: 5px;
 	opacity: 0;
 	display: inline-block;
-	-webkit-font-smoothing: subpixel-antialiased;
 	filter: blur(0);
-	-webkit-filter: blur(0px);
-	-moz-filter: blur(0px);
-	-ms-filter: blur(0px);
-	/* filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
 }
 
 @keyframes lol {
@@ -1177,34 +1092,13 @@ div {
 		transform: translateX(300px);
 	}
 }
-@-webkit-keyframes lol {
-	0% {
-		opacity: 0;
-		-webkit-transform: translateX(-300px);
-	}
-	33% {
-		opacity: 1;
-		-webkit-transform: translateX(0px);
-	}
-	66% {
-		opacity: 1;
-		-webkit-transform: translateX(0px);
-	}
-	100% {
-		opacity: 0;
-		-webkit-transform: translateX(300px);
-	}
-}
 .cs-loader-inner label:nth-child(4) {
-	-webkit-animation: lol 3s 300ms infinite ease-in-out;
 	animation: lol 3s 300ms infinite ease-in-out;
 }
 .cs-loader-inner label:nth-child(3) {
-	-webkit-animation: lol 3s 400ms infinite ease-in-out;
 	animation: lol 3s 400ms infinite ease-in-out;
 }
 .cs-loader-inner label:nth-child(2) {
-	-webkit-animation: lol 3s 500ms infinite ease-in-out;
 	animation: lol 3s 500ms infinite ease-in-out;
 }
 
@@ -1216,12 +1110,7 @@ div {
 	width: 100%;
 	height: 100%;
 	position: absolute;
-	-webkit-font-smoothing: subpixel-antialiased;
 	filter: blur(0);
-	-webkit-filter: blur(0px);
-	-moz-filter: blur(0px);
-	-ms-filter: blur(0px);
-	/* filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
 }
 
 #startMenuWrapper {
@@ -1233,12 +1122,7 @@ div {
 	left: 50%;
 	margin-right: -50%;
 	transform: translate(-50%, -50%) scale(1);
-	-webkit-font-smoothing: subpixel-antialiased;
 	filter: blur(0);
-	-webkit-filter: blur(0px);
-	-moz-filter: blur(0px);
-	-ms-filter: blur(0px);
-	/* filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
 }
 
 .menuHeader {
@@ -1293,15 +1177,12 @@ div {
 	padding: 20px;
 	float: left;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	background-color: white;
 	box-sizing: border-box;
 	margin-bottom: 10px;
 	display: inline-block;
 	vertical-align: top;
 	pointer-events: auto;
-	-webkit-box-shadow: inset 0 -5px #e0e0e0;
 	box-shadow: inset 0 -5px #e0e0e0;
 }
 
@@ -1312,13 +1193,10 @@ div {
 	margin-right: 10px;
 	padding: 20px;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	vertical-align: top;
 	background-color: white;
 	box-sizing: border-box;
 	pointer-events: auto;
-	-webkit-box-shadow: inset 0 -5px #e0e0e0;
 	box-shadow: inset 0 -5px #e0e0e0;
 }
 
@@ -1329,15 +1207,12 @@ div {
 	margin-left: 10px;
 	padding: 20px;
 	border-radius: 1px;
-	-moz-border-radius: 1px;
-	-webkit-border-radius: 1px;
 	vertical-align: top;
 	background-color: white;
 	box-sizing: border-box;
 	font-size: 16px;
 	color: rgba(0, 0, 0, 0.4);
 	pointer-events: auto;
-	-webkit-box-shadow: inset 0 -5px #e0e0e0;
 	box-shadow: inset 0 -5px #e0e0e0;
 }
 
