@@ -3460,7 +3460,7 @@ function deactivateSprays() {
 		userSprays[i].active = false;
 	}
 }
-function cacheSpray(img: HTMLImageElement) {
+function cacheSpray(img: Sprite) {
 	const tmpIndex = img.src;
 	let tmpSpray = cachedSprays[tmpIndex];
 	if (tmpSpray === undefined && img.width !== 0) {
@@ -4522,10 +4522,10 @@ function loadPlayerSpriteArray(
 	classes: typeof characterClasses | typeof specialClasses,
 ) {
 	for (let i = 0; i < classes.length; ++i) {
-		let upSprites: HTMLImageElement[] = [];
-		let downSprites: HTMLImageElement[] = [];
-		let leftSprites: HTMLImageElement[] = [];
-		let rightSprites: HTMLImageElement[] = [];
+		let upSprites: Sprite[] = [];
+		let downSprites: Sprite[] = [];
+		let leftSprites: Sprite[] = [];
+		let rightSprites: Sprite[] = [];
 		upSprites.push(getSprite(`${base}characters/${classes[i].folderName}/up`));
 		downSprites.push(
 			getSprite(`${base}characters/${classes[i].folderName}/down`),
@@ -5863,7 +5863,7 @@ function drawMap(layer: number) {
 }
 function drawSprite(
 	ctx: CanvasRenderingContext2D,
-	sprite: RestrictedCanvasImageSource,
+	sprite: Sprite,
 	dx: number,
 	dy: number,
 	dw: number,
@@ -5896,7 +5896,7 @@ function drawSprite(
 }
 var shadowIntensity = 0.16;
 function getCachedShadow(
-	sprite: RestrictedCanvasImageSource,
+	sprite: Sprite,
 	width: number,
 	height: number,
 	e,
@@ -5926,7 +5926,6 @@ function getCachedShadow(
 			pixelArray[i + 2] = 0;
 			pixelArray[i + 3] = pixelArray[i + 3]; // ??
 		}
-		ctx.putImageData(imgData, 0, 0);
 		cachedShadows[sprite.index] = tmpCanvas;
 	}
 	return cachedShadows[sprite.index];
