@@ -60,6 +60,24 @@ export type InputSendData = {
 		delta: number,
 }
 
+export interface Sprite extends HTMLImageElement {
+  index: number;
+  isLoaded: boolean;
+  flipped: boolean;
+  //SPRAY
+  owner?: Player;
+  active?: boolean;
+  xPos?: number;
+  yPos?: number;
+  scale?: number;
+  alpha?: number;
+  resolution?: number;
+  //WEAPON
+  wpnImg?: any;
+  flip?: boolean;
+  tmpInx?: string;
+}
+
 export interface SpriteCanvas extends HTMLCanvasElement {
 	index?: number;
 	flipped?: boolean;

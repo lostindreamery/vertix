@@ -9,7 +9,7 @@ import {
 	specialClasses,
 	weaponNames,
 } from "./loadouts.ts";
-import type { Player, InputSendData, SpriteCanvas } from "./types.ts";
+import type { Player, InputSendData, Sprite, SpriteCanvas } from "./types.ts";
 import * as utils from "./utils.ts";
 
 const {
@@ -3430,7 +3430,7 @@ function createSpray(a, b, d) {
 			}
 		}
 		if (tmpSpray == null) {
-			const img = new Sprite();
+			const img = new Image() as Sprite;
 			img.owner = a;
 			img.active = false;
 			img.xPos = 0;
@@ -3706,25 +3706,8 @@ function stopAllSounds() {
 }
 var spritesLoaded = false;
 var spriteIndex = 0;
-class Sprite extends Image {
-  index = 0;
-  isLoaded = false;
-  flipped = false;
-  //SPRAY
-  owner: any; // Player
-  active = false;
-  xPos = 0;
-  yPos = 0;
-  scale = 0;
-  alpha = 0;
-  resolution = 0;
-  //WEAPON
-  wpnImg: any;
-  flip = false;
-  tmpInx = "";
-}
 function getSprite(fileName: string) {
-	var b = new Sprite();
+	var b = new Image() as Sprite;
 	b.index = spriteIndex;
 	b.flipped = false;
 	b.isLoaded = false;
@@ -4898,10 +4881,10 @@ function getHatSprite(playerObj: Player, dir: number) {
 		let tmpSprite = cachedHats[tmpAcc.hat.id];
 		if (!tmpSprite) {
 			let hat = {
-				lS: new Sprite(),
-				uS: new Sprite(),
-				rS: new Sprite(),
-				dS: new Sprite(),
+				lS: new Image() as Sprite,
+				uS: new Image() as Sprite,
+				rS: new Image() as Sprite,
+				dS: new Image() as Sprite,
 				imgToLoad: 0,
 			};
 			if (tmpAcc.hat.left) {
@@ -4985,15 +4968,15 @@ function getShirtSprite(playerObj: Player, dir: number) {
 	let tmpSprite = cachedShirts[tmpAcc.shirt.id];
 	if (!tmpSprite) {
 		let d = {
-			lS: new Sprite(),
-			uS: new Sprite(),
-			rS: new Sprite(),
-			dS: new Sprite(),
+			lS: new Image() as Sprite,
+			uS: new Image() as Sprite,
+			rS: new Image() as Sprite,
+			dS: new Image() as Sprite,
 			imgToLoad: 0,
 		};
 		if (tmpAcc.shirt.left) {
 			d.imgToLoad++;
-			d.lS = new Sprite();
+			d.lS = new Image() as Sprite;
 			d.lS.index = spriteIndex;
 			spriteIndex++;
 			d.lS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
@@ -5003,7 +4986,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 				d.lS.onload = null;
 			};
 			d.imgToLoad++;
-			d.rS = new Sprite();
+			d.rS = new Image() as Sprite;
 			d.rS.index = spriteIndex;
 			spriteIndex++;
 			d.rS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
@@ -5016,7 +4999,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 		}
 		if (tmpAcc.shirt.up) {
 			d.imgToLoad++;
-			d.uS = new Sprite();
+			d.uS = new Image() as Sprite;
 			d.uS.index = spriteIndex;
 			spriteIndex++;
 			d.uS.src = `.././images/shirts/${tmpAcc.shirt.id}/u.png`;
@@ -5027,7 +5010,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 			};
 		}
 		d.imgToLoad++;
-		d.dS = new Sprite();
+		d.dS = new Image() as Sprite;
 		d.dS.index = spriteIndex;
 		spriteIndex++;
 		d.dS.src = `.././images/shirts/${tmpAcc.shirt.id}/d.png`;
@@ -5077,7 +5060,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 		tmpSprite = canvasElem;
 		cachedWeaponSprites[tmpIndex] = tmpSprite;
 		if (camo >= 0) {
-			let img = new Sprite();
+			let img = new Image() as Sprite;
 			img.wpnImg = tmpSprite;
 			img.flip = wepSprite.flipped;
 			img.tmpInx = tmpIndex;
