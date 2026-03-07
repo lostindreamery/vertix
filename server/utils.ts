@@ -318,23 +318,6 @@ export class ServerProjectile {
 			dotY <= rectY + rectH
 		);
 	}
-	rectInRect(
-		rectX: number,
-		rectY: number,
-		rectW: number,
-		rectH: number,
-		rectX2: number,
-		rectY2: number,
-		rectW2: number,
-		rectH2: number,
-	) {
-		return (
-			rectX < rectX2 + rectW2 &&
-			rectX + rectW > rectX2 &&
-			rectY < rectY2 + rectH2 &&
-			rectY + rectH > rectY2
-		);
-	}
 	adjustOnCollision(
 		rectX: number,
 		rectY: number,

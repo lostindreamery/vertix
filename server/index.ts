@@ -8,7 +8,8 @@ import {
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
-	roundNumber,
+  roundNumber,
+  getDistance,
 } from "core/src/utils.ts";
 import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
@@ -303,87 +304,76 @@ io.on("connection", (socket: Socket) => {
 				bullet,
 			);
 			const updateBullet = () => {
-				let sourcePlayer = player;
-				let destPlayers: Player[] = [];
 				if (bullet.active && bullet.lastHit.length > 0) {
 					for (let i = 0; i < bullet.lastHit.length; i++) {
-						destPlayers.push(players[bullet.lastHit[i]]);
+            updateHit(player, players[bullet.lastHit[i]], bullet.dmg);
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					for (let p = 0; p < players.length; p++) {
-						let tmpPlayer = players[p];
-						//TODO: align hitboxes properly and calculate dmg drop off
-						if (
-							bullet.rectInRect(
-								bullet.x,
-								bullet.y,
-								bullet.blastRadius,
-								bullet.blastRadius,
-								tmpPlayer.x - tmpPlayer.width / 4,
-								tmpPlayer.y - tmpPlayer.height / 4 - tmpPlayer.jumpY,
-								tmpPlayer.width,
-								tmpPlayer.height,
-							)
-						) {
-							destPlayers.push(tmpPlayer);
+            let tmpPlayer = players[p];
+						//TODO
+            const dist = getDistance(bullet.x, bullet.y, tmpPlayer.x, tmpPlayer.y - tmpPlayer.jumpY);
+            if (150 > dist) {
+              const dmg = -110 + Math.round(dist) > 0 ? 0 : -110 + Math.round(dist);
+              updateHit(player, tmpPlayer, dmg);
 						}
 					}
-					if (destPlayers.length < 0) return;
 				} else {
 					bullet.update(player.delta, currentTime, clutter, tiles, players);
 					setTimeout(updateBullet, player.delta);
 					return;
 				}
 				bullet.deactivate();
-				for (let i = 0; i < destPlayers.length; i++) {
-					if (destPlayers[i]?.dead) return;
-					destPlayers[i].health -= bullet.dmg;
-					io.emit("1", {
-						dID: sourcePlayer.index,
-						gID: destPlayers[i].index,
-						dir: d,
-						amount: -bullet.dmg,
-						bi: -1,
-						h: destPlayers[i].health,
-					});
-					const dead = destPlayers[i].health <= 0;
-					if (!dead) return;
-					destPlayers[i].dead = true;
-					destPlayers[i].onScreen = false;
-					io.emit("3", {
-						dID: sourcePlayer.index,
-						gID: destPlayers[i].index,
-						sS: 100,
-					});
-					sourcePlayer.score += 100;
-					sourcePlayer.kills += 1;
-					io.emit("upd", {
-						i: sourcePlayer.index,
-						s: sourcePlayer.score,
-						kil: sourcePlayer.kills,
-					});
-					destPlayers[i].deaths += 1;
-					io.emit("upd", {
-						i: destPlayers[i].index,
-						dea: destPlayers[i].deaths,
-					});
-					io.emit(
-						"lb",
-						players.flatMap((pl) => [pl.index]),
-					);
-
-					if (sourcePlayer.team === "red") scoreRed += 1;
-					else scoreBlue += 1;
-
-					io.emit(
-						"ts",
-						destPlayers[i].team === "red" ? scoreRed : scoreBlue,
-						sourcePlayer.team === "red" ? scoreRed : scoreBlue,
-					);
-				}
 			};
-			updateBullet();
+      updateBullet();
+
+      const updateHit = (source: Player, dest: Player, dmg: number) => {
+   			if (dest?.dead) return;
+				dest.health += dmg;
+				io.emit("1", {
+					dID: source.index,
+					gID: dest.index,
+					dir: d,
+					amount: dmg,
+					bi: -1,
+					h: dest.health,
+				});
+				const dead = dest.health <= 0;
+				if (!dead) return;
+				dest.dead = true;
+				dest.onScreen = false;
+				io.emit("3", {
+					dID: source.index,
+					gID: dest.index,
+					sS: 100,
+				});
+				source.score += 100;
+				source.kills += 1;
+				io.emit("upd", {
+					i: source.index,
+					s: source.score,
+					kil: source.kills,
+				});
+				dest.deaths += 1;
+				io.emit("upd", {
+					i: dest.index,
+					dea: dest.deaths,
+				});
+				io.emit(
+					"lb",
+					players.flatMap((pl) => [pl.index]),
+				);
+
+				if (source.team === "red") scoreRed += 1;
+				else scoreBlue += 1;
+
+				io.emit(
+					"ts",
+					dest.team === "red" ? scoreRed : scoreBlue,
+					source.team === "red" ? scoreRed : scoreBlue,
+				);
+      }
 		}
 	});
 	socket.on("4", (data) => {
