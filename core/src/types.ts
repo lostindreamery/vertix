@@ -51,6 +51,15 @@ export type Player = {
 // todo
 export type Account = any;
 
+export type InputSendData = {
+		hdt: number,
+		vdt: number,
+		ts: number,
+		isn: number,
+		s: number,
+		delta: number,
+}
+
 export type RestrictedCanvasImageSource = Exclude<
 	CanvasImageSource,
 	SVGImageElement | VideoFrame

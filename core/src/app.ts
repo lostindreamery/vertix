@@ -9,7 +9,7 @@ import {
 	specialClasses,
 	weaponNames,
 } from "./loadouts.ts";
-import type { Player, RestrictedCanvasImageSource } from "./types.ts";
+import type { Player, InputSendData, RestrictedCanvasImageSource } from "./types.ts";
 import * as utils from "./utils.ts";
 
 const {
@@ -124,14 +124,14 @@ var delta = 0;
 var horizontalDT = 0;
 var verticalDT = 0;
 var roomNum = 0;
-var currentTime: number | undefined;
+var currentTime = Date.now();
 var oldTime = Date.now();
 var FRAME_STEP = 1000 / 60;
 var count = -1;
 var clientPrediction = true;
 var inputNumber = 0;
 var clientSpeed = 12;
-var thisInput = [];
+var thisInput: InputSendData[] = [];
 var keyd = 1;
 var tabbed = 0;
 var timeSinceLastUpdate = 0;
@@ -3417,8 +3417,8 @@ function updateScreenShake(_) {
 		}
 	}
 }
-var userSprays: HTMLImageElement[] = [];
-var cachedSprays: RestrictedCanvasImageSource[] = [];
+var userSprays: Sprite[] = [];
+var cachedSprays: Sprite[] = [];
 function createSpray(a, b, d) {
 	let tmpPlayer = findUserByIndex(a);
 	if (tmpPlayer != null) {
@@ -3430,7 +3430,7 @@ function createSpray(a, b, d) {
 			}
 		}
 		if (tmpSpray == null) {
-			const img = new Image();
+			const img = new Sprite();
 			img.owner = a;
 			img.active = false;
 			img.xPos = 0;
@@ -3706,8 +3706,25 @@ function stopAllSounds() {
 }
 var spritesLoaded = false;
 var spriteIndex = 0;
+class Sprite extends Image {
+  index = 0;
+  isLoaded = false;
+  flipped = false;
+  //SPRAY
+  owner: any; // Player
+  active = false;
+  xPos = 0;
+  yPos = 0;
+  scale = 0;
+  alpha = 0;
+  resolution = 0;
+  //WEAPON
+  wpnImg: any;
+  flip = false;
+  tmpInx = "";
+}
 function getSprite(fileName: string) {
-	var b = new Image();
+	var b = new Sprite();
 	b.index = spriteIndex;
 	b.flipped = false;
 	b.isLoaded = false;
@@ -3721,7 +3738,7 @@ function getSprite(fileName: string) {
 	};
 	try {
 		let tmpPicture = localStorage.getItem(`${fileName}.png`);
-		b.src = tmpPicture;
+		b.src = tmpPicture ? tmpPicture : "";
 		b.crossOrigin = "anonymous";
 	} catch (d) {
 		console.log(d);
@@ -3730,7 +3747,7 @@ function getSprite(fileName: string) {
 	return b;
 }
 function flipSprite(
-	sprite: RestrictedCanvasImageSource,
+	sprite: Sprite,
 	b,
 ): RestrictedCanvasImageSource {
 	let canvasElem = document.createElement("canvas");
@@ -3756,7 +3773,8 @@ function flipSprite(
 			canvasElem.width,
 			canvasElem.height,
 		);
-	}
+  }
+	// TODO
 	canvasElem.index = sprite.index;
 	canvasElem.flipped = true;
 	canvasElem.isLoaded = true;
@@ -4483,15 +4501,15 @@ function updateCamosList(a, b) {
 window.updateCamosList = updateCamosList;
 var animLength = 3;
 var classSpriteSheets: {
-	upSprites: RestrictedCanvasImageSource[];
-	downSprites: RestrictedCanvasImageSource[];
-	leftSprites: RestrictedCanvasImageSource[];
-	rightSprites: RestrictedCanvasImageSource[];
-	arm: RestrictedCanvasImageSource;
-	hD: RestrictedCanvasImageSource;
-	hU: RestrictedCanvasImageSource;
-	hL: RestrictedCanvasImageSource;
-	hR: RestrictedCanvasImageSource;
+	upSprites: Sprite[];
+	downSprites: Sprite[];
+	leftSprites: Sprite[];
+	rightSprites: Sprite[];
+	arm: Sprite;
+	hD: Sprite;
+	hU: Sprite;
+	hL: Sprite;
+	hR: Sprite;
 }[] = [];
 function loadPlayerSprites(base: string) {
 	classSpriteSheets = [];
@@ -4571,10 +4589,10 @@ var ambientSprites: HTMLImageElement[] = [];
 var wallSpritesSeg: HTMLImageElement[] = [];
 var particleSprites: HTMLImageElement[] = [];
 var weaponSpriteSheet: {
-	upSprite: RestrictedCanvasImageSource;
-	downSprite: RestrictedCanvasImageSource;
-	leftSprite: RestrictedCanvasImageSource;
-	rightSprite: RestrictedCanvasImageSource;
+	upSprite: Sprite;
+	downSprite: Sprite;
+	leftSprite: Sprite;
+	rightSprite: Sprite;
 	icon: HTMLImageElement;
 }[] = [];
 var bulletSprites: HTMLImageElement[] = [];
@@ -4847,91 +4865,87 @@ function loadModPack(url: string, isBaseAssets: boolean) {
 	}
 }
 function getPlayerSprite(classIdx: number, angle: number, animIdx: number) {
-	let tmpSprite: RestrictedCanvasImageSource;
+	let tmpSprite: Sprite;
 	let tmpSpriteCollection = classSpriteSheets[classIdx];
 	if (!tmpSpriteCollection) {
 		return null;
 	}
 	if (angle === 90) {
-		tmpSprite = tmpSpriteCollection.leftSprites[animIdx];
+    tmpSprite = tmpSpriteCollection.leftSprites[animIdx];
 	} else if (angle === 180) {
-		tmpSprite = tmpSpriteCollection.upSprites[animIdx];
-	} else if (angle === 270) {
+    tmpSprite = tmpSpriteCollection.upSprites[animIdx];
+  } else if (angle === 270) {
 		if (
 			!tmpSpriteCollection.rightSprites[animIdx].flipped &&
 			tmpSpriteCollection.rightSprites[animIdx].isLoaded
-		) {
+    ) {
 			tmpSpriteCollection.rightSprites[animIdx] = flipSprite(
 				tmpSpriteCollection.rightSprites[animIdx],
 				true,
 			);
 		}
 		tmpSprite = tmpSpriteCollection.rightSprites[animIdx];
-	} else {
+  } else {
 		tmpSprite = tmpSpriteCollection.downSprites[animIdx];
 	}
 	return tmpSprite;
 }
-var cachedHats = [];
+var cachedHats: any[] = [];
 function getHatSprite(playerObj: Player, dir: number) {
 	let tmpAcc = playerObj.account;
 	if (!tmpAcc) return null;
 	if (tmpAcc.hat != null) {
 		let tmpSprite = cachedHats[tmpAcc.hat.id];
 		if (!tmpSprite) {
-			let d = {
-				lS: null,
-				uS: null,
-				rS: null,
-				dS: null,
+			let hat = {
+				lS: new Sprite(),
+				uS: new Sprite(),
+				rS: new Sprite(),
+				dS: new Sprite(),
 				imgToLoad: 0,
 			};
 			if (tmpAcc.hat.left) {
-				d.imgToLoad++;
-				d.lS = new Image();
-				d.lS.index = spriteIndex;
+				hat.imgToLoad++;
+				hat.lS.index = spriteIndex;
 				spriteIndex++;
-				d.lS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
-				d.lS.onload = () => {
-					d.imgToLoad--;
-					d.lS.isLoaded = true;
-					d.lS.onload = null;
+				hat.lS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
+				hat.lS.onload = () => {
+					hat.imgToLoad--;
+					hat.lS.isLoaded = true;
+					hat.lS.onload = null;
 				};
-				d.imgToLoad++;
-				d.rS = new Image();
-				d.rS.index = spriteIndex;
+				hat.imgToLoad++;
+				hat.rS.index = spriteIndex;
 				spriteIndex++;
-				d.rS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
-				d.rS.onload = () => {
-					d.rS = flipSprite(d.rS, true);
-					d.imgToLoad--;
-					d.rS.isLoaded = true;
-					d.rS.onload = null;
+				hat.rS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
+				hat.rS.onload = () => {
+					hat.rS = flipSprite(hat.rS, true);
+					hat.imgToLoad--;
+					hat.rS.isLoaded = true;
+					hat.rS.onload = null;
 				};
 			}
 			if (tmpAcc.hat.up) {
-				d.imgToLoad++;
-				d.uS = new Image();
-				d.uS.index = spriteIndex;
+				hat.imgToLoad++;
+				hat.uS.index = spriteIndex;
 				spriteIndex++;
-				d.uS.src = `.././images/hats/${tmpAcc.hat.id}/u.png`;
-				d.uS.onload = () => {
-					d.imgToLoad--;
-					d.uS.isLoaded = true;
-					d.uS.onload = null;
+				hat.uS.src = `.././images/hats/${tmpAcc.hat.id}/u.png`;
+				hat.uS.onload = () => {
+					hat.imgToLoad--;
+					hat.uS.isLoaded = true;
+					hat.uS.onload = null;
 				};
 			}
-			d.imgToLoad++;
-			d.dS = new Image();
-			d.dS.index = spriteIndex;
+			hat.imgToLoad++;
+			hat.dS.index = spriteIndex;
 			spriteIndex++;
-			d.dS.src = `.././images/hats/${tmpAcc.hat.id}/d.png`;
-			d.dS.onload = () => {
-				d.imgToLoad--;
-				d.dS.isLoaded = true;
-				d.dS.onload = null;
+			hat.dS.src = `.././images/hats/${tmpAcc.hat.id}/d.png`;
+			hat.dS.onload = () => {
+				hat.imgToLoad--;
+				hat.dS.isLoaded = true;
+				hat.dS.onload = null;
 			};
-			cachedHats[tmpAcc.hat.id] = d;
+			cachedHats[tmpAcc.hat.id] = hat;
 		} else if (tmpSprite.imgToLoad <= 0) {
 			if (tmpAcc.hat.left && dir === 90) {
 				return tmpSprite.lS;
@@ -4944,7 +4958,7 @@ function getHatSprite(playerObj: Player, dir: number) {
 			}
 		}
 	} else {
-		let tmpSprite: RestrictedCanvasImageSource;
+		let tmpSprite: Sprite;
 		let tmpSpriteCollection = classSpriteSheets[playerObj.classIndex];
 		if (!tmpSpriteCollection) {
 			return null;
@@ -4964,22 +4978,22 @@ function getHatSprite(playerObj: Player, dir: number) {
 		return tmpSprite;
 	}
 }
-var cachedShirts = [];
+var cachedShirts: any[] = [];
 function getShirtSprite(playerObj: Player, dir: number) {
 	let tmpAcc = playerObj.account;
 	if (!tmpAcc?.shirt || playerObj.classIndex === 8) return null;
 	let tmpSprite = cachedShirts[tmpAcc.shirt.id];
 	if (!tmpSprite) {
 		let d = {
-			lS: null,
-			uS: null,
-			rS: null,
-			dS: null,
+			lS: new Sprite(),
+			uS: new Sprite(),
+			rS: new Sprite(),
+			dS: new Sprite(),
 			imgToLoad: 0,
 		};
 		if (tmpAcc.shirt.left) {
 			d.imgToLoad++;
-			d.lS = new Image();
+			d.lS = new Sprite();
 			d.lS.index = spriteIndex;
 			spriteIndex++;
 			d.lS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
@@ -4989,7 +5003,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 				d.lS.onload = null;
 			};
 			d.imgToLoad++;
-			d.rS = new Image();
+			d.rS = new Sprite();
 			d.rS.index = spriteIndex;
 			spriteIndex++;
 			d.rS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
@@ -5002,7 +5016,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 		}
 		if (tmpAcc.shirt.up) {
 			d.imgToLoad++;
-			d.uS = new Image();
+			d.uS = new Sprite();
 			d.uS.index = spriteIndex;
 			spriteIndex++;
 			d.uS.src = `.././images/shirts/${tmpAcc.shirt.id}/u.png`;
@@ -5013,7 +5027,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 			};
 		}
 		d.imgToLoad++;
-		d.dS = new Image();
+		d.dS = new Sprite();
 		d.dS.index = spriteIndex;
 		spriteIndex++;
 		d.dS.src = `.././images/shirts/${tmpAcc.shirt.id}/d.png`;
@@ -5041,7 +5055,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	if (!tmpSprite) {
 		let wepSprites = weaponSpriteSheet[weaponIndex];
 		if (!wepSprites) return;
-		let wepSprite: RestrictedCanvasImageSource;
+		let wepSprite: Sprite;
 		if (angle === 90) {
 			wepSprite = wepSprites.leftSprite;
 		} else if (angle === 180) {
@@ -5063,28 +5077,28 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 		tmpSprite = canvasElem;
 		cachedWeaponSprites[tmpIndex] = tmpSprite;
 		if (camo >= 0) {
-			let img = new Image();
+			let img = new Sprite();
 			img.wpnImg = tmpSprite;
 			img.flip = wepSprite.flipped;
 			img.tmpInx = tmpIndex;
 			img.onload = () => {
-				var a = document.createElement("canvas");
-				var b = a.getContext("2d");
-				b.imageSmoothingEnabled = false;
-				a.width = img.width;
-				a.height = img.height;
+				var canvas = document.createElement("canvas");
+				var ctx = canvas.getContext("2d");
+				ctx.imageSmoothingEnabled = false;
+				canvas.width = img.width;
+				canvas.height = img.height;
 				img.onload = null;
-				b.drawImage(img.wpnImg, 0, 0, img.width, img.height);
-				b.globalCompositeOperation = "source-atop";
-				b.globalAlpha = 0.75;
-				b.drawImage(
+				ctx.drawImage(img.wpnImg, 0, 0, img.width, img.height);
+				ctx.globalCompositeOperation = "source-atop";
+				ctx.globalAlpha = 0.75;
+				ctx.drawImage(
 					img.flip ? flipSprite(img, true) : img,
 					0,
 					0,
 					img.width,
 					img.height,
 				);
-				cachedWeaponSprites[img.tmpInx] = a;
+				cachedWeaponSprites[img.tmpInx] = canvas;
 			};
 			img.src = getCamoURL(camo);
 		}
