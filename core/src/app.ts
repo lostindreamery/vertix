@@ -3749,8 +3749,8 @@ function getSprite(fileName: string) {
 function flipSprite(
 	sprite: Sprite,
 	b,
-): SpriteCanvas {
-	let canvasElem = document.createElement("canvas") as SpriteCanvas;
+): Sprite {
+	let canvasElem = document.createElement("canvas") as any;
 	let ctx = canvasElem.getContext("2d");
 	canvasElem.width = sprite.width;
 	canvasElem.height = sprite.height;
@@ -5863,7 +5863,7 @@ function drawMap(layer: number) {
 }
 function drawSprite(
 	ctx: CanvasRenderingContext2D,
-	sprite: Sprite,
+	sprite: Sprite | SpriteCanvas,
 	dx: number,
 	dy: number,
 	dw: number,
@@ -5896,7 +5896,7 @@ function drawSprite(
 }
 var shadowIntensity = 0.16;
 function getCachedShadow(
-	sprite: Sprite,
+	sprite: Sprite | SpriteCanvas,
 	width: number,
 	height: number,
 	e,
