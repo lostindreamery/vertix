@@ -9,7 +9,7 @@ import {
 	specialClasses,
 	weaponNames,
 } from "./loadouts.ts";
-import type { Player, InputSendData, RestrictedCanvasImageSource } from "./types.ts";
+import type { Player, InputSendData, SpriteCanvas } from "./types.ts";
 import * as utils from "./utils.ts";
 
 const {
@@ -3749,8 +3749,8 @@ function getSprite(fileName: string) {
 function flipSprite(
 	sprite: Sprite,
 	b,
-): RestrictedCanvasImageSource {
-	let canvasElem = document.createElement("canvas");
+): SpriteCanvas {
+	let canvasElem = document.createElement("canvas") as SpriteCanvas;
 	let ctx = canvasElem.getContext("2d");
 	canvasElem.width = sprite.width;
 	canvasElem.height = sprite.height;
@@ -4580,9 +4580,9 @@ function loadPlayerSpriteArray(
 }
 var flagSprites: Sprite[] = [];
 var clutterSprites: Sprite[] = [];
-var cachedWalls: Record<string, Sprite> = {};
+var cachedWalls: Record<string, SpriteCanvas> = {};
 var floorSprites: Sprite[] = [];
-var cachedFloors: Record<string, Sprite> = {};
+var cachedFloors: Record<string, SpriteCanvas> = {};
 var sideWalkSprite = null;
 var lightSprite = null;
 var ambientSprites: Sprite[] = [];
@@ -4596,8 +4596,8 @@ var weaponSpriteSheet: {
 	icon: HTMLImageElement;
 }[] = [];
 var bulletSprites: Sprite[] = [];
-var cachedShadows: Sprite[] = [];
-var cachedWeaponSprites: Record<string, Sprite> = {};
+var cachedShadows: SpriteCanvas[] = [];
+var cachedWeaponSprites: Record<string, SpriteCanvas> = {};
 var wallSprite = null;
 var darkFillerSprite = null;
 var healthPackSprite = null;
@@ -5105,7 +5105,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	}
 	return cachedWeaponSprites[tmpIndex];
 }
-var playerCanvas = document.createElement("canvas");
+var playerCanvas = document.createElement("canvas") as SpriteCanvas;
 var playerContext = playerCanvas.getContext("2d");
 var initPlayerCanv = false;
 function drawGameObjects(delta: number) {

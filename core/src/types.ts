@@ -60,6 +60,12 @@ export type InputSendData = {
 		delta: number,
 }
 
+export interface SpriteCanvas extends HTMLCanvasElement {
+	index?: number;
+	flipped?: boolean;
+	isLoaded?: boolean;
+}
+
 export type RestrictedCanvasImageSource = Exclude<
 	CanvasImageSource,
 	SVGImageElement | VideoFrame
