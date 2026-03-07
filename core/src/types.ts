@@ -65,8 +65,3 @@ export interface SpriteCanvas extends HTMLCanvasElement {
 	flipped?: boolean;
 	isLoaded?: boolean;
 }
-
-export type RestrictedCanvasImageSource = Exclude<
-	CanvasImageSource,
-	SVGImageElement | VideoFrame
->;

@@ -3418,7 +3418,7 @@ function updateScreenShake(_) {
 	}
 }
 var userSprays: Sprite[] = [];
-var cachedSprays: Sprite[] = [];
+var cachedSprays: SpriteCanvas[] = [];
 function createSpray(a, b, d) {
 	let tmpPlayer = findUserByIndex(a);
 	if (tmpPlayer != null) {
