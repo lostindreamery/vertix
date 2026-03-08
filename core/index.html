@@ -22,7 +22,7 @@
 				<ul id="chatList" class="chat-list"></ul>
 				<div>
 					<input id="chatInput" type="text" class="chat-input" placeholder="Send Message..." maxlength="50">
-					<div id="chatType" onclick="toggleTeamChat(this);">ALL</div>
+					<div id="chatType">ALL</div>
 				</div>
 			</div>
 			<div id="actionBar"></div>
@@ -111,24 +111,24 @@
 						<h2 style="margin-bottom:5px;">GRAPHICS:</h2>
 						<label>
 							FPS:
-							<select id="fpsSelect" onchange="pickedFps(this);">
+							<select id="fpsSelect">
 								<option value="30">30</option>
 								<option value="60">60</option>
 							</select>
 						</label>
 						<br>
 						<label>
-							<input id="showParticles" type="checkbox" onclick="settingShowParticles(this);">
+							<input id="showParticles" type="checkbox">
 							Particles
 						</label>
 						<br>
 						<label>
-							<input id="showBTrails" type="checkbox" onclick="settingShowBTrails(this);">
+							<input id="showBTrails" type="checkbox">
 							Bullet Trails
 						</label>
 						<br>
 						<label>
-							<input id="showGlows" type="checkbox" onclick="settingShowGlows(this);">
+							<input id="showGlows" type="checkbox">
 							Bloom
 						</label>
 						<br>

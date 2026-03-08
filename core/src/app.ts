@@ -151,10 +151,6 @@ window.settingShowFade = settingShowFade;
 
 window.settingShowShadows = settingShowShadows;
 
-window.settingShowGlows = settingShowGlows;
-
-window.settingShowBTrails = settingShowBTrails;
-
 window.settingShowChat = settingShowChat;
 
 window.settingHideUI = settingHideUI;
@@ -551,7 +547,7 @@ window.onload = () => {
 			});
 		});
 		hideUI(true);
-		$(".noRightClick").bind("contextmenu", (_) => false);
+		$(".noRightClick").on("contextmenu", (_) => false);
 		resize();
 		$("#loadingWrapper").fadeOut(200, () => {});
 	}
@@ -1021,6 +1017,7 @@ ChatManager.prototype.sendChat = function (a) {
 		}
 	}
 };
+document.getElementById("chatType").addEventListener("click", toggleTeamChat);
 function toggleTeamChat() {
 	chatTypeIndex++;
 	if (chatTypeIndex >= chatTypes.length) {
@@ -1138,10 +1135,12 @@ if (localStorage.getItem("showParticles") !== "false") {
 var showParticles = (
 	document.getElementById("showParticles") as HTMLInputElement
 ).checked;
-function settingShowParticles(a) {
-	showParticles = a.checked;
+document.getElementById("showParticles").addEventListener("click", settingShowParticles)
+function settingShowParticles(this: HTMLInputElement) {
+	showParticles = this.checked;
 	localStorage.setItem("showParticles", showParticles ? "true" : "false");
 }
+
 if (localStorage.getItem("showTrippy") === "true") {
 	if (!(document.getElementById("showTrippy") as HTMLInputElement).checked) {
 		document.getElementById("showTrippy").click();
@@ -1210,10 +1209,12 @@ if (localStorage.getItem("showGlows") !== "false") {
 }
 var showGlows = (document.getElementById("showGlows") as HTMLInputElement)
 	.checked;
-function settingShowGlows(a) {
-	showGlows = a.checked;
+document.getElementById("showGlows").addEventListener("click", settingShowGlows)
+function settingShowGlows(this: HTMLInputElement) {
+	showGlows = this.checked;
 	localStorage.setItem("showGlows", showGlows ? "true" : "false");
 }
+
 if (localStorage.getItem("showBTrails") !== "false") {
 	if (!(document.getElementById("showBTrails") as HTMLInputElement).checked) {
 		document.getElementById("showBTrails").click();
@@ -1221,8 +1222,9 @@ if (localStorage.getItem("showBTrails") !== "false") {
 }
 var showBTrails = (document.getElementById("showBTrails") as HTMLInputElement)
 	.checked;
-function settingShowBTrails(a) {
-	showBTrails = a.checked;
+document.getElementById("showBTrails").addEventListener("click", settingShowBTrails);
+function settingShowBTrails(this: HTMLInputElement) {
+	showBTrails = this.checked;
 	localStorage.setItem("showBTrails", showBTrails ? "true" : "false");
 }
 if (localStorage.getItem("showChat") !== "false") {
@@ -1300,6 +1302,7 @@ function settingSelectChat(elem: HTMLInputElement) {
 		? "auto"
 		: "none";
 }
+
 var targetFPS = 60;
 if (localStorage.getItem("targetFPS")) {
 	try {
@@ -1310,15 +1313,17 @@ if (localStorage.getItem("targetFPS")) {
 	const fpsSelect = document.getElementById("fpsSelect") as HTMLSelectElement;
 	fpsSelect.value = targetFPS.toString();
 }
-window.pickedFps = pickedFps;
-function pickedFps(elem: HTMLSelectElement) {
+
+document.getElementById("fpsSelect").addEventListener("change", pickedFps)
+function pickedFps(this: HTMLSelectElement) {
 	try {
-		targetFPS = Number.parseInt(elem.options[elem.selectedIndex].value);
+		targetFPS = Number.parseInt(this.options[this.selectedIndex].value);
 	} catch (_) {
 		targetFPS = 60;
 	}
 	localStorage.setItem("targetFPS", targetFPS.toString());
 }
+
 function changeMenuTab(event: MouseEvent, tabId: string) {
 	const tabContents = document.getElementsByClassName("tabcontent");
 	for (let i = 0; i < tabContents.length; i++) {
