@@ -306,16 +306,16 @@ io.on("connection", (socket: Socket) => {
 			const updateBullet = () => {
 				if (bullet.active && bullet.lastHit.length > 0) {
 					for (let i = 0; i < bullet.lastHit.length; i++) {
-            updateHit(player, players[bullet.lastHit[i]], bullet.dmg);
+            updateHit(player, players[bullet.lastHit[i]], -bullet.dmg);
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					for (let p = 0; p < players.length; p++) {
-            let tmpPlayer = players[p];
+            const tmpPlayer = players[p];
 						//TODO
-            const dist = getDistance(bullet.x, bullet.y, tmpPlayer.x, tmpPlayer.y - tmpPlayer.jumpY);
-            if (150 > dist) {
-              const dmg = -110 + Math.round(dist) > 0 ? 0 : -110 + Math.round(dist);
+            const dist = getDistance(bullet.x, bullet.y, tmpPlayer.x, tmpPlayer.y - tmpPlayer.height / 2)
+            if (bullet.blastRadius > dist) {
+              const dmg = -bullet.blastRadius + Math.round(dist) < -bullet.dmg ? -bullet.dmg : -bullet.blastRadius + Math.round(dist);
               updateHit(player, tmpPlayer, dmg);
 						}
 					}
