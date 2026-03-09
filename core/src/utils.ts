@@ -1,3 +1,5 @@
+import type { Player } from "./types.ts";
+
 var bulletIndex = 0;
 export function getNextBullet(bullets: any) {
 	bulletIndex++;
@@ -27,9 +29,9 @@ export function shootNextBullet(
 		bullet.height = weapon.bHeight;
 		let randScale = weapon.bRandScale;
 		if (randScale != null) {
-			randScale = randomFloat(randScale[0], randScale[1]);
-			bullet.width *= randScale;
-			bullet.height *= randScale;
+			let rand = randomFloat(randScale[0], randScale[1]);
+			bullet.width *= rand;
+			bullet.height *= rand;
 			bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
 		}
 		bullet.trailWidth = bullet.width * 0.7;
@@ -50,7 +52,7 @@ export function shootNextBullet(
 		bullet.glowWidth = weapon.glowWidth;
 		bullet.glowHeight = weapon.glowHeight;
 		bullet.explodeOnDeath = weapon.explodeOnDeath;
-		bullet.pierceCount = weapon.pierce;
+		bullet.pierceCount = weapon.pierceCount; // used to be weapon.pierce, which doesn't exist?
 		bullet.blastRadius = weapon.blastRadius;
 		bullet.activate();
 	}
@@ -269,7 +271,7 @@ function canPlaceFlag(tile, b) {
 		return tile !== undefined && !tile.hardPoint;
 	}
 }
-export function wallCol(player, gameMap, gameObjects) {
+export function wallCol(player: Player, gameMap, gameObjects) {
 	if (player.dead) return;
 	player.nameYOffset = 0;
 	for (let i = 0; i < gameMap.tiles.length; ++i) {
@@ -337,7 +339,7 @@ export function wallCol(player, gameMap, gameObjects) {
 		}
 	}
 }
-export function getCurrentWeapon(player) {
+export function getCurrentWeapon(player: Player) {
 	if (
 		player.weapons !== undefined &&
 		player.weapons[player.currentWeapon] !== undefined

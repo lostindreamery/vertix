@@ -273,7 +273,7 @@ var serverKeyTxt = document.getElementById("serverKeyTxt");
 
 let dropUpLinksCount = 5;
 let activeIndex = -1;
-window.clickDropUpLink = (index) => {
+window.clickDropUpLink = (index: number) => {
 	for (let i = 0; i < dropUpLinksCount; ++i) {
 		const tmpIndex = i + 1;
 		try {
@@ -820,12 +820,13 @@ function inputReset(a) {
 }
 inputReset(false);
 var previousKeyElementContent = null;
+window.inputChange = inputChange;
 function inputChange(a, b) {
 	if (keyToChange != null && keyChangeElement != null) {
 		keyChangeElement.innerHTML = previousKeyElementContent;
 	}
 	previousKeyElementContent = a.innerHTML;
-	a.innerHTML = "Press any Key";
+	a.textContent = "Press any Key";
 	keyChangeElement = a;
 	keyToChange = b;
 }
@@ -1043,7 +1044,7 @@ function toggleTeamChat() {
 // 	return a;
 // }
 var chatLineCounter = 0;
-ChatManager.prototype.addChatLine = function (a, b, d, e) {
+ChatManager.prototype.addChatLine = function (a, text: string, d, e) {
 	if (mobile) return;
 
 	// b = checkProfanityString(b);
@@ -1062,7 +1063,7 @@ ChatManager.prototype.addChatLine = function (a, b, d, e) {
 	listElem.className = source;
 	e = false;
 	if (source === "system" || source === "notif") {
-		listElem.innerHTML = `<span>${b}</span>`;
+		listElem.innerHTML = `<span>${text}</span>`;
 	} else {
 		e = true;
 		listElem.innerHTML =
@@ -1074,7 +1075,7 @@ ChatManager.prototype.addChatLine = function (a, b, d, e) {
 	}
 	this.appendMessage(listElem);
 	if (e) {
-		document.getElementById(`chatLine${chatLineCounter}`).textContent = b;
+		document.getElementById(`chatLine${chatLineCounter}`).textContent = text;
 	}
 };
 ChatManager.prototype.appendMessage = (msgElem: HTMLElement) => {
@@ -2227,7 +2228,7 @@ function addRowToStatTable(data, b) {
 				}
 				if (currentLikeButton !== m.uID) {
 					currentLikeButton = m.uID;
-					this.setAttribute("class", "gameStatLikeButtonA");
+					btn.setAttribute("class", "gameStatLikeButtonA");
 				} else {
 					currentLikeButton = "";
 				}
@@ -2274,13 +2275,13 @@ function removeUser(userIndex: number) {
 		}
 	}
 }
-function updateUiStats(player) {
-	document.getElementById("scoreValue").innerHTML = player.score;
+function updateUiStats(player: Player) {
+	document.getElementById("scoreValue").textContent = player.score.toString();
 	if (player.weapons.length > 0) {
-		document.getElementById("ammoValue").innerHTML =
-			getCurrentWeapon(player).ammo;
+		document.getElementById("ammoValue").textContent =
+			getCurrentWeapon(player).ammo.toString();
 	}
-	document.getElementById("healthValue").innerHTML = player.health;
+	document.getElementById("healthValue").textContent = player.health.toString();
 	if (player.health <= 10) {
 		document.getElementById("healthValue").style.color = "#e06363";
 	} else {
@@ -2353,7 +2354,7 @@ function updateUserValue(a) {
 		fetchUserWithIndex(a.i);
 	}
 }
-function fetchUserWithIndex(a) {
+function fetchUserWithIndex(a: number) {
 	socket.emit("ftc", a);
 }
 function canPlaceFlag(a, b) {
@@ -2851,7 +2852,7 @@ function updateGameLoop() {
 	fpsUpdateUICounter--;
 	if (fpsUpdateUICounter <= 0) {
 		currentFPS = Math.round(1000 / delta);
-		fpsText.innerHTML = `FPS ${currentFPS}`;
+		if (fpsText) fpsText.textContent = `FPS ${currentFPS}`;
 		fpsUpdateUICounter = targetFPS;
 	}
 	oldTime = currentTime;
@@ -3049,17 +3050,17 @@ function updateGameLoop() {
 		context.globalAlpha = 0.25;
 	}
 }
-function otherJump(a) {
-	var b = findUserByIndex(a);
-	if (b != undefined && b != null && player.index != a) {
-		playerJump(b);
+function otherJump(userIdx: number) {
+	var tmpPlayer = findUserByIndex(userIdx);
+	if (tmpPlayer != undefined && tmpPlayer != null && player.index != userIdx) {
+		playerJump(tmpPlayer);
 	}
 }
-function playerJump(a) {
-	if (a.jumpY <= 0) {
-		playSound("jump1", a.x, a.y);
-		a.jumpDelta = a.jumpStrength;
-		a.jumpY = a.jumpDelta;
+function playerJump(plr: Player) {
+	if (plr.jumpY <= 0) {
+		playSound("jump1", plr.x, plr.y);
+		plr.jumpDelta = plr.jumpStrength;
+		plr.jumpY = plr.jumpDelta;
 	}
 }
 var overlayMaxAlpha = 0.5;
@@ -3067,14 +3068,18 @@ var overlayAlpha = overlayMaxAlpha;
 var overlayFadeUp = 0.01;
 var overlayFadeDown = 0.04;
 var animateOverlay = true;
-function drawOverlay(a, b, d) {
+function drawOverlay(
+	ctx: CanvasRenderingContext2D,
+	fadeUp: boolean,
+	fadeDown: boolean,
+) {
 	if (animateOverlay) {
-		if (b) {
+		if (fadeUp) {
 			overlayAlpha += overlayFadeUp;
 			if (overlayAlpha >= overlayMaxAlpha) {
 				overlayAlpha = overlayMaxAlpha;
 			}
-		} else if (d) {
+		} else if (fadeDown) {
 			overlayAlpha -= overlayFadeDown;
 			if (overlayAlpha <= 0) {
 				overlayAlpha = 0;
@@ -3084,10 +3089,10 @@ function drawOverlay(a, b, d) {
 		}
 	}
 	if (overlayAlpha > 0) {
-		a.fillStyle = "#2e3031";
-		a.globalAlpha = overlayAlpha;
-		a.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
-		a.globalAlpha = 1;
+		ctx.fillStyle = "#2e3031";
+		ctx.globalAlpha = overlayAlpha;
+		ctx.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
+		ctx.globalAlpha = 1;
 	}
 }
 var drawMiniMapFPS = 4;
@@ -3218,7 +3223,7 @@ class FlashGlow {
 var lightX = 0;
 var lightY = 0;
 var glowIntensity = 0.2;
-var flashGlows = [];
+var flashGlows: FlashGlow[] = [];
 var glowIndex = 0;
 for (let i = 0; i < 30; ++i) {
 	flashGlows.push(new FlashGlow());
@@ -3287,7 +3292,7 @@ var pingScale = mapScale / 80;
 mapContext.lineWidth = pingScale / 2;
 var pingFade = 0.085;
 var pingGrow = 0.4;
-var cachedMiniMap = null;
+var cachedMiniMap: HTMLCanvasElement | null = null;
 function getCachedMiniMap() {
 	fillCounter++;
 	if (
@@ -3335,29 +3340,29 @@ function getCachedMiniMap() {
 }
 function drawMiniMap() {
 	mapContext.reset(); // I had to add this - the minimap 'caching' system seems weird
-	var a = getCachedMiniMap();
-	if (a != null) {
-		mapContext.drawImage(a, 0, 0, mapScale, mapScale);
+	var cachedMiniMap = getCachedMiniMap();
+	if (cachedMiniMap != null) {
+		mapContext.drawImage(cachedMiniMap, 0, 0, mapScale, mapScale);
 	}
 	mapContext.globalAlpha = 1;
-	for (a = 0; a < gameObjects.length; ++a) {
+	for (let i = 0; i < gameObjects.length; ++i) {
 		if (
-			gameObjects[a].type === "player" &&
-			gameObjects[a].onScreen &&
-			(gameObjects[a].index === player.index ||
-				gameObjects[a].team === player.team ||
-				gameObjects[a].isBoss)
+			gameObjects[i].type === "player" &&
+			gameObjects[i].onScreen &&
+			(gameObjects[i].index === player.index ||
+				gameObjects[i].team === player.team ||
+				gameObjects[i].isBoss)
 		) {
 			mapContext.fillStyle =
-				gameObjects[a].index === player.index
+				gameObjects[i].index === player.index
 					? "#fff"
-					: gameObjects[a].isBoss
+					: gameObjects[i].isBoss
 						? "#db4fcd"
 						: "#5151d9";
 			mapContext.beginPath();
 			mapContext.arc(
-				(gameObjects[a].x / gameWidth) * mapScale,
-				(gameObjects[a].y / gameHeight) * mapScale,
+				(gameObjects[i].x / gameWidth) * mapScale,
+				(gameObjects[i].y / gameHeight) * mapScale,
 				pingScale,
 				0,
 				Math.PI * 2,
@@ -3369,18 +3374,17 @@ function drawMiniMap() {
 	}
 	if (gameMap != null) {
 		mapContext.globalAlpha = 1;
-		a = 0;
-		for (; a < gameMap.pickups.length; ++a) {
-			if (gameMap.pickups[a].active) {
-				if (gameMap.pickups[a].type === "lootcrate") {
+		for (let i = 0; i < gameMap.pickups.length; ++i) {
+			if (gameMap.pickups[i].active) {
+				if (gameMap.pickups[i].type === "lootcrate") {
 					mapContext.fillStyle = "#ffd100";
-				} else if (gameMap.pickups[a].type === "healthpack") {
+				} else if (gameMap.pickups[i].type === "healthpack") {
 					mapContext.fillStyle = "#5ed951";
 				}
 				mapContext.beginPath();
 				mapContext.arc(
-					(gameMap.pickups[a].x / gameWidth) * mapScale,
-					(gameMap.pickups[a].y / gameHeight) * mapScale,
+					(gameMap.pickups[i].x / gameWidth) * mapScale,
+					(gameMap.pickups[i].y / gameHeight) * mapScale,
 					pingScale,
 					0,
 					Math.PI * 2,
@@ -3429,7 +3433,7 @@ function updateScreenShake(_) {
 	}
 }
 var userSprays: Sprite[] = [];
-var cachedSprays: SpriteCanvas[] = [];
+var cachedSprays: Record<string, SpriteCanvas> = {};
 function createSpray(a, b, d) {
 	let tmpPlayer = findUserByIndex(a);
 	if (tmpPlayer != null) {
@@ -3513,7 +3517,7 @@ var tmpList: Record<
 		id: string;
 		sound: Howl | null;
 		loop: boolean;
-		onload: () => void;
+		onload?: () => void;
 	}
 > = {};
 var soundList = [
@@ -3654,7 +3658,7 @@ function loadSounds(base: string) {
 		loadSound(tmpSound, soundList[i], tmpFormat);
 	}
 }
-function loadSound(a, b, d) {
+function loadSound(a: string, b: (typeof soundList)[number], d: string) {
 	if (tmpList[b.id] != undefined && tmpList[b.id].sound != null) {
 		tmpList[b.id].sound.stop();
 	}
@@ -4171,7 +4175,7 @@ function setCooldownAnimation(weaponIdx, time, d) {
 		tmpDiv.style.height = "0%";
 	}
 }
-function shootBullet(source) {
+function shootBullet(source: Player) {
 	if (
 		!source.dead &&
 		getCurrentWeapon(source) !== undefined &&
@@ -4231,7 +4235,7 @@ function shootBullet(source) {
 		updateUiStats(source);
 	}
 }
-function playerReload(player, shouldEmit: boolean) {
+function playerReload(player: Player, shouldEmit: boolean) {
 	if (
 		getCurrentWeapon(player).reloadTime <= 0 &&
 		getCurrentWeapon(player).ammo !== getCurrentWeapon(player).maxAmmo
@@ -4249,7 +4253,7 @@ function playerReload(player, shouldEmit: boolean) {
 		);
 	}
 }
-function findServerBullet(bulletIndex) {
+function findServerBullet(bulletIndex: number) {
 	for (let b = 0; b < bullets.length; ++b) {
 		if (bullets[b].serverIndex === bulletIndex) {
 			return bullets[b];
@@ -4270,11 +4274,9 @@ function someoneShot(a) {
 		}
 	}
 }
-var trailGrad = null;
 function updateBullets(delta: number) {
 	graph.globalAlpha = 1;
-	for (let i = 0; i < bullets.length; i++) {
-		let bullet = bullets[i];
+	for (const bullet of bullets) {
 		bullet.update(delta, currentTime, gameObjects, gameMap.tiles, gameObjects);
 		if (bullet.active) {
 			let b = bullet.x - startX;
@@ -4322,7 +4324,7 @@ function updateBullets(delta: number) {
 			let d = Math.round(bullet.startY - startY);
 			let e = Math.round(bullet.x - startX);
 			let f = Math.round(bullet.y - startY);
-			trailGrad = graph.createLinearGradient(b, d, e, f);
+			let trailGrad = graph.createLinearGradient(b, d, e, f);
 			trailGrad.addColorStop(0, "rgba(255, 255, 255, 0)");
 			trailGrad.addColorStop(1, `rgba(255, 255, 255, ${bullet.trailAlpha})`);
 			graph.strokeStyle = trailGrad;
@@ -4574,8 +4576,8 @@ var clutterSprites: Sprite[] = [];
 var cachedWalls: Record<string, SpriteCanvas> = {};
 var floorSprites: Sprite[] = [];
 var cachedFloors: Record<string, SpriteCanvas> = {};
-var sideWalkSprite = null;
-var lightSprite = null;
+var sideWalkSprite: Sprite | null = null;
+var lightSprite: Sprite | null = null;
 var ambientSprites: Sprite[] = [];
 var wallSpritesSeg: Sprite[] = [];
 var particleSprites: Sprite[] = [];
@@ -4589,10 +4591,10 @@ var weaponSpriteSheet: {
 var bulletSprites: Sprite[] = [];
 var cachedShadows: SpriteCanvas[] = [];
 var cachedWeaponSprites: Record<string, SpriteCanvas> = {};
-var wallSprite = null;
-var darkFillerSprite = null;
-var healthPackSprite = null;
-var lootCrateSprite = null;
+var wallSprite: Sprite | null = null;
+var darkFillerSprite: Sprite | null = null;
+var healthPackSprite: Sprite | null = null;
+var lootCrateSprite: Sprite | null = null;
 var weaponWidth = 27;
 var weaponHeight = 54;
 function loadDefaultSprites(base: string) {
@@ -4671,107 +4673,9 @@ function setModInfoText(a) {
 }
 var fileFormat = "";
 window.loadModPack = loadModPack;
-function loadModPack(url: string, isBaseAssets: boolean) {
+async function loadModPack(url: string, isBaseAssets: boolean) {
 	try {
 		if (loadingTexturePack) return;
-		function d() {
-			this.numFiles;
-			this.progress;
-			this.reader;
-			this.init = (reader: ZipReader<unknown>, numFiles: number) => {
-				this.numFiles = numFiles;
-				this.progress = 0;
-				this.reader = reader;
-			};
-			this.close = () => {
-				if (this.reader) {
-					this.progress++;
-					if (this.numFiles === this.progress) {
-						spriteIndex = 0;
-						loadPlayerSprites("sprites/");
-						loadDefaultSprites("sprites/");
-						loadSounds("sounds/");
-						this.reader.close();
-						this.reader = undefined;
-						loadingTexturePack = false;
-					}
-				} else {
-					console.log("reader not valid");
-				}
-			};
-		}
-		function e(a) {
-			this.typeName = a;
-			this.process = (a) => {
-				try {
-					if (this.typeName.indexOf("modinfo") > -1) {
-						setModInfoText(a);
-					} else if (this.typeName.indexOf("cssmod") > -1) {
-						let d = document.createElement("style");
-						d.type = "text/css";
-						d.innerHTML = a;
-						document.getElementsByTagName("head")[0].appendChild(d);
-					} else if (this.typeName.indexOf("gameinfo") > -1) {
-						let e = a.replace(/(\r\n|\n|\r)/gm, "");
-						let f = JSON.parse(e);
-						updateMenuInfo(f.name);
-					} else if (this.typeName.indexOf("charinfo") > -1) {
-						let h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
-						let tmp = [];
-						for (a = 0; a < h.length; ++a) {
-							tmp.push(JSON.parse(h[a]));
-						}
-						setCharacterClasses(tmp);
-						createClassList();
-						pickedCharacter(currentClassID);
-					}
-				} catch (err) {
-					console.error(`Script Read Error: ${err}`);
-				}
-				zipFileCloser.close();
-			};
-		}
-		function f(a, b) {
-			this.filename = a;
-			this.soundAsDataURL = this.tmpLocation = "";
-			this.format = b;
-			this.process = (a) => {
-				this.soundAsDataURL = URL.createObjectURL(a);
-				if (this.soundAsDataURL) {
-					try {
-						this.tmpLocation = this.filename;
-						localStorage.setItem(
-							`${this.tmpLocation}data`,
-							this.soundAsDataURL,
-						);
-						localStorage.setItem(`${this.tmpLocation}format`, this.format);
-					} catch (err) {
-						console.error(`Storage failed: ${err}`);
-					}
-					zipFileCloser.close();
-				} else {
-					console.error(`failed to generate url: ${this.filename}`);
-				}
-			};
-		}
-		function h(a) {
-			this.filename = a;
-			this.imgAsDataURL = this.tmpLocation = "";
-			this.process = (a) => {
-				this.imgAsDataURL = URL.createObjectURL(a);
-				if (this.imgAsDataURL) {
-					try {
-						this.tmpLocation = this.filename;
-						localStorage.setItem(this.tmpLocation, this.imgAsDataURL);
-					} catch (err) {
-						console.error(`Storage failed: ${err}`);
-					}
-					zipFileCloser.close();
-				} else {
-					console.error(`failed to generate url: ${this.filename}`);
-				}
-			};
-		}
 		let modPath = "";
 		if (isBaseAssets) {
 			doSounds = false;
@@ -4794,61 +4698,55 @@ function loadModPack(url: string, isBaseAssets: boolean) {
 		if (!isBaseAssets) {
 			setModInfoText("Loading...");
 		}
-		zipFileCloser ||= new d();
+
 		const reader = new zip.ZipReader(new zip.HttpReader(modPath));
-		reader.getEntries().then((entries) => {
-			let b = entries;
-			if (!b.length) return;
-			zipFileCloser.init(reader, b.length);
-			for (let i = 0; i < b.length; i++) {
-				let tmpFile = b[i];
-				if (tmpFile.directory) {
-					zipFileCloser.close();
-				} else {
-					tmpFile.filename = tmpFile.filename.replace("vertixmod/", "");
-					fileFormat =
-						tmpFile.filename.split(".")[tmpFile.filename.split(".").length - 1];
-					let basePath = tmpFile.filename.split("/")[0];
-					if (basePath === "scripts") {
-						let processor = new e(tmpFile.filename);
-						(tmpFile as any)
-							.getData(new zip.TextWriter())
-							.then((a) => {
-								processor.process(a);
-							})
-							.catch((err) => {
-								console.error(`Script Read Error: ${err}`);
-							});
-					} else if (basePath === "sprites") {
-						let processor = new h(tmpFile.filename);
-						(tmpFile as any)
-							.getData(new zip.BlobWriter("image/png"))
-							.then((a) => {
-								processor.process(a);
-							})
-							.catch((err) => {
-								console.error(`Image Load Error: ${err}`);
-							});
-					} else if (basePath === "sounds") {
-						let processor = new f(
-							tmpFile.filename.replace(`.${fileFormat}`, ""),
-							fileFormat,
-						);
-						(tmpFile as any)
-							.getData(new zip.BlobWriter(`audio/${fileFormat}`))
-							.then((a) => {
-								processor.process(a);
-							})
-							.catch((err) => {
-								console.error(`Sound Load Error: ${err}`);
-							});
-					} else {
-						loadingTexturePack = false;
-						setModInfoText("Mod could not be loaded");
-					}
+
+		const entries = await reader.getEntries();
+		for (const entry of entries) {
+			if (entry.directory) continue;
+			entry.filename = entry.filename.replace("vertixmod/", "");
+			let fileFormat =
+				entry.filename.split(".")[entry.filename.split(".").length - 1];
+			let basePath = entry.filename.split("/")[0];
+			if (basePath === "scripts") {
+				let data = await (entry as zip.FileEntry).getData(new zip.TextWriter());
+				if (entry.filename.includes("modinfo")) {
+					setModInfoText(data);
+				} else if (entry.filename.includes("cssmod")) {
+					let styleElem = document.createElement("style");
+					styleElem.textContent = data;
+				} else if (entry.filename.includes("gameinfo")) {
+					data = data.replace(/(\r\n|\n|\r)/gm, "");
+					let parsed = JSON.parse(data);
+					updateMenuInfo(parsed.name);
+				} else if (entry.filename.includes("charinfo")) {
+					let split = data.replace(/(\r\n|\n|\r)/gm, "").split("|");
+					let tmp = split.map((s) => JSON.parse(s));
+					setCharacterClasses(tmp);
+					createClassList();
+					pickedCharacter(currentClassID);
 				}
+			} else if (basePath === "sprites") {
+				let data = await (entry as zip.FileEntry).getData(
+					new zip.BlobWriter("image/png"),
+				);
+				let imgAsDataURL = URL.createObjectURL(data);
+				localStorage.setItem(entry.filename, imgAsDataURL);
+			} else if (basePath === "sounds") {
+				entry.filename = entry.filename.replace(`.${fileFormat}`, "");
+				let data = await (entry as zip.FileEntry).getData(
+					new zip.BlobWriter(`audio/${fileFormat}`),
+				);
+				let soundAsDataURL = URL.createObjectURL(data);
+				localStorage.setItem(`${entry.filename}data`, soundAsDataURL);
+				localStorage.setItem(`${entry.filename}format`, fileFormat);
 			}
-		});
+		}
+		spriteIndex = 0;
+		loadPlayerSprites("sprites/");
+		loadDefaultSprites("sprites/");
+		loadSounds("sounds/");
+		loadingTexturePack = false;
 	} catch (err) {
 		console.error(err);
 		loadingTexturePack = false;
