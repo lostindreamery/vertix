@@ -8,8 +8,8 @@ import {
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
-  roundNumber,
-  getDistance,
+	roundNumber,
+	getDistance,
 } from "core/src/utils.ts";
 import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
@@ -306,17 +306,25 @@ io.on("connection", (socket: Socket) => {
 			const updateBullet = () => {
 				if (bullet.active && bullet.lastHit.length > 0) {
 					for (let i = 0; i < bullet.lastHit.length; i++) {
-            updateHit(player, players[bullet.lastHit[i]], -bullet.dmg);
+						updateHit(player, players[bullet.lastHit[i]], -bullet.dmg);
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					for (let p = 0; p < players.length; p++) {
-            const tmpPlayer = players[p];
+						const tmpPlayer = players[p];
 						//TODO
-            const dist = getDistance(bullet.x, bullet.y, tmpPlayer.x, tmpPlayer.y - tmpPlayer.height / 2)
-            if (bullet.blastRadius > dist) {
-              const dmg = -bullet.blastRadius + Math.round(dist) < -bullet.dmg ? -bullet.dmg : -bullet.blastRadius + Math.round(dist);
-              updateHit(player, tmpPlayer, dmg);
+						const dist = getDistance(
+							bullet.x,
+							bullet.y,
+							tmpPlayer.x,
+							tmpPlayer.y - tmpPlayer.height / 2,
+						);
+						if (bullet.blastRadius > dist) {
+							const dmg =
+								-bullet.blastRadius + Math.round(dist) < -bullet.dmg
+									? -bullet.dmg
+									: -bullet.blastRadius + Math.round(dist);
+							updateHit(player, tmpPlayer, dmg);
 						}
 					}
 				} else {
@@ -326,10 +334,10 @@ io.on("connection", (socket: Socket) => {
 				}
 				bullet.deactivate();
 			};
-      updateBullet();
+			updateBullet();
 
-      const updateHit = (source: Player, dest: Player, dmg: number) => {
-   			if (dest?.dead) return;
+			const updateHit = (source: Player, dest: Player, dmg: number) => {
+				if (dest?.dead) return;
 				dest.health += dmg;
 				io.emit("1", {
 					dID: source.index,
@@ -373,7 +381,7 @@ io.on("connection", (socket: Socket) => {
 					dest.team === "red" ? scoreRed : scoreBlue,
 					source.team === "red" ? scoreRed : scoreBlue,
 				);
-      }
+			};
 		}
 	});
 	socket.on("4", (data) => {

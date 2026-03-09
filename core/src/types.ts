@@ -52,30 +52,30 @@ export type Player = {
 export type Account = any;
 
 export type InputSendData = {
-		hdt: number,
-		vdt: number,
-		ts: number,
-		isn: number,
-		s: number,
-		delta: number,
-}
+	hdt: number;
+	vdt: number;
+	ts: number;
+	isn: number;
+	s: number;
+	delta: number;
+};
 
 export interface Sprite extends HTMLImageElement {
-  index: number;
-  isLoaded: boolean;
-  flipped: boolean;
-  //SPRAY
-  owner?: Player;
-  active?: boolean;
-  xPos?: number;
-  yPos?: number;
-  scale?: number;
-  alpha?: number;
-  resolution?: number;
-  //WEAPON
-  wpnImg?: any;
-  flip?: boolean;
-  tmpInx?: string;
+	index: number;
+	isLoaded: boolean;
+	flipped: boolean;
+	//SPRAY
+	owner?: Player;
+	active?: boolean;
+	xPos?: number;
+	yPos?: number;
+	scale?: number;
+	alpha?: number;
+	resolution?: number;
+	//WEAPON
+	wpnImg?: any;
+	flip?: boolean;
+	tmpInx?: string;
 }
 
 export interface SpriteCanvas extends HTMLCanvasElement {

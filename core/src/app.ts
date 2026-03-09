@@ -1135,7 +1135,9 @@ if (localStorage.getItem("showParticles") !== "false") {
 var showParticles = (
 	document.getElementById("showParticles") as HTMLInputElement
 ).checked;
-document.getElementById("showParticles").addEventListener("click", settingShowParticles)
+document
+	.getElementById("showParticles")
+	.addEventListener("click", settingShowParticles);
 function settingShowParticles(this: HTMLInputElement) {
 	showParticles = this.checked;
 	localStorage.setItem("showParticles", showParticles ? "true" : "false");
@@ -1209,7 +1211,9 @@ if (localStorage.getItem("showGlows") !== "false") {
 }
 var showGlows = (document.getElementById("showGlows") as HTMLInputElement)
 	.checked;
-document.getElementById("showGlows").addEventListener("click", settingShowGlows)
+document
+	.getElementById("showGlows")
+	.addEventListener("click", settingShowGlows);
 function settingShowGlows(this: HTMLInputElement) {
 	showGlows = this.checked;
 	localStorage.setItem("showGlows", showGlows ? "true" : "false");
@@ -1222,7 +1226,9 @@ if (localStorage.getItem("showBTrails") !== "false") {
 }
 var showBTrails = (document.getElementById("showBTrails") as HTMLInputElement)
 	.checked;
-document.getElementById("showBTrails").addEventListener("click", settingShowBTrails);
+document
+	.getElementById("showBTrails")
+	.addEventListener("click", settingShowBTrails);
 function settingShowBTrails(this: HTMLInputElement) {
 	showBTrails = this.checked;
 	localStorage.setItem("showBTrails", showBTrails ? "true" : "false");
@@ -1314,7 +1320,7 @@ if (localStorage.getItem("targetFPS")) {
 	fpsSelect.value = targetFPS.toString();
 }
 
-document.getElementById("fpsSelect").addEventListener("change", pickedFps)
+document.getElementById("fpsSelect").addEventListener("change", pickedFps);
 function pickedFps(this: HTMLSelectElement) {
 	try {
 		targetFPS = Number.parseInt(this.options[this.selectedIndex].value);
@@ -3734,10 +3740,7 @@ function getSprite(fileName: string) {
 	spriteIndex++;
 	return b;
 }
-function flipSprite(
-	sprite: Sprite,
-	b,
-): Sprite {
+function flipSprite(sprite: Sprite, b): Sprite {
 	let canvasElem = document.createElement("canvas") as any;
 	let ctx = canvasElem.getContext("2d");
 	canvasElem.width = sprite.width;
@@ -3761,7 +3764,7 @@ function flipSprite(
 			canvasElem.width,
 			canvasElem.height,
 		);
-  }
+	}
 	// TODO
 	canvasElem.index = sprite.index;
 	canvasElem.flipped = true;
@@ -4859,21 +4862,21 @@ function getPlayerSprite(classIdx: number, angle: number, animIdx: number) {
 		return null;
 	}
 	if (angle === 90) {
-    tmpSprite = tmpSpriteCollection.leftSprites[animIdx];
+		tmpSprite = tmpSpriteCollection.leftSprites[animIdx];
 	} else if (angle === 180) {
-    tmpSprite = tmpSpriteCollection.upSprites[animIdx];
-  } else if (angle === 270) {
+		tmpSprite = tmpSpriteCollection.upSprites[animIdx];
+	} else if (angle === 270) {
 		if (
 			!tmpSpriteCollection.rightSprites[animIdx].flipped &&
 			tmpSpriteCollection.rightSprites[animIdx].isLoaded
-    ) {
+		) {
 			tmpSpriteCollection.rightSprites[animIdx] = flipSprite(
 				tmpSpriteCollection.rightSprites[animIdx],
 				true,
 			);
 		}
 		tmpSprite = tmpSpriteCollection.rightSprites[animIdx];
-  } else {
+	} else {
 		tmpSprite = tmpSpriteCollection.downSprites[animIdx];
 	}
 	return tmpSprite;
@@ -5913,7 +5916,7 @@ function getCachedShadow(
 			pixelArray[i + 1] = 0;
 			pixelArray[i + 2] = 0;
 			pixelArray[i + 3] = pixelArray[i + 3]; // ??
-    }
+		}
 		ctx.putImageData(imgData, 0, 0);
 		cachedShadows[sprite.index] = tmpCanvas;
 	}
