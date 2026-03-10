@@ -105,7 +105,7 @@ io.on("connection", (socket: Socket) => {
 		account: { clan: "" },
 		classIndex: 0,
 		currentWeapon: 0,
-		weapons: [weapons[0], weapons[5]],
+		weapons: structuredClone([weapons[0], weapons[5]]),
 		health: 0,
 		maxHealth: 0,
 		height: 100,
@@ -178,7 +178,7 @@ io.on("connection", (socket: Socket) => {
 		player.name = client.name ? client.name : player.name;
 		player.classIndex = client.classIndex ? client.classIndex : 0;
 		const currentClass = characterClasses[player.classIndex];
-		player.weapons = currentClass.weaponIndexes.map((i) => weapons[i]);
+		player.weapons = currentClass.weaponIndexes.map((i) => structuredClone(weapons[i]));
 		player.health = player.maxHealth = currentClass.maxHealth;
 		player.height = currentClass.height;
 		player.width = currentClass.width;
@@ -272,6 +272,7 @@ io.on("connection", (socket: Socket) => {
 	//TODO: socket.on stuff
 	socket.on("1", (x, y, jumpY, targetF, targetD, currentTime) => {
 		const currentWeapon = getCurrentWeapon(player);
+		if (!currentWeapon) return;
 		currentWeapon.spreadIndex++;
 		if (currentWeapon.spreadIndex >= currentWeapon.spread.length) {
 			currentWeapon.spreadIndex = 0;
@@ -288,7 +289,7 @@ io.on("connection", (socket: Socket) => {
 			d: d,
 			si: -1,
 		});
-		for (let b = 0; b < getCurrentWeapon(player).bulletsPerShot; b++) {
+		for (let b = 0; b < currentWeapon.bulletsPerShot; b++) {
 			const bullet = getNextBullet(bullets);
 			shootNextBullet(
 				{
