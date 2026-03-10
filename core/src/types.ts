@@ -1,5 +1,3 @@
-import type { weapons } from "./loadouts.ts";
-
 export type Player = {
 	id: number;
 	room: string;
@@ -8,7 +6,7 @@ export type Player = {
 	account: Account;
 	classIndex: number;
 	currentWeapon: number;
-	weapons: (typeof weapons)[number][];
+	weapons: Weapon[];
 	health: number;
 	maxHealth: number;
 	height: number;
@@ -46,6 +44,48 @@ export type Player = {
 	isn?: number;
 	firstReceive?: boolean; // unused?
 	spray?: any; // todo
+};
+
+export type Weapon = {
+  name: string;
+  weaponIndex: number;
+  dmg: number;
+  ammo: number;
+  maxAmmo: number;
+  reloadSpeed: number;
+  fireRate: number;
+  spread: number[];
+  width: number;
+  length: number;
+  yOffset: number;
+  holdDist: number;
+
+  bSpeed: number;
+  bWidth: number;
+  bHeight: number;
+  bRandScale: [number, number];
+  cAcc: number;
+  maxLife: number | null;
+  bulletsPerShot: number;
+  pierceCount: number;
+  blastRadius?: number;
+  bounce: boolean;
+  distBased: boolean;
+  explodeOnDeath: boolean;
+  bDist: number;
+  bTrail: number;
+  bSprite: number;
+  glowWidth: number;
+  glowHeight: number;
+  shake: number;
+
+  reloadTime: number;
+  spreadIndex: number;
+  lastShot: number;
+
+  // added at runtime
+  front?: boolean;
+  camo?: number;
 };
 
 // todo

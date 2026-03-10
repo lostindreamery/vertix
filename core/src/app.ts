@@ -985,39 +985,11 @@ function keyUp(event: KeyboardEvent) {
 		hideStatTable();
 	}
 }
-function ChatManager() {
-	this.commands = {};
-	var chatInput = document.getElementById("chatInput") as HTMLInputElement;
-	chatInput.addEventListener("keypress", this.sendChat.bind(this));
-	chatInput.addEventListener("keyup", (b) => {
-		let knum = b.which || b.keyCode;
-		if (knum) {
-			chatInput.value = "";
-			mainCanvas.focus();
-		}
-	});
-}
+var chatInput = document.getElementById("chatInput") as HTMLInputElement;
+
 var chatTypeIndex = 0;
 var chatTypes = ["ALL", "TEAM"];
 var currentChatType = chatTypes[0];
-ChatManager.prototype.sendChat = function (a) {
-	var chatInput = document.getElementById("chatInput") as HTMLInputElement;
-	a = a.which || a.keyCode;
-	if (a === 13) {
-		a = chatInput.value.replace(/(<([^>]+)>)/gi, "");
-		if (a !== "") {
-			socket.emit("cht", a.substring(0, 50), currentChatType);
-			this.addChatLine(
-				player.name,
-				(currentChatType == "TEAM" ? "(TEAM) " : "") + a,
-				true,
-				player.team,
-			);
-			chatInput.value = "";
-			mainCanvas.focus();
-		}
-	}
-};
 document.getElementById("chatType").addEventListener("click", toggleTeamChat);
 function toggleTeamChat() {
 	chatTypeIndex++;
@@ -1028,66 +1000,81 @@ function toggleTeamChat() {
 	document.getElementById("chatType").innerHTML = currentChatType;
 	mainCanvas.focus();
 }
-// var profanityList = []; // emptied
-// function checkProfanityString(a) {
-// 	if (showProfanity) {
-// 		for (let i = 0; i < profanityList.length; ++i) {
-// 			if (a.indexOf(profanityList[i]) > -1) {
-// 				let tmpString = "";
-// 				for (var d = 0; d < profanityList[i].length; ++d) {
-// 					tmpString += "*";
-// 				}
-// 				a = a.replace(new RegExp(profanityList[i], "g"), tmpString);
-// 			}
-// 		}
-// 	}
-// 	return a;
-// }
-var chatLineCounter = 0;
-ChatManager.prototype.addChatLine = function (a, text: string, d, e) {
-	if (mobile) return;
-
-	// b = checkProfanityString(b);
-	let listElem = document.createElement("li");
-	let source = "me";
-	if (d || e === "system" || e === "notif") {
-		if (e === "system") {
-			source = "system";
-		} else if (e === "notif") {
-			source = "notif";
+class ChatManager {
+	chatLineCounter = 0;
+	constructor() {
+		chatInput.addEventListener("keypress", this.sendChat.bind(this));
+		// chatInput.addEventListener("keyup", (b) => {
+		// 	let knum = b.which || b.keyCode;
+		// 	if (knum) {
+		// 		chatInput.value = "";
+		// 		mainCanvas.focus();
+		// 	}
+		// });
+	}
+	sendChat(event: KeyboardEvent) {
+		var chatInput = document.getElementById("chatInput") as HTMLInputElement;
+		if (event.key === "Enter") {
+			let msg = chatInput.value.replace(/(<([^>]+)>)/gi, "");
+			if (msg !== "") {
+				socket.emit("cht", msg.substring(0, 50), currentChatType);
+				this.addChatLine(
+					player.name,
+					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg,
+					true,
+					player.team,
+				);
+				chatInput.value = "";
+				mainCanvas.focus();
+			}
 		}
-	} else {
-		source = player.team === e ? "blue" : "red";
 	}
-	chatLineCounter++;
-	listElem.className = source;
-	e = false;
-	if (source === "system" || source === "notif") {
-		listElem.innerHTML = `<span>${text}</span>`;
-	} else {
-		e = true;
-		listElem.innerHTML =
-			"<span>" +
-			(d ? "YOU" : a) +
-			': </span><label id="chatLine' +
-			chatLineCounter +
-			'"></label>';
-	}
-	this.appendMessage(listElem);
-	if (e) {
-		document.getElementById(`chatLine${chatLineCounter}`).textContent = text;
-	}
-};
-ChatManager.prototype.appendMessage = (msgElem: HTMLElement) => {
-	if (mobile) return;
+	appendMessage(msgElem: HTMLElement) {
+		if (mobile) return;
 
-	const chatbox = document.getElementById("chatbox");
-	const chatList = document.getElementById("chatList");
-	for (; chatbox.clientHeight > 260; ) {
-		chatList.removeChild(chatList.childNodes[0]);
+		const chatbox = document.getElementById("chatbox");
+		const chatList = document.getElementById("chatList");
+		for (; chatbox.clientHeight > 260; ) {
+			chatList.removeChild(chatList.childNodes[0]);
+		}
+		chatList.appendChild(msgElem);
 	}
-	chatList.appendChild(msgElem);
-};
+	addChatLine(a, text: string, d, e) {
+		if (mobile) return;
+
+		// b = checkProfanityString(b);
+		let listElem = document.createElement("li");
+		let source = "me";
+		if (d || e === "system" || e === "notif") {
+			if (e === "system") {
+				source = "system";
+			} else if (e === "notif") {
+				source = "notif";
+			}
+		} else {
+			source = player.team === e ? "blue" : "red";
+		}
+		this.chatLineCounter++;
+		listElem.className = source;
+		e = false;
+		if (source === "system" || source === "notif") {
+			listElem.innerHTML = `<span>${text}</span>`;
+		} else {
+			e = true;
+			listElem.innerHTML =
+				"<span>" +
+				(d ? "YOU" : a) +
+				': </span><label id="chatLine' +
+				this.chatLineCounter +
+				'"></label>';
+		}
+		this.appendMessage(listElem);
+		if (e) {
+			document.getElementById(`chatLine${this.chatLineCounter}`).textContent =
+				text;
+		}
+	}
+}
 var chat = new ChatManager();
 function messageFromServer(a) {
 	try {
@@ -5034,7 +5021,7 @@ function drawGameObjects(delta: number) {
 				if (tmpObject.weapons.length > 0) {
 					e = getWeaponSprite(
 						getCurrentWeapon(tmpObject).weaponIndex,
-						getCurrentWeapon(tmpObject).camo,
+						getCurrentWeapon(tmpObject).camo, // this isn't set anywhere..?
 						k,
 					);
 					f = classSpriteSheets[tmpObject.classIndex];
@@ -6142,50 +6129,26 @@ function renderShadedAnimText(
 	}
 	return cachedText;
 }
-var cachedParticles: any[] = []; // todo use better type once the Particle here is an es6 class
-var particleIndex = 0;
-for (let i = 0; i < 700; ++i) {
-	cachedParticles.push(new Particle());
-}
-function updateParticles(delta: number, layer: number) {
-	for (let i = 0; i < cachedParticles.length; ++i) {
-		if (
-			(showParticles || cachedParticles[i].forceShow) &&
-			cachedParticles[i].active &&
-			canSee(
-				cachedParticles[i].x - startX,
-				cachedParticles[i].y - startY,
-				cachedParticles[i].scale,
-				cachedParticles[i].scale,
-			)
-		) {
-			if (layer === cachedParticles[i].layer) {
-				cachedParticles[i].update(delta);
-				cachedParticles[i].draw();
-			}
-		} else {
-			cachedParticles[i].active = false;
-		}
-	}
-	graph.globalAlpha = 1;
-}
-function Particle() {
-	this.rotation =
-		this.initScale =
-		this.scale =
-		this.dir =
-		this.initSpeed =
-		this.speed =
-		this.y =
-		this.x =
-			0;
-	this.active = false;
-	this.layer = this.spriteIndex = 0;
-	this.alpha = 1;
-	this.fadeSpeed = 0;
-	this.forceShow = this.checkCollisions = false;
-	this.tmpScale = this.maxDuration = this.duration = 0;
-	this.update = function (a) {
+class Particle {
+	rotation = 0;
+	initScale = 0;
+	scale = 0;
+	dir = 0;
+	initSpeed = 0;
+	speed = 0;
+	y = 0;
+	x = 0;
+	active = false;
+	layer = 0;
+	spriteIndex = 0;
+	alpha = 1;
+	fadeSpeed = 0;
+	forceShow = false;
+	checkCollisions = false;
+	tmpScale = 0;
+	maxDuration = 0;
+	duration = 0;
+	update(a) {
 		if (!this.active) return;
 		if (this.maxDuration > 0) {
 			this.duration += a;
@@ -6216,8 +6179,8 @@ function Particle() {
 		if (this.checkCollisions) {
 			this.checkInWall();
 		}
-	};
-	this.draw = function () {
+	}
+	draw() {
 		if (
 			this.active &&
 			particleSprites[this.spriteIndex] != null &&
@@ -6246,8 +6209,8 @@ function Particle() {
 				);
 			}
 		}
-	};
-	this.checkInWall = function () {
+	}
+	checkInWall() {
 		for (let i = 0; i < gameMap.tiles.length; ++i) {
 			if (gameMap.tiles[i].wall && gameMap.tiles[i].hasCollision) {
 				const tmpTl = gameMap.tiles[i];
@@ -6261,8 +6224,36 @@ function Particle() {
 				}
 			}
 		}
-	};
+	}
 }
+var cachedParticles: Particle[] = [];
+var particleIndex = 0;
+for (let i = 0; i < 700; ++i) {
+	cachedParticles.push(new Particle());
+}
+function updateParticles(delta: number, layer: number) {
+	for (let i = 0; i < cachedParticles.length; ++i) {
+		if (
+			(showParticles || cachedParticles[i].forceShow) &&
+			cachedParticles[i].active &&
+			canSee(
+				cachedParticles[i].x - startX,
+				cachedParticles[i].y - startY,
+				cachedParticles[i].scale,
+				cachedParticles[i].scale,
+			)
+		) {
+			if (layer === cachedParticles[i].layer) {
+				cachedParticles[i].update(delta);
+				cachedParticles[i].draw();
+			}
+		} else {
+			cachedParticles[i].active = false;
+		}
+	}
+	graph.globalAlpha = 1;
+}
+
 function getReadyParticle() {
 	particleIndex++;
 	if (particleIndex >= cachedParticles.length) {

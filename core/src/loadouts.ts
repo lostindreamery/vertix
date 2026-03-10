@@ -1,3 +1,5 @@
+import type { Weapon } from "./types.ts";
+
 export let characterClasses = [
 	{
 		classN: "Triggerman",
@@ -139,7 +141,7 @@ export const specialClasses = [
 	},
 ];
 
-export const weapons = [
+export const weapons: Weapon[] = [
 	{
 		name: "smg",
 		weaponIndex: 0,
