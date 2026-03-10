@@ -20,5 +20,13 @@
 				"noAutofocus": "off"
 			}
 		}
+	},
+	"formatter": {
+		"lineWidth": 100
+	},
+	"html": {
+		"formatter": {
+			"lineWidth": 120
+		}
 	}
 }

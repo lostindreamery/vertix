@@ -178,7 +178,9 @@ io.on("connection", (socket: Socket) => {
 		player.name = client.name ? client.name : player.name;
 		player.classIndex = client.classIndex ? client.classIndex : 0;
 		const currentClass = characterClasses[player.classIndex];
-		player.weapons = currentClass.weaponIndexes.map((i) => structuredClone(weapons[i]));
+		player.weapons = currentClass.weaponIndexes.map((i) =>
+			structuredClone(weapons[i]),
+		);
 		player.health = player.maxHealth = currentClass.maxHealth;
 		player.height = currentClass.height;
 		player.width = currentClass.width;

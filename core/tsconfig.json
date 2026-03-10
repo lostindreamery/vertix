@@ -12,6 +12,6 @@
 		// todo:
 		"strictNullChecks": false,
 		"noImplicitAny": true,
-		"noImplicitThis": true 
+		"noImplicitThis": true
 	}
 }

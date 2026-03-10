@@ -47,45 +47,45 @@ export type Player = {
 };
 
 export type Weapon = {
-  name: string;
-  weaponIndex: number;
-  dmg: number;
-  ammo: number;
-  maxAmmo: number;
-  reloadSpeed: number;
-  fireRate: number;
-  spread: number[];
-  width: number;
-  length: number;
-  yOffset: number;
-  holdDist: number;
+	name: string;
+	weaponIndex: number;
+	dmg: number;
+	ammo: number;
+	maxAmmo: number;
+	reloadSpeed: number;
+	fireRate: number;
+	spread: number[];
+	width: number;
+	length: number;
+	yOffset: number;
+	holdDist: number;
 
-  bSpeed: number;
-  bWidth: number;
-  bHeight: number;
-  bRandScale: [number, number];
-  cAcc: number;
-  maxLife: number | null;
-  bulletsPerShot: number;
-  pierceCount: number;
-  blastRadius?: number;
-  bounce: boolean;
-  distBased: boolean;
-  explodeOnDeath: boolean;
-  bDist: number;
-  bTrail: number;
-  bSprite: number;
-  glowWidth: number;
-  glowHeight: number;
-  shake: number;
+	bSpeed: number;
+	bWidth: number;
+	bHeight: number;
+	bRandScale: [number, number];
+	cAcc: number;
+	maxLife: number | null;
+	bulletsPerShot: number;
+	pierceCount: number;
+	blastRadius?: number;
+	bounce: boolean;
+	distBased: boolean;
+	explodeOnDeath: boolean;
+	bDist: number;
+	bTrail: number;
+	bSprite: number;
+	glowWidth: number;
+	glowHeight: number;
+	shake: number;
 
-  reloadTime: number;
-  spreadIndex: number;
-  lastShot: number;
+	reloadTime: number;
+	spreadIndex: number;
+	lastShot: number;
 
-  // added at runtime
-  front?: boolean;
-  camo?: number;
+	// added at runtime
+	front?: boolean;
+	camo?: number;
 };
 
 // todo
@@ -125,23 +125,23 @@ export interface SpriteCanvas extends HTMLCanvasElement {
 }
 
 export type Tile = {
-  index: number;
-  scale: number;
-  x: number;
-  y: number;
-  wall: boolean;
-  spriteIndex: number;
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-  topLeft: number;
-  topRight: number;
-  bottomLeft: number;
-  bottomRight: number;
-  neighbours: number;
-  hasCollision: boolean;
-  hardPoint: boolean;
-  objTeam: string;
-  edgeTile: boolean;
+	index: number;
+	scale: number;
+	x: number;
+	y: number;
+	wall: boolean;
+	spriteIndex: number;
+	left: number;
+	right: number;
+	top: number;
+	bottom: number;
+	topLeft: number;
+	topRight: number;
+	bottomLeft: number;
+	bottomRight: number;
+	neighbours: number;
+	hasCollision: boolean;
+	hardPoint: boolean;
+	objTeam: string;
+	edgeTile: boolean;
 };

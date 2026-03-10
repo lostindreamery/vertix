@@ -72,12 +72,7 @@ export function setupMap(a: any, mapTileScale: number) {
 	for (let i = 0; i < b.width; i++) {
 		for (let j = 0; j < b.height; j++) {
 			const tileDataBaseIdx = (b.width * j + i) << 2;
-			let p =
-				l[tileDataBaseIdx] +
-				" " +
-				l[tileDataBaseIdx + 1] +
-				" " +
-				l[tileDataBaseIdx + 2];
+			let p = `${l[tileDataBaseIdx]} ${l[tileDataBaseIdx + 1]} ${l[tileDataBaseIdx + 2]}`;
 			const n: Tile = {
 				index: f,
 				scale: mapTileScale,
@@ -177,10 +172,7 @@ export function setupMap(a: any, mapTileScale: number) {
 				if (p === "0 255 0") {
 					n.spriteIndex = 2;
 				} else if (p === "255 255 0") {
-					if (
-						a.gameMode.name === "Hardpoint" ||
-						a.gameMode.name === "Zone War"
-					) {
+					if (a.gameMode.name === "Hardpoint" || a.gameMode.name === "Zone War") {
 						n.hardPoint = true;
 						if (a.gameMode.name === "Zone War") {
 							n.objTeam = i < b.width / 2 ? "red" : "blue";
@@ -285,10 +277,7 @@ export function wallCol(player: Player, gameMap, gameObjects) {
 			) {
 				if (player.oldX <= tmpTile.x) {
 					player.x = tmpTile.x - player.width / 2 - 2;
-				} else if (
-					player.oldX - player.width / 2 >=
-					tmpTile.x + tmpTile.scale
-				) {
+				} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
 					player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
 				}
 				if (player.oldY <= tmpTile.y) {
@@ -301,15 +290,11 @@ export function wallCol(player: Player, gameMap, gameObjects) {
 				!tmpTile.hardPoint &&
 				player.x > tmpTile.x &&
 				player.x < tmpTile.x + tmpTile.scale &&
-				player.y - player.jumpY - player.height * 0.85 >
-					tmpTile.y - tmpTile.scale / 2 &&
+				player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
 				player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
 			) {
 				player.nameYOffset = Math.round(
-					player.y -
-						player.jumpY -
-						player.height * 0.85 -
-						(tmpTile.y - tmpTile.scale / 2),
+					player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
 				);
 			}
 		}
@@ -340,10 +325,7 @@ export function wallCol(player: Player, gameMap, gameObjects) {
 	}
 }
 export function getCurrentWeapon(player: Player) {
-	if (
-		player.weapons !== undefined &&
-		player.weapons[player.currentWeapon] !== undefined
-	) {
+	if (player.weapons !== undefined && player.weapons[player.currentWeapon] !== undefined) {
 		return player.weapons[player.currentWeapon];
 	} else {
 		return null;
@@ -382,12 +364,9 @@ export function shadeColor(hexColor: string, percent: number) {
 	r = r < 255 ? r : 255;
 	g = g < 255 ? g : 255;
 	b = b < 255 ? b : 255;
-	var rstr =
-		r.toString(16).length === 1 ? `0${r.toString(16)}` : r.toString(16);
-	var gstr =
-		g.toString(16).length === 1 ? `0${g.toString(16)}` : g.toString(16);
-	var bstr =
-		b.toString(16).length === 1 ? `0${b.toString(16)}` : b.toString(16);
+	var rstr = r.toString(16).length === 1 ? `0${r.toString(16)}` : r.toString(16);
+	var gstr = g.toString(16).length === 1 ? `0${g.toString(16)}` : g.toString(16);
+	var bstr = b.toString(16).length === 1 ? `0${b.toString(16)}` : b.toString(16);
 	return `#${rstr}${gstr}${bstr}`;
 }
 export function randomFloat(min: number, max: number) {
@@ -396,11 +375,7 @@ export function randomFloat(min: number, max: number) {
 export function randomInt(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-export function linearInterpolate(
-	current: number,
-	target: number,
-	step: number,
-) {
+export function linearInterpolate(current: number, target: number, step: number) {
 	var delta = current - target;
 	if (delta * delta > step * step) {
 		return target + step;
