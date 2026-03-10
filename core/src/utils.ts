@@ -52,7 +52,8 @@ export function shootNextBullet(
 		bullet.glowWidth = weapon.glowWidth;
 		bullet.glowHeight = weapon.glowHeight;
 		bullet.explodeOnDeath = weapon.explodeOnDeath;
-		bullet.pierceCount = weapon.pierce; // doesn't exist?
+		//@ts-ignore weapon.pierce doesn't exist?
+		bullet.pierceCount = weapon.pierce;
 		bullet.blastRadius = weapon.blastRadius;
 		bullet.activate();
 	}
@@ -256,14 +257,14 @@ export function setupMap(a: any, mapTileScale: number) {
 		}
 	}
 }
-function canPlaceFlag(tile: Tile, b) {
-	if (b) {
+function canPlaceFlag(tile: Tile, ignoreWalls: true) {
+	if (ignoreWalls) {
 		return tile !== undefined && !tile.wall && !tile.hardPoint;
 	} else {
 		return tile !== undefined && !tile.hardPoint;
 	}
 }
-export function wallCol(player: Player, gameMap, gameObjects) {
+export function wallCol(player: Player, gameMap: any, gameObjects: any) {
 	if (player.dead) return;
 	player.nameYOffset = 0;
 	for (let i = 0; i < gameMap.tiles.length; ++i) {
@@ -325,11 +326,7 @@ export function wallCol(player: Player, gameMap, gameObjects) {
 	}
 }
 export function getCurrentWeapon(player: Player) {
-	if (player.weapons !== undefined && player.weapons[player.currentWeapon] !== undefined) {
-		return player.weapons[player.currentWeapon];
-	} else {
-		return null;
-	}
+	return player.weapons?.[player.currentWeapon] ?? null;
 }
 export function roundNumber(num: number, fractionDigits: number) {
 	return +num.toFixed(fractionDigits);
