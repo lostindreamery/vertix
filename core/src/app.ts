@@ -686,14 +686,14 @@ var gameMap: any = null; // todo
 window.getGameMap = () => gameMap;
 var mapTileScale = 0;
 var leaderboard = [];
-var keys = {
-	u: 0,
-	d: 0,
-	l: 0,
-	r: 0,
-	lm: 0,
-	s: 0,
-	rl: 0,
+const keys = {
+	u: false,
+	d: false,
+	l: false,
+	r: false,
+	lm: false,
+	s: false,
+	rl: false,
 };
 var reenviar = true;
 var directionLock = false;
@@ -743,12 +743,12 @@ function gameInput(event: MouseEvent) {
 function mouseDown(event: MouseEvent) {
 	event.preventDefault();
 	event.stopPropagation();
-	keys.lm = 1;
+	keys.lm = true;
 }
 function mouseUp(event: MouseEvent) {
 	event.preventDefault();
 	event.stopPropagation();
-	keys.lm = 0;
+	keys.lm = false;
 }
 mainCanvas.addEventListener("mousewheel", gameScroll, false);
 mainCanvas.addEventListener("DOMMouseScroll", gameScroll, false);
@@ -760,87 +760,54 @@ function gameScroll(event) {
 		Math.max(-1, Math.min(1, event.wheelDelta || -event.detail)) * -1;
 }
 // todo: redo input handling to not use keycodes
-var keyMap = [];
+var keyMap: Record<string, boolean> = {};
 var showingScoreBoard = false;
-var keyToChange = null;
-var keyChangeElement = null;
-var keyCodeMap = {
-	8: "backspace",
-	9: "tab",
-	13: "enter",
-	16: "shift",
-	//17: "ctrl",
-	18: "alt",
-	19: "pausebreak",
-	20: "capslock",
-	27: "escape",
-	32: "space",
-	33: "pageup",
-	34: "pagedown",
-	35: "end",
-	36: "home",
-	37: "left",
-	38: "up",
-	39: "right",
-	40: "down",
-	43: "+",
-	44: "printscreen",
-	45: "insert",
-	46: "delete",
-	112: "f1",
-	113: "f2",
-	114: "f3",
-	115: "f4",
-	116: "f5",
-	117: "f6",
-	118: "f7",
-	119: "f8",
-	120: "f9",
-	121: "f10",
-	122: "f11",
-	//123: "f12",
-	144: "numlock",
-	145: "scrolllock",
-};
-var keysList = null;
-function inputReset(a) {
+var keyToChange: keyof typeof keysList | null = null;
+var keyChangeElement: HTMLElement | null = null;
+
+var keysList: {
+	upKey: string;
+	downKey: string;
+	leftKey: string;
+	rightKey: string;
+	reloadKey: string;
+	jumpKey: string;
+	sprayKey: string;
+	leaderboardKey: string;
+	chatToggleKey: string;
+	incWeapKey: string;
+	decWeapKey: string;
+} = null;
+function inputReset(save: boolean) {
 	keysList = {
-		upKey: 87,
-		downKey: 83,
-		leftKey: 65,
-		rightKey: 68,
-		reloadKey: 82,
-		jumpKey: 32,
-		sprayKey: 70,
-		leaderboardKey: 16,
-		chatToggleKey: 13,
-		incWeapKey: 69,
-		decWeapKey: 81,
+		upKey: "w",
+		downKey: "s",
+		leftKey: "a",
+		rightKey: "d",
+		reloadKey: "r",
+		jumpKey: " ",
+		sprayKey: "f",
+		leaderboardKey: "Shift",
+		chatToggleKey: "Enter",
+		incWeapKey: "e",
+		decWeapKey: "q",
 	};
 	updateKeysUI();
-	if (a) {
+	if (save) {
 		localStorage.setItem("customControls", JSON.stringify(keysList));
 	}
 }
 inputReset(false);
-var previousKeyElementContent = null;
+var previousKeyElementContent: string | null = null;
 window.inputChange = inputChange;
-function inputChange(a, b) {
+function inputChange(elem: HTMLElement, ktc: keyof typeof keysList) {
 	if (keyToChange != null && keyChangeElement != null) {
 		keyChangeElement.innerHTML = previousKeyElementContent;
 	}
-	previousKeyElementContent = a.innerHTML;
-	a.textContent = "Press any Key";
-	keyChangeElement = a;
-	keyToChange = b;
-}
-function getKeyName(a) {
-	let b = keyCodeMap[a];
-	if (b == undefined || !b.trim()) {
-		b = String.fromCharCode(a);
-	}
-	b = b.charAt(0).toUpperCase() + b.slice(1);
-	return b;
+	previousKeyElementContent = elem.innerHTML;
+	elem.textContent = "Press any Key";
+	keyChangeElement = elem;
+	keyToChange = ktc;
 }
 function saveKeysToCookie() {
 	localStorage.setItem("customControls", JSON.stringify(keysList));
@@ -854,48 +821,36 @@ if (localStorage.getItem("customControls")) {
 	}
 }
 function updateKeysUI() {
-	document.getElementById("upKeyCh").textContent = getKeyName(keysList.upKey);
-	document.getElementById("downKeyCh").textContent = getKeyName(
-		keysList.downKey,
-	);
-	document.getElementById("leftKeyCh").textContent = getKeyName(
-		keysList.leftKey,
-	);
-	document.getElementById("rightKeyCh").textContent = getKeyName(
-		keysList.rightKey,
-	);
-	document.getElementById("reloadKeyCh").textContent = getKeyName(
-		keysList.reloadKey,
-	);
-	document.getElementById("jumpKeyCh").textContent = getKeyName(
-		keysList.jumpKey,
-	);
-	document.getElementById("sprayKeyCh").textContent = getKeyName(
-		keysList.sprayKey,
-	);
-	document.getElementById("leaderboardKeyCh").textContent = getKeyName(
-		keysList.leaderboardKey,
-	);
-	document.getElementById("chatToggleKeyCh").textContent = getKeyName(
-		keysList.chatToggleKey,
-	);
-	document.getElementById("incWeapKeyCh").textContent = getKeyName(
-		keysList.incWeapKey,
-	);
-	document.getElementById("decWeapKeyCh").textContent = getKeyName(
-		keysList.decWeapKey,
-	);
+	document.getElementById("upKeyCh").textContent = keysList.upKey;
+	document.getElementById("downKeyCh").textContent = keysList.downKey;
+
+	document.getElementById("leftKeyCh").textContent = keysList.leftKey;
+
+	document.getElementById("rightKeyCh").textContent = keysList.rightKey;
+
+	document.getElementById("reloadKeyCh").textContent = keysList.reloadKey;
+
+	document.getElementById("jumpKeyCh").textContent = keysList.jumpKey;
+
+	document.getElementById("sprayKeyCh").textContent = keysList.sprayKey;
+
+	document.getElementById("leaderboardKeyCh").textContent =
+		keysList.leaderboardKey;
+
+	document.getElementById("chatToggleKeyCh").textContent =
+		keysList.chatToggleKey;
+
+	document.getElementById("incWeapKeyCh").textContent = keysList.incWeapKey;
+
+	document.getElementById("decWeapKeyCh").textContent = keysList.decWeapKey;
 }
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
 	if (keyToChange != null) {
-		let b = keyCodeMap[event.keyCode];
-		if (b == undefined || !b.trim()) {
-			b = String.fromCharCode(event.keyCode);
-		}
-		if (b.trim()) {
-			keyChangeElement.innerHTML = b.charAt(0).toUpperCase() + b.slice(1);
-			keysList[keyToChange] = event.keyCode;
+		event.preventDefault();
+		if (event.key) {
+			keyChangeElement.innerHTML = event.key;
+			keysList[keyToChange] = event.key;
 		} else {
 			keyChangeElement.innerHTML = previousKeyElementContent;
 		}
@@ -903,37 +858,37 @@ function keyDown(event: KeyboardEvent) {
 		saveKeysToCookie();
 	} else if (mainCanvas === document.activeElement) {
 		event.preventDefault();
-		keyMap[event.keyCode] = event.type === "keydown";
-		if (event.keyCode === 27 && gameStart) {
+		keyMap[event.key] = event.type === "keydown";
+		if (event.key === "Escape" && gameStart) {
 			showESCMenu();
 		}
 		if (keyMap[keysList.upKey] && !keys.u) {
-			keys.u = 1;
-			keys.d = 0;
+			keys.u = true;
+			keys.d = false;
 			keyMap[keysList.downKey] = false;
 		}
 		if (keyMap[keysList.downKey] && !keys.d) {
-			keys.d = 1;
-			keys.u = 0;
+			keys.d = true;
+			keys.u = false;
 			keyMap[keysList.upKey] = false;
 		}
 		if (keyMap[keysList.leftKey] && !keys.l) {
-			keys.l = 1;
-			keys.r = 0;
+			keys.l = true;
+			keys.r = false;
 			keyMap[keysList.rightKey] = false;
 		}
 		if (keyMap[keysList.rightKey] && !keys.r) {
-			keys.r = 1;
-			keys.l = 0;
+			keys.r = true;
+			keys.l = false;
 			keyMap[keysList.leftKey] = false;
 		}
 		if (keyMap[keysList.jumpKey] && !keys.s) {
-			keys.s = 1;
+			keys.s = true;
 		}
 		if (keyMap[keysList.reloadKey] && !keys.rl) {
-			keys.rl = 1;
+			keys.rl = true;
 		}
-		if (event.keyCode === keysList.chatToggleKey) {
+		if (event.key === keysList.chatToggleKey) {
 			document.getElementById("chatInput").focus();
 		}
 		if (
@@ -951,36 +906,36 @@ function keyDown(event: KeyboardEvent) {
 mainCanvas.addEventListener("keyup", keyUp, false);
 function keyUp(event: KeyboardEvent) {
 	event.preventDefault();
-	keyMap[event.keyCode] = event.type === "keydown";
-	if (event.keyCode === keysList.upKey) {
-		keys.u = 0;
+	keyMap[event.key] = event.type === "keydown";
+	if (event.key === keysList.upKey) {
+		keys.u = false;
 	}
-	if (event.keyCode === keysList.downKey) {
-		keys.d = 0;
+	if (event.key === keysList.downKey) {
+		keys.d = false;
 	}
-	if (event.keyCode === keysList.leftKey) {
-		keys.l = 0;
+	if (event.key === keysList.leftKey) {
+		keys.l = false;
 	}
-	if (event.keyCode === keysList.rightKey) {
-		keys.r = 0;
+	if (event.key === keysList.rightKey) {
+		keys.r = false;
 	}
-	if (event.keyCode === keysList.jumpKey) {
-		keys.s = 0;
+	if (event.key === keysList.jumpKey) {
+		keys.s = false;
 	}
-	if (event.keyCode === keysList.reloadKey) {
-		keys.rl = 0;
+	if (event.key === keysList.reloadKey) {
+		keys.rl = false;
 	}
-	if (event.keyCode === keysList.incWeapKey) {
+	if (event.key === keysList.incWeapKey) {
 		playerSwapWeapon(findUserByIndex(player.index), 1);
 	}
-	if (event.keyCode === keysList.decWeapKey) {
+	if (event.key === keysList.decWeapKey) {
 		playerSwapWeapon(findUserByIndex(player.index), -1);
 	}
-	if (event.keyCode === keysList.sprayKey) {
+	if (event.key === keysList.sprayKey) {
 		sendSpray();
 	}
 	if (
-		event.keyCode === keysList.leaderboardKey &&
+		event.key === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
 		!player.dead &&
 		!gameOver &&
@@ -1645,7 +1600,7 @@ function setupSocket(sock: Socket) {
 			showUI();
 			document.getElementById("cvs").focus();
 		}
-		keys.lm = 0;
+		keys.lm = false;
 		maxScreenHeight = a.maxScreenHeight * a.viewMult;
 		maxScreenWidth = a.maxScreenWidth * a.viewMult;
 		viewMult = a.viewMult;
@@ -2854,25 +2809,25 @@ function updateGameLoop() {
 	horizontalDT = verticalDT = 0;
 	count++;
 	var doJump = 0;
-	if (keys.u === 1) {
+	if (keys.u) {
 		verticalDT = -1;
 		// temp = 0;
 	}
-	if (keys.d === 1) {
+	if (keys.d) {
 		verticalDT = 1;
 		// temp = 0;
 	}
-	if (keys.r === 1) {
+	if (keys.r) {
 		horizontalDT = 1;
 		// temp = 0;
 	}
-	if (keys.l === 1) {
+	if (keys.l) {
 		horizontalDT = -1;
 		// temp = 0;
 	} else {
 		keyd = 0;
 	}
-	if (keys.s === 1) {
+	if (keys.s) {
 		doJump = 0;
 		// temp = 0;
 	}
