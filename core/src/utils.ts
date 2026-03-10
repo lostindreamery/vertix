@@ -52,7 +52,7 @@ export function shootNextBullet(
 		bullet.glowWidth = weapon.glowWidth;
 		bullet.glowHeight = weapon.glowHeight;
 		bullet.explodeOnDeath = weapon.explodeOnDeath;
-		bullet.pierceCount = weapon.pierceCount; // used to be weapon.pierce, which doesn't exist?
+		bullet.pierceCount = weapon.pierce; // doesn't exist?
 		bullet.blastRadius = weapon.blastRadius;
 		bullet.activate();
 	}
