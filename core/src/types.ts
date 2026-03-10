@@ -105,7 +105,7 @@ export interface Sprite extends HTMLImageElement {
 	isLoaded: boolean;
 	flipped: boolean;
 	//SPRAY
-	owner?: Player;
+	owner?: number;
 	active?: boolean;
 	xPos?: number;
 	yPos?: number;
@@ -123,3 +123,25 @@ export interface SpriteCanvas extends HTMLCanvasElement {
 	flipped?: boolean;
 	isLoaded?: boolean;
 }
+
+export type Tile = {
+  index: number;
+  scale: number;
+  x: number;
+  y: number;
+  wall: boolean;
+  spriteIndex: number;
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  topLeft: number;
+  topRight: number;
+  bottomLeft: number;
+  bottomRight: number;
+  neighbours: number;
+  hasCollision: boolean;
+  hardPoint: boolean;
+  objTeam: string;
+  edgeTile: boolean;
+};

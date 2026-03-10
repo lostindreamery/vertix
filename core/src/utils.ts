@@ -1,4 +1,4 @@
-import type { Player } from "./types.ts";
+import type { Player, Tile } from "./types.ts";
 
 var bulletIndex = 0;
 export function getNextBullet(bullets: any) {
@@ -78,7 +78,7 @@ export function setupMap(a: any, mapTileScale: number) {
 				l[tileDataBaseIdx + 1] +
 				" " +
 				l[tileDataBaseIdx + 2];
-			const n = {
+			const n: Tile = {
 				index: f,
 				scale: mapTileScale,
 				x: 0,
@@ -104,7 +104,7 @@ export function setupMap(a: any, mapTileScale: number) {
 			if (i === 0 && j === 0) {
 				p = "0 0 0";
 			}
-			let tmpTile: any;
+			let tmpTile: Tile;
 			if (p === "0 0 0") {
 				n.wall = true;
 				n.hasCollision = true;
@@ -154,9 +154,9 @@ export function setupMap(a: any, mapTileScale: number) {
 					n.spriteIndex = randomInt(1, 2);
 				}
 			} else {
-				tmpTile = randomInt(0, 10);
+				let rand = randomInt(0, 10);
 				n.spriteIndex = 0;
-				if (tmpTile <= 0) {
+				if (rand <= 0) {
 					n.spriteIndex = 1;
 				}
 				n.wall = false;
@@ -264,7 +264,7 @@ export function setupMap(a: any, mapTileScale: number) {
 		}
 	}
 }
-function canPlaceFlag(tile, b) {
+function canPlaceFlag(tile: Tile, b) {
 	if (b) {
 		return tile !== undefined && !tile.wall && !tile.hardPoint;
 	} else {
