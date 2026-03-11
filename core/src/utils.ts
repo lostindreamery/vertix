@@ -257,7 +257,7 @@ export function setupMap(a: any, mapTileScale: number) {
 		}
 	}
 }
-function canPlaceFlag(tile: Tile, ignoreWalls: true) {
+function canPlaceFlag(tile: Tile, ignoreWalls: boolean) {
 	if (ignoreWalls) {
 		return tile !== undefined && !tile.wall && !tile.hardPoint;
 	} else {
