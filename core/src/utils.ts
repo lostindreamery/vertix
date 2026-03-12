@@ -380,3 +380,6 @@ export function linearInterpolate(current: number, target: number, step: number)
 		return current;
 	}
 }
+export function isImageOk(img: HTMLImageElement) {
+	return img.complete && img.naturalWidth !== 0;
+}

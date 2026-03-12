@@ -2880,9 +2880,9 @@ class FlashGlow {
 	maxDuration = 0;
 	duration = 0;
 
-	update(a) {
+	update(delta: number) {
 		if (!(this.active && this.maxDuration > 0)) return;
-		this.duration += a;
+		this.duration += delta;
 		let tmpScale = Math.max(0, 1 - this.duration / this.maxDuration);
 		this.scale = this.initScale * tmpScale;
 		if (this.scale < 1) {
@@ -2905,8 +2905,6 @@ class FlashGlow {
 	}
 }
 
-var lightX = 0;
-var lightY = 0;
 var glowIntensity = 0.2;
 var flashGlows: FlashGlow[] = [];
 var glowIndex = 0;
@@ -2929,46 +2927,45 @@ function createFlash(x: number, y: number, scale: number) {
 	tmpGlow.active = true;
 }
 function drawGameLights(delta: number) {
-	if (lightSprite != null) {
-		graph.globalCompositeOperation = "lighter";
-		graph.globalAlpha = 0.2;
-		for (let i = 0; i < bullets.length; i++) {
-			let tmpObject = bullets[i];
-			if (showGlows && tmpObject.spriteIndex !== 2 && tmpObject.active) {
-				let tmpBulletGlowWidth = tmpObject.glowWidth || Math.min(200, tmpObject.width * 14);
-				let tmpBulletGlowHeight = tmpObject.glowHeight || tmpObject.height * 2.5;
-				lightX = tmpObject.x - startX.get();
-				lightY = tmpObject.y - startY.get();
-				if (canSee(lightX, lightY, tmpBulletGlowWidth, tmpBulletGlowHeight)) {
-					graph.save();
-					graph.translate(lightX, lightY);
-					drawSprite(
-						graph,
-						lightSprite,
-						-(tmpBulletGlowWidth / 2),
-						-(tmpBulletGlowHeight / 2) + tmpObject.height / 2,
-						tmpBulletGlowWidth,
-						tmpBulletGlowHeight,
-						tmpObject.dir - Math.PI / 2,
-						false,
-						0,
-						0,
-						0,
-					);
-					graph.restore();
-				}
+	if (!lightSprite) return;
+	graph.globalCompositeOperation = "lighter";
+	graph.globalAlpha = 0.2;
+	for (let i = 0; i < bullets.length; i++) {
+		let tmpObject = bullets[i];
+		if (showGlows && tmpObject.spriteIndex !== 2 && tmpObject.active) {
+			let tmpBulletGlowWidth = tmpObject.glowWidth || Math.min(200, tmpObject.width * 14);
+			let tmpBulletGlowHeight = tmpObject.glowHeight || tmpObject.height * 2.5;
+			let lightX = tmpObject.x - startX.get();
+			let lightY = tmpObject.y - startY.get();
+			if (canSee(lightX, lightY, tmpBulletGlowWidth, tmpBulletGlowHeight)) {
+				graph.save();
+				graph.translate(lightX, lightY);
+				drawSprite(
+					graph,
+					lightSprite,
+					-(tmpBulletGlowWidth / 2),
+					-(tmpBulletGlowHeight / 2) + tmpObject.height / 2,
+					tmpBulletGlowWidth,
+					tmpBulletGlowHeight,
+					tmpObject.dir - Math.PI / 2,
+					false,
+					0,
+					0,
+					0,
+				);
+				graph.restore();
 			}
 		}
-		if (showGlows) {
-			graph.globalAlpha = 0.2;
-			for (let i = 0; i < flashGlows.length; ++i) {
-				let tmpObject = flashGlows[i];
-				tmpObject.update(delta);
-				tmpObject.draw();
-			}
-		}
-		graph.globalCompositeOperation = "source-over";
 	}
+	if (showGlows) {
+		graph.globalAlpha = 0.2;
+		for (let i = 0; i < flashGlows.length; ++i) {
+			let tmpObject = flashGlows[i];
+			tmpObject.update(delta);
+			tmpObject.draw();
+		}
+	}
+	graph.globalCompositeOperation = "source-over";
 }
 var mapScale = mapCanvas.width;
 var pingScale = mapScale / 80;
@@ -3080,13 +3077,6 @@ function calculateUIScale() {
 		1.25;
 }
 function drawMenuBackground() {}
-function isImageOk(img: HTMLImageElement) {
-	if (img.complete && img.naturalWidth !== 0) {
-		return true;
-	} else {
-		return false;
-	}
-}
 function drawUI() {}
 var screenSkX = 0;
 var screenShackeScale = 0;
@@ -5309,7 +5299,7 @@ class Particle {
 		if (
 			!this.active ||
 			!particleSprites[this.spriteIndex] ||
-			!isImageOk(particleSprites[this.spriteIndex])
+			!utils.isImageOk(particleSprites[this.spriteIndex])
 		)
 			return;
 
@@ -5429,7 +5419,7 @@ function particleCone(
 	}
 }
 var liquidSpread = 35;
-function createLiquid(x: number, y: number, _dir, spriteIndex: number) {
+function createLiquid(x: number, y: number, _dir: number, spriteIndex: number) {
 	let tmpParticle = getReadyParticle();
 	tmpParticle.x = x + randomFloat(-liquidSpread, liquidSpread);
 	tmpParticle.y = y + randomFloat(-liquidSpread, liquidSpread);
