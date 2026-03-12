@@ -182,105 +182,128 @@ export function getReadyAnimText() {
 	}
 	return null;
 }
-export function startAnimText(a, b, d, e, f, h, g, l, m, k, p, n, r, u, v, t, w) {
-	var q = getReadyAnimText();
-	if (q == null) return;
-	q.text = a.toUpperCase();
-	q.x = b;
-	q.y = d;
-	q.xSpeed = e;
-	q.ySpeed = f;
-	q.fadeSpeed = h;
-	q.fontSize = g * viewMult.get();
-	q.scale = 1;
-	q.maxScale = 1.6;
-	q.minScale = 1;
-	q.alpha = 1;
-	q.scaleSpeed = l;
-	q.useStart = m;
-	q.fadeDelay = k;
-	q.removable = p;
-	q.moveDelay = n;
-	q.alpha = u;
-	q.color = v;
-	q.textType = t;
-	q.cachedImage = renderShadedAnimText(q.text, q.fontSize, q.color, w, r);
-	q.active = true;
+type ClassProperties<C> = {
+	// biome-ignore lint/complexity/noBannedTypes: intended
+	[Key in keyof C as C[Key] extends Function ? never : Key]: C[Key];
+};
+function startAnimText(
+	opts: Partial<ClassProperties<AnimText>>,
+	layerCount: number,
+	fontExtra: string,
+) {
+	const tmpText = getReadyAnimText();
+	if (!tmpText) return;
+	Object.assign(tmpText, opts);
+	tmpText.text = tmpText.text.toUpperCase();
+	tmpText.fontSize *= viewMult.get();
+	tmpText.scale = 1;
+	tmpText.maxScale = 1.6;
+	tmpText.minScale = 1;
+	tmpText.alpha ??= 1;
+	tmpText.cachedImage = renderShadedAnimText(
+		tmpText.text,
+		tmpText.fontSize,
+		tmpText.color,
+		layerCount,
+		fontExtra,
+	);
+	tmpText.active = true;
 }
-export function startBigAnimText(a, b, d, e, f, h, g, l) {
+export function startBigAnimText(
+	text: string,
+	secondaryText: string,
+	delay: number,
+	doScale: boolean,
+	color: string,
+	secondaryColor: string,
+	removable: boolean,
+	fontSizeMult: number,
+) {
 	if (!deactiveAnimTexts("big")) return;
-	if (a.length > 0) {
+	if (text.length > 0) {
 		startAnimText(
-			a,
-			appStore.get().maxScreenWidth / 2,
-			bigTextY,
-			0,
-			-0.1,
-			0.0025,
-			bigTextSize * l,
-			e ? 0.005 : 0,
-			false,
-			d,
-			g,
-			d,
-			"Italic ",
-			1,
-			f,
-			"big",
+			{
+				text,
+				x: appStore.get().maxScreenWidth / 2,
+				y: bigTextY,
+				xSpeed: 0,
+				ySpeed: -0.1,
+				fadeSpeed: 0.0025,
+				fontSize: bigTextSize * fontSizeMult,
+				scaleSpeed: doScale ? 0.005 : 0,
+				useStart: false,
+				fadeDelay: delay,
+				removable: removable,
+				moveDelay: delay,
+				alpha: 1,
+				color: color,
+				textType: "big",
+			},
 			8,
+			"Italic ",
 		);
 	}
-	if (b.length > 0) {
+	if (secondaryText.length > 0) {
 		startAnimText(
-			b,
-			appStore.get().maxScreenWidth / 2,
-			bigTextY + textGap * viewMult.get() * l,
-			0,
-			-0.04,
-			0.0025,
-			(medTextSize / 2) * l,
-			e ? 0.003 : 0,
-			false,
-			d,
-			g,
-			d,
-			"Italic ",
-			1,
-			h,
-			"big",
+			{
+				text: secondaryText,
+				x: appStore.get().maxScreenWidth / 2,
+				y: bigTextY + textGap * viewMult.get() * fontSizeMult,
+				xSpeed: 0,
+				ySpeed: -0.04,
+				fadeSpeed: 0.0025,
+				fontSize: (medTextSize / 2) * fontSizeMult,
+				scaleSpeed: doScale ? 0.003 : 0,
+				useStart: false,
+				fadeDelay: delay,
+				removable: removable,
+				moveDelay: delay,
+				alpha: 1,
+				color: secondaryColor,
+				textType: "big",
+			},
 			8,
+			"Italic ",
 		);
 	}
 }
-export function startMovingAnimText(a, b, d, e, f) {
-	b += randomInt(-25, 25);
-	d += randomInt(-20, 5);
+export function startMovingAnimText(
+	text: string,
+	x: number,
+	y: number,
+	color: string,
+	extraFontSize: number,
+) {
+	x += randomInt(-25, 25);
+	y += randomInt(-20, 5);
 	startAnimText(
-		a,
-		b,
-		d,
-		0,
-		-0.15,
-		0.0025,
-		appStore.get().maxScreenHeight / 26 + f,
-		0.005,
-		true,
-		350,
-		false,
-		0,
-		"",
-		1,
-		e,
-		"moving",
+		{
+			text: text,
+			x: x,
+			y: y,
+			xSpeed: 0,
+			ySpeed: -0.15,
+			fadeSpeed: 0.0025,
+			fontSize: appStore.get().maxScreenHeight / 26 + extraFontSize,
+			scaleSpeed: 0.005,
+			useStart: true,
+			fadeDelay: 350,
+			removable: false,
+			moveDelay: 0,
+			alpha: 1,
+			color: color,
+			textType: "moving",
+		},
 		5,
+		"",
 	);
 }
-export function deactiveAnimTexts(a) {
+function deactiveAnimTexts(type: string) {
 	for (let i = 0; i < animTexts.length; ++i) {
 		if (!animTexts[i].active) continue;
 		if (animTexts[i].removable) {
 			animTexts[i].active = false;
-		} else if (animTexts[i].textType === a) {
+		} else if (animTexts[i].textType === type) {
 			return false;
 		}
 	}
@@ -292,8 +315,14 @@ export function deactiveAllAnimTexts() {
 	}
 }
 var cachedTextRenders: Record<string, HTMLCanvasElement> = {};
-export function renderShadedAnimText(text: string, b, color: string, layerCount: number, f) {
-	let tmpIndex = `${text}${b}${color}${layerCount}${f}`;
+export function renderShadedAnimText(
+	text: string,
+	fontSize: number,
+	color: string,
+	layerCount: number,
+	fontExtra: string,
+) {
+	let tmpIndex = `${text}${fontSize}${color}${layerCount}${fontExtra}`;
 	let cachedText = cachedTextRenders[tmpIndex];
 	if (cachedText === undefined) {
 		let tmpCanvas = document.createElement("canvas");
@@ -301,18 +330,18 @@ export function renderShadedAnimText(text: string, b, color: string, layerCount:
 		ctx.imageSmoothingEnabled = false;
 
 		ctx.textAlign = "center";
-		ctx.font = `${f + b}px mainFont`;
+		ctx.font = `${fontExtra + fontSize}px mainFont`;
 		tmpCanvas.width = ctx.measureText(text).width * 1.08;
-		tmpCanvas.height = b * 1.8 + layerCount;
+		tmpCanvas.height = fontSize * 1.8 + layerCount;
 		ctx.fillStyle = shadeColor(color, -18);
-		ctx.font = `${f + b}px mainFont`;
+		ctx.font = `${fontExtra + fontSize}px mainFont`;
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "center";
 		for (let i = 1; i < layerCount; ++i) {
 			ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2 + i);
 		}
 		ctx.fillStyle = color;
-		ctx.font = `${f + b}px mainFont`;
+		ctx.font = `${fontExtra + fontSize}px mainFont`;
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "center";
 		ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2);
