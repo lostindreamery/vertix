@@ -145,3 +145,12 @@ export type Tile = {
 	objTeam: string;
 	edgeTile: boolean;
 };
+
+export type GameMode = {
+	code: string;
+	name: string;
+	score: number;
+	desc1: string;
+	desc2: string;
+	teams: boolean;
+};
