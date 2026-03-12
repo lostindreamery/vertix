@@ -5,6 +5,16 @@ import { io, type Socket } from "socket.io-client";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import type { GameMode, InputSendData, Player, Sprite, SpriteCanvas, Tile } from "./types.ts";
 import * as utils from "./utils.ts";
+import { appStore } from "./state.ts";
+import {
+	deactiveAllAnimTexts,
+	renderShadedAnimText,
+	showNotification,
+	startBigAnimText,
+	startMovingAnimText,
+	updateAnimTexts,
+	updateNotifications,
+} from "./visual/animtext.ts";
 
 const {
 	shootNextBullet,
@@ -14,7 +24,6 @@ const {
 	getCurrentWeapon,
 	getDistance,
 	getAngle,
-	shadeColor,
 	randomFloat,
 	randomInt,
 } = utils;
@@ -487,11 +496,9 @@ var gameWidth = 0;
 var gameHeight = 0;
 var mouseX = 0;
 var mouseY = 0;
-var maxScreenWidth = 1920;
-var originalScreenWidth = maxScreenWidth;
-var maxScreenHeight = 1080;
-var originalScreenHeight = maxScreenHeight;
-var viewMult = 1;
+var maxScreenWidth = appStore.select("maxScreenWidth");
+var maxScreenHeight = appStore.select("maxScreenHeight");
+var viewMult = appStore.select("viewMult");
 var uiScale = 1;
 calculateUIScale();
 var gameStart = false;
@@ -503,12 +510,8 @@ var killTxt = "";
 var continuity = false;
 var startPingTime = 0;
 var textSizeMult = 0.55;
-var bigTextSize = (maxScreenHeight / 7.7) * textSizeMult;
-var medTextSize = bigTextSize * 0.85;
-var textGap = bigTextSize * 1.2;
-var bigTextY = maxScreenHeight / 4.3;
-var startX = 0;
-var startY = 0;
+var startX = appStore.select("startX");
+var startY = appStore.select("startY");
 var gameMode: GameMode = null;
 var playerConfig = {
 	border: 6,
@@ -572,7 +575,7 @@ function gameInput(event: MouseEvent) {
 	target.d = Math.sqrt(
 		Math.pow(mouseY - (screenHeight / 2 - b / 2), 2) + Math.pow(mouseX - screenWidth / 2, 2),
 	);
-	target.d *= Math.min(maxScreenWidth / screenWidth, maxScreenHeight / screenHeight);
+	target.d *= Math.min(maxScreenWidth.get() / screenWidth, maxScreenHeight.get() / screenHeight);
 	target.f = Math.atan2(screenHeight / 2 - b / 2 - mouseY, screenWidth / 2 - mouseX);
 	target.f = utils.roundNumber(target.f, 2);
 	target.d = utils.roundNumber(target.d, 2);
@@ -895,6 +898,12 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 }
 var context = mainCanvas.getContext("2d");
 var graph = context;
+window.graph = graph;
+declare global {
+	interface Window {
+		graph: CanvasRenderingContext2D;
+	}
+}
 var mapCanvas = document.getElementById("mapc") as HTMLCanvasElement;
 var mapContext = mapCanvas.getContext("2d");
 mapCanvas.width = 200;
@@ -1415,9 +1424,9 @@ function setupSocket(sock: Socket) {
 			document.getElementById("cvs").focus();
 		}
 		keys.lm = false;
-		maxScreenHeight = a.maxScreenHeight * a.viewMult;
-		maxScreenWidth = a.maxScreenWidth * a.viewMult;
-		viewMult = a.viewMult;
+		maxScreenHeight.set(a.maxScreenHeight * a.viewMult);
+		maxScreenWidth.set(a.maxScreenWidth * a.viewMult);
+		viewMult.set(a.viewMult);
 		a.you.type = "player";
 		player = a.you;
 		e = findUserByIndex(a.you.index);
@@ -2714,14 +2723,14 @@ function updateGameLoop() {
 		drawOverlay(graph, false, false);
 		const renderedReason = kicked
 			? reason !== ""
-				? renderShadedAnimText(reason, viewMult * 48, "#ffffff", 6, "")
-				: renderShadedAnimText("You were kicked", viewMult * 48, "#ffffff", 6, "")
-			: renderShadedAnimText("Disconnected", viewMult * 48, "#ffffff", 6, "");
+				? renderShadedAnimText(reason, viewMult.get() * 48, "#ffffff", 6, "")
+				: renderShadedAnimText("You were kicked", viewMult.get() * 48, "#ffffff", 6, "")
+			: renderShadedAnimText("Disconnected", viewMult.get() * 48, "#ffffff", 6, "");
 		if (renderedReason !== undefined) {
 			graph.drawImage(
 				renderedReason,
-				maxScreenWidth / 2 - renderedReason.width / 2,
-				maxScreenHeight / 2 - renderedReason.height / 2,
+				maxScreenWidth.get() / 2 - renderedReason.width / 2,
+				maxScreenHeight.get() / 2 - renderedReason.height / 2,
 				renderedReason.width,
 				renderedReason.height,
 			);
@@ -2768,23 +2777,28 @@ function drawOverlay(ctx: CanvasRenderingContext2D, fadeUp: boolean, fadeDown: b
 	if (overlayAlpha > 0) {
 		ctx.fillStyle = "#2e3031";
 		ctx.globalAlpha = overlayAlpha;
-		ctx.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
+		ctx.fillRect(0, 0, maxScreenWidth.get(), maxScreenHeight.get());
 		ctx.globalAlpha = 1;
 	}
 }
 var drawMiniMapFPS = 4;
 var drawMiniMapCounter = 0;
 function doGame(delta: number) {
-	updateScreenShake(delta);
+	updateScreenShake(/*delta*/);
 	if (target != null) {
-		startX =
-			player.x - maxScreenWidth / 2 + -screenSkX + target.dOffset * Math.cos(target.f + Math.PI);
-		startY =
+		startX.set(
+			player.x -
+				maxScreenWidth.get() / 2 +
+				-screenSkX +
+				target.dOffset * Math.cos(target.f + Math.PI),
+		);
+		startY.set(
 			player.y -
-			20 -
-			maxScreenHeight / 2 +
-			-screenSkY +
-			target.dOffset * Math.sin(target.f + Math.PI);
+				20 -
+				maxScreenHeight.get() / 2 +
+				-screenSkY +
+				target.dOffset * Math.sin(target.f + Math.PI),
+		);
 		if (fillCounter > 1 && socket) {
 			socket.emit("kil");
 		}
@@ -2816,7 +2830,7 @@ function resize() {
 	screenWidth = Math.round(window.innerWidth);
 	screenHeight = Math.round(window.innerHeight);
 	calculateUIScale();
-	var a = Math.max(screenWidth / maxScreenWidth, screenHeight / maxScreenHeight);
+	var a = Math.max(screenWidth / maxScreenWidth.get(), screenHeight / maxScreenHeight.get());
 	mainCanvas.width = screenWidth;
 	mainCanvas.height = screenHeight;
 	graph.setTransform(
@@ -2824,8 +2838,8 @@ function resize() {
 		0,
 		0,
 		a,
-		(screenWidth - maxScreenWidth * a) / 2,
-		(screenHeight - maxScreenHeight * a) / 2,
+		(screenWidth - maxScreenWidth.get() * a) / 2,
+		(screenHeight - maxScreenHeight.get() * a) / 2,
 	);
 	document.getElementById("startMenuWrapper").style.transform =
 		`perspective(1px) translate(-50%, -50%) scale(${uiScale})`;
@@ -2840,18 +2854,18 @@ function drawEdgeShader() {
 	try {
 		if (grd == null) {
 			grd = graph.createRadialGradient(
-				player.x - startX,
-				player.y - startY,
+				player.x - startX.get(),
+				player.y - startY.get(),
 				0,
-				player.x - startX,
-				player.y - startY,
-				maxScreenWidth / 2,
+				player.x - startX.get(),
+				player.y - startY.get(),
+				maxScreenWidth.get() / 2,
 			);
 			grd.addColorStop(0, "rgba(0,0,0,0.0)");
 			grd.addColorStop(1, "rgba(0,0,0,0.4");
 		}
 		graph.fillStyle = grd;
-		graph.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
+		graph.fillRect(0, 0, maxScreenWidth.get(), maxScreenHeight.get());
 	} catch (err) {
 		console.error(err);
 	}
@@ -2883,8 +2897,8 @@ class FlashGlow {
 		if (!this.active) return;
 		graph.drawImage(
 			lightSprite,
-			this.x - startX - this.scale / 2,
-			this.y - startY - this.scale / 2,
+			this.x - startX.get() - this.scale / 2,
+			this.y - startY.get() - this.scale / 2,
 			this.scale,
 			this.scale,
 		);
@@ -2923,8 +2937,8 @@ function drawGameLights(delta: number) {
 			if (showGlows && tmpObject.spriteIndex !== 2 && tmpObject.active) {
 				let tmpBulletGlowWidth = tmpObject.glowWidth || Math.min(200, tmpObject.width * 14);
 				let tmpBulletGlowHeight = tmpObject.glowHeight || tmpObject.height * 2.5;
-				lightX = tmpObject.x - startX;
-				lightY = tmpObject.y - startY;
+				lightX = tmpObject.x - startX.get();
+				lightY = tmpObject.y - startY.get();
 				if (canSee(lightX, lightY, tmpBulletGlowWidth, tmpBulletGlowHeight)) {
 					graph.save();
 					graph.translate(lightX, lightY);
@@ -3061,7 +3075,9 @@ function drawMiniMap() {
 	}
 }
 function calculateUIScale() {
-	uiScale = ((screenHeight + screenWidth) / (originalScreenWidth + originalScreenHeight)) * 1.25;
+	uiScale =
+		((screenHeight + screenWidth) / (maxScreenWidth.getInitial() + maxScreenHeight.getInitial())) *
+		1.25;
 }
 function drawMenuBackground() {}
 function isImageOk(img: HTMLImageElement) {
@@ -3162,7 +3178,11 @@ function drawSprays() {
 		if (userSprays[i].active) {
 			let tmpSpray = cachedSprays[`${userSprays[i].src}`];
 			if (tmpSpray != undefined) {
-				graph.drawImage(tmpSpray, userSprays[i].xPos - startX, userSprays[i].yPos - startY);
+				graph.drawImage(
+					tmpSpray,
+					userSprays[i].xPos - startX.get(),
+					userSprays[i].yPos - startY.get(),
+				);
 			}
 		}
 	}
@@ -3872,8 +3892,8 @@ function updateBullets(delta: number) {
 	for (const bullet of bullets) {
 		bullet.update(delta, currentTime, gameObjects, gameMap.tiles, gameObjects);
 		if (bullet.active) {
-			let b = bullet.x - startX;
-			let d = bullet.y - startY;
+			let b = bullet.x - startX.get();
+			let d = bullet.y - startY.get();
 			if (canSee(b, d, bullet.height, bullet.height)) {
 				graph.save();
 				graph.translate(b, d);
@@ -3913,10 +3933,10 @@ function updateBullets(delta: number) {
 		}
 		if (showBTrails && bullet.trailAlpha > 0) {
 			graph.save();
-			let b = Math.round(bullet.startX - startX);
-			let d = Math.round(bullet.startY - startY);
-			let e = Math.round(bullet.x - startX);
-			let f = Math.round(bullet.y - startY);
+			let b = Math.round(bullet.startX - startX.get());
+			let d = Math.round(bullet.startY - startY.get());
+			let e = Math.round(bullet.x - startX.get());
+			let f = Math.round(bullet.y - startY.get());
 			let trailGrad = graph.createLinearGradient(b, d, e, f);
 			trailGrad.addColorStop(0, "rgba(255, 255, 255, 0)");
 			trailGrad.addColorStop(1, `rgba(255, 255, 255, ${bullet.trailAlpha})`);
@@ -4566,8 +4586,8 @@ function drawGameObjects(delta: number) {
 				playerContext.translate(playerCanvas.width / 2, playerCanvas.height / 2);
 				let m = (Math.PI / 180) * tmpObject.angle;
 				let k = Math.round((tmpObject.angle % 360) / 90) * 90;
-				let h = tmpObject.x - startX;
-				let g = tmpObject.y - tmpObject.jumpY - startY;
+				let h = tmpObject.x - startX.get();
+				let g = tmpObject.y - tmpObject.jumpY - startY.get();
 				if (tmpObject.animIndex === 1) {
 					g -= 3;
 				}
@@ -4777,8 +4797,8 @@ function drawGameObjects(delta: number) {
 			drawSprite(
 				graph,
 				flagSprites[tmpObject.ai + (tmpObject.team == player.team ? 0 : 3)],
-				tmpObject.x - tmpObject.w / 2 - startX,
-				tmpObject.y - tmpObject.h - startY,
+				tmpObject.x - tmpObject.w / 2 - startX.get(),
+				tmpObject.y - tmpObject.h - startY.get(),
 				tmpObject.w,
 				tmpObject.h,
 				0,
@@ -4790,13 +4810,13 @@ function drawGameObjects(delta: number) {
 		} else if (
 			tmpObject.type === "clutter" &&
 			tmpObject.active &&
-			canSee(tmpObject.x - startX, tmpObject.y - startY, tmpObject.w, tmpObject.h)
+			canSee(tmpObject.x - startX.get(), tmpObject.y - startY.get(), tmpObject.w, tmpObject.h)
 		) {
 			drawSprite(
 				graph,
 				clutterSprites[tmpObject.i],
-				tmpObject.x - startX,
-				tmpObject.y - tmpObject.h - startY,
+				tmpObject.x - startX.get(),
+				tmpObject.y - tmpObject.h - startY.get(),
 				tmpObject.w,
 				tmpObject.h,
 				0,
@@ -4829,8 +4849,8 @@ function drawPlayerNames() {
 
 		let d = tmpObject.height / 3.2;
 		let e = Math.min(200, (tmpObject.maxHealth / 100) * 100);
-		let shapeX = tmpObject.x - startX;
-		let shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - startY;
+		let shapeX = tmpObject.x - startX.get();
+		let shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - startY.get();
 		if (tmpObject.account !== undefined && tmpObject.account.hat != null) {
 			shapeY -= tmpObject.account.hat.nameY;
 		}
@@ -4890,7 +4910,19 @@ function drawPlayerNames() {
 	}
 }
 function drawBackground() {
-	drawSprite(graph, darkFillerSprite, 0, 0, maxScreenWidth, maxScreenHeight, 0, false, 0, 0, 0);
+	drawSprite(
+		graph,
+		darkFillerSprite,
+		0,
+		0,
+		maxScreenWidth.get(),
+		maxScreenHeight.get(),
+		0,
+		false,
+		0,
+		0,
+		0,
+	);
 }
 function getCachedWall(tile: Tile) {
 	let cacheKey = `${tile.left}${tile.right}${tile.top}${tile.bottom}${tile.topLeft}${tile.topRight}${tile.bottomLeft}${tile.bottomRight}${tile.edgeTile}${tile.hasCollision}`;
@@ -5039,14 +5071,17 @@ function drawMap(layer: number) {
 		for (let i = 0; i < gameMap.tiles.length; ++i) {
 			let tile = gameMap.tiles[i];
 			if (layer === 0) {
-				if (!tile.wall && canSee(tile.x - startX, tile.y - startY, mapTileScale, mapTileScale)) {
+				if (
+					!tile.wall &&
+					canSee(tile.x - startX.get(), tile.y - startY.get(), mapTileScale, mapTileScale)
+				) {
 					let tmpTlSprite = getCachedFloor(tile);
 					if (tmpTlSprite !== undefined) {
 						drawSprite(
 							graph,
 							tmpTlSprite,
-							tile.x - startX,
-							tile.y - startY,
+							tile.x - startX.get(),
+							tile.y - startY.get(),
 							tmpTlSprite.width,
 							tmpTlSprite.height,
 							0,
@@ -5062,8 +5097,8 @@ function drawMap(layer: number) {
 					tile.wall &&
 					!tile.bottom &&
 					canSee(
-						tile.x - startX,
-						tile.y - startY + mapTileScale * 0.5,
+						tile.x - startX.get(),
+						tile.y - startY.get() + mapTileScale * 0.5,
 						mapTileScale,
 						mapTileScale * 0.75,
 					)
@@ -5071,8 +5106,8 @@ function drawMap(layer: number) {
 					drawSprite(
 						graph,
 						wallSpritesSeg[tile.spriteIndex],
-						tile.x - startX,
-						tile.y + Math.round(mapTileScale / 2) - startY,
+						tile.x - startX.get(),
+						tile.y + Math.round(mapTileScale / 2) - startY.get(),
 						mapTileScale,
 						mapTileScale / 2,
 						0,
@@ -5085,15 +5120,20 @@ function drawMap(layer: number) {
 			} else if (
 				layer === 2 &&
 				tile.wall &&
-				canSee(tile.x - startX, tile.y - startY - mapTileScale * 0.5, mapTileScale, mapTileScale)
+				canSee(
+					tile.x - startX.get(),
+					tile.y - startY.get() - mapTileScale * 0.5,
+					mapTileScale,
+					mapTileScale,
+				)
 			) {
 				let tmpTlSprite = getCachedWall(tile);
 				if (tmpTlSprite !== undefined) {
 					drawSprite(
 						graph,
 						tmpTlSprite,
-						tile.x - startX,
-						Math.round(tile.y - mapTileScale / 2 - startY),
+						tile.x - startX.get(),
+						Math.round(tile.y - mapTileScale / 2 - startY.get()),
 						mapTileScale,
 						mapTileScale,
 						0,
@@ -5108,13 +5148,16 @@ function drawMap(layer: number) {
 		if (layer === 0) {
 			for (let i = 0; i < gameMap.pickups.length; ++i) {
 				let tmpPickup = gameMap.pickups[i];
-				if (tmpPickup.active && canSee(tmpPickup.x - startX, tmpPickup.y - startY, 0, 0)) {
+				if (
+					tmpPickup.active &&
+					canSee(tmpPickup.x - startX.get(), tmpPickup.y - startY.get(), 0, 0)
+				) {
 					if (tmpPickup.type === "healthpack") {
 						drawSprite(
 							graph,
 							healthPackSprite,
-							tmpPickup.x - tmpPickup.scale / 2 - startX,
-							tmpPickup.y - tmpPickup.scale / 2 - startY,
+							tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
+							tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
 							tmpPickup.scale,
 							tmpPickup.scale,
 							0,
@@ -5127,8 +5170,8 @@ function drawMap(layer: number) {
 						drawSprite(
 							graph,
 							lootCrateSprite,
-							tmpPickup.x - tmpPickup.scale / 2 - startX,
-							tmpPickup.y - tmpPickup.scale / 2 - startY,
+							tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
+							tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
 							tmpPickup.scale,
 							tmpPickup.scale,
 							0,
@@ -5209,317 +5252,7 @@ function getCachedShadow(sprite: Sprite | SpriteCanvas, width: number, height: n
 	return cachedShadows[sprite.index];
 }
 function canSee(a, b, d, e) {
-	return a + d > 0 && b + e > 0 && a < maxScreenWidth && b < maxScreenHeight;
-}
-class AnimText {
-	text = "";
-	scaleSpeed = 0;
-	minScale = 0;
-	maxScale = 0;
-	fontSize = 0;
-	scale = 0;
-	ySpeed = 0;
-	xSpeed = 0;
-	y = 0;
-	x = 0;
-	active = false;
-	alpha = 1;
-	fadeSpeed = 0;
-	useStart = false;
-	moveDelay = 0;
-	fadeDelay = 0;
-	removable = false;
-	textType = "";
-	color = "#fff";
-	cachedImage: HTMLCanvasElement | null = null;
-
-	update(delta: number) {
-		if (!this.active) return;
-		this.scale += this.scaleSpeed * delta;
-		if (this.scaleSpeed > 0) {
-			if (this.scale >= this.maxScale) {
-				this.scale = this.maxScale;
-				this.scaleSpeed *= -1;
-			}
-		} else if (this.scale < this.minScale) {
-			this.scale = this.minScale;
-			this.scaleSpeed = 0;
-		}
-		if (this.moveDelay > 0) {
-			this.moveDelay -= delta;
-		} else {
-			this.x += this.xSpeed * delta;
-			this.y += this.ySpeed * delta;
-		}
-		if (this.fadeDelay > 0) {
-			this.fadeDelay -= delta;
-		} else {
-			this.alpha -= this.fadeSpeed * delta;
-			if (this.alpha <= 0) {
-				this.alpha = 0;
-				this.active = false;
-			}
-		}
-	}
-
-	draw() {
-		if (!this.active || !this.cachedImage) return;
-		graph.globalAlpha = this.alpha;
-		if (this.useStart) {
-			graph.drawImage(
-				this.cachedImage,
-				this.x - startX - (this.cachedImage.width / 2) * this.scale,
-				this.y - startY - (this.cachedImage.height / 2) * this.scale,
-				this.cachedImage.width * this.scale,
-				this.cachedImage.height * this.scale,
-			);
-		} else {
-			graph.drawImage(
-				this.cachedImage,
-				this.x - (this.cachedImage.width / 2) * this.scale,
-				this.y - (this.cachedImage.height / 2) * this.scale,
-				this.cachedImage.width * this.scale,
-				this.cachedImage.height * this.scale,
-			);
-		}
-	}
-}
-var notificationsSize = textSizeMult * 80;
-var notificationsGap = notificationsSize * 1.6;
-var notifications: AnimText[] = [];
-for (let i = 0; i < 3; ++i) {
-	notifications.push(new AnimText());
-}
-var notificationIndex = 0;
-function showNotification(text: string) {
-	text = text.toUpperCase();
-	notificationIndex++;
-	if (notificationIndex >= notifications.length) {
-		notificationIndex = 0;
-	}
-	notifications[notificationIndex].text = text;
-	notifications[notificationIndex].alpha = 1;
-	notifications[notificationIndex].x = maxScreenWidth / 2;
-	notifications[notificationIndex].fadeSpeed = 0.003;
-	notifications[notificationIndex].fadeDelay = 800;
-	notifications[notificationIndex].fontSize = notificationsSize * viewMult;
-	notifications[notificationIndex].scale = 1;
-	notifications[notificationIndex].scaleSpeed = 0.005;
-	notifications[notificationIndex].minScale = 1;
-	notifications[notificationIndex].maxScale = 1.5;
-	notifications[notificationIndex].cachedImage = renderShadedAnimText(
-		text,
-		notificationsSize * viewMult,
-		"#ffffff",
-		7,
-		"Italic ",
-	);
-	notifications[notificationIndex].active = true;
-	positionNotifications();
-}
-var activeNotifications = 0;
-function positionNotifications() {
-	activeNotifications = 0;
-	for (let i = 0; i < notifications.length; ++i) {
-		if (notifications[i].active) {
-			activeNotifications++;
-		}
-	}
-	if (activeNotifications > 0) {
-		notifications.sort(sortByAlpha);
-		let b = 0;
-		const yBase = maxScreenHeight - notifications.length * notificationsGap * viewMult - 100;
-		for (let i = 0; i < notifications.length; ++i) {
-			if (notifications[i].active) {
-				notifications[i].y = yBase + notificationsGap * viewMult * b;
-				b++;
-			}
-		}
-	}
-}
-function sortByAlpha(a: AnimText, b: AnimText) {
-	if (a.alpha < b.alpha) {
-		return 1;
-	} else if (b.alpha < a.alpha) {
-		return -1;
-	} else {
-		return 0;
-	}
-}
-function updateNotifications(delta: number) {
-	graph.fillStyle = "#fff";
-	for (let i = 0; i < notifications.length; ++i) {
-		if (notifications[i].active) {
-			notifications[i].update(delta);
-			notifications[i].draw();
-		}
-	}
-	graph.globalAlpha = 1;
-}
-var animTexts: AnimText[] = [];
-for (let i = 0; i < 20; i++) {
-	animTexts.push(new AnimText());
-}
-var shadowOffset = 6;
-
-function updateAnimTexts(delta: number) {
-	graph.lineJoin = "round";
-	graph.textAlign = "center";
-	graph.textBaseline = "middle";
-	for (let i = 0; i < animTexts.length; i++) {
-		animTexts[i].update(delta);
-		if (animTexts[i].active) {
-			animTexts[i].draw();
-		}
-	}
-	graph.globalAlpha = 1;
-}
-function getReadyAnimText() {
-	for (let i = 0; i < animTexts.length; ++i) {
-		if (!animTexts[i].active) {
-			return animTexts[i];
-		}
-	}
-	return null;
-}
-function startAnimText(a, b, d, e, f, h, g, l, m, k, p, n, r, u, v, t, w) {
-	var q = getReadyAnimText();
-	if (q == null) return;
-	q.text = a.toUpperCase();
-	q.x = b;
-	q.y = d;
-	q.xSpeed = e;
-	q.ySpeed = f;
-	q.fadeSpeed = h;
-	q.fontSize = g * viewMult;
-	q.scale = 1;
-	q.maxScale = 1.6;
-	q.minScale = 1;
-	q.alpha = 1;
-	q.scaleSpeed = l;
-	q.useStart = m;
-	q.fadeDelay = k;
-	q.removable = p;
-	q.moveDelay = n;
-	q.alpha = u;
-	q.color = v;
-	q.textType = t;
-	q.cachedImage = renderShadedAnimText(q.text, q.fontSize, q.color, w, r);
-	q.active = true;
-}
-function startBigAnimText(a, b, d, e, f, h, g, l) {
-	if (!deactiveAnimTexts("big")) return;
-	if (a.length > 0) {
-		startAnimText(
-			a,
-			maxScreenWidth / 2,
-			bigTextY,
-			0,
-			-0.1,
-			0.0025,
-			bigTextSize * l,
-			e ? 0.005 : 0,
-			false,
-			d,
-			g,
-			d,
-			"Italic ",
-			1,
-			f,
-			"big",
-			8,
-		);
-	}
-	if (b.length > 0) {
-		startAnimText(
-			b,
-			maxScreenWidth / 2,
-			bigTextY + textGap * viewMult * l,
-			0,
-			-0.04,
-			0.0025,
-			(medTextSize / 2) * l,
-			e ? 0.003 : 0,
-			false,
-			d,
-			g,
-			d,
-			"Italic ",
-			1,
-			h,
-			"big",
-			8,
-		);
-	}
-}
-function startMovingAnimText(a, b, d, e, f) {
-	b += randomInt(-25, 25);
-	d += randomInt(-20, 5);
-	startAnimText(
-		a,
-		b,
-		d,
-		0,
-		-0.15,
-		0.0025,
-		maxScreenHeight / 26 + f,
-		0.005,
-		true,
-		350,
-		false,
-		0,
-		"",
-		1,
-		e,
-		"moving",
-		5,
-	);
-}
-function deactiveAnimTexts(a) {
-	for (let i = 0; i < animTexts.length; ++i) {
-		if (!animTexts[i].active) continue;
-		if (animTexts[i].removable) {
-			animTexts[i].active = false;
-		} else if (animTexts[i].textType === a) {
-			return false;
-		}
-	}
-	return true;
-}
-function deactiveAllAnimTexts() {
-	for (let i = 0; i < animTexts.length; ++i) {
-		animTexts[i].active = false;
-	}
-}
-var cachedTextRenders: Record<string, HTMLCanvasElement> = {};
-function renderShadedAnimText(text: string, b, color: string, layerCount: number, f) {
-	let tmpIndex = `${text}${b}${color}${layerCount}${f}`;
-	let cachedText = cachedTextRenders[tmpIndex];
-	if (cachedText === undefined) {
-		let tmpCanvas = document.createElement("canvas");
-		let ctx = tmpCanvas.getContext("2d");
-		ctx.imageSmoothingEnabled = false;
-
-		ctx.textAlign = "center";
-		ctx.font = `${f + b}px mainFont`;
-		tmpCanvas.width = ctx.measureText(text).width * 1.08;
-		tmpCanvas.height = b * 1.8 + layerCount;
-		ctx.fillStyle = shadeColor(color, -18);
-		ctx.font = `${f + b}px mainFont`;
-		ctx.textBaseline = "middle";
-		ctx.textAlign = "center";
-		for (let i = 1; i < layerCount; ++i) {
-			ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2 + i);
-		}
-		ctx.fillStyle = color;
-		ctx.font = `${f + b}px mainFont`;
-		ctx.textBaseline = "middle";
-		ctx.textAlign = "center";
-		ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2);
-		cachedText = tmpCanvas;
-		cachedTextRenders[tmpIndex] = cachedText;
-	}
-	return cachedText;
+	return a + d > 0 && b + e > 0 && a < maxScreenWidth.get() && b < maxScreenHeight.get();
 }
 class Particle {
 	rotation = 0;
@@ -5583,7 +5316,7 @@ class Particle {
 		graph.globalAlpha = this.alpha;
 		if (this.rotation !== 0) {
 			graph.save();
-			graph.translate(this.x - startX, this.y - startY);
+			graph.translate(this.x - startX.get(), this.y - startY.get());
 			graph.rotate(this.rotation);
 			graph.drawImage(
 				particleSprites[this.spriteIndex],
@@ -5596,8 +5329,8 @@ class Particle {
 		} else {
 			graph.drawImage(
 				particleSprites[this.spriteIndex],
-				this.x - startX - this.scale / 2,
-				this.y - startY - this.scale / 2,
+				this.x - startX.get() - this.scale / 2,
+				this.y - startY.get() - this.scale / 2,
 				this.scale,
 				this.scale,
 			);
@@ -5629,8 +5362,8 @@ function updateParticles(delta: number, layer: number) {
 			(showParticles || cachedParticles[i].forceShow) &&
 			cachedParticles[i].active &&
 			canSee(
-				cachedParticles[i].x - startX,
-				cachedParticles[i].y - startY,
+				cachedParticles[i].x - startX.get(),
+				cachedParticles[i].y - startY.get(),
 				cachedParticles[i].scale,
 				cachedParticles[i].scale,
 			)
