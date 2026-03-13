@@ -11,7 +11,7 @@ import {
 	roundNumber,
 	getDistance,
 } from "core/src/utils.ts";
-import { ServerProjectile } from "./utils.ts";
+import { getSpawn, ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 import type { Player, Tile, MapObjects } from "core/src/types.ts";
 import { genData } from "./genData.ts";
@@ -47,28 +47,10 @@ const io = new Server({
 
 let bullets = [];
 let players: Player[] = [];
-let mapTileScale = 256;
+let mapTileScale = genData.width * genData.height;
 let tiles: Tile[] = [];
 let clutter: MapObjects[] = [];
 let pickups: MapObjects[] = [];
-
-// TODO: auto generate map objects
-clutter.push({
-	i: 0,
-	x: 128 + mapTileScale,
-	y: 128,
-	w: 64,
-	h: 64,
-	active: true,
-});
-pickups.push({
-	type: "healthpack",
-	x: 128,
-	y: 128 + mapTileScale,
-	scale: 64,
-	active: true,
-});
-
 let mapData = {
 	gameMode: {
 		code: "tdm",
@@ -147,6 +129,18 @@ io.on("connection", (socket: Socket) => {
 		true,
 	);
 
+	socket.on("cSrv", (data) => {
+		if (data.srvMap) {
+			mapData.tiles = tiles = [];
+			mapData.genData = data.srvMap;
+			mapTileScale = data.srvMap.width * data.srvMap.height;
+			mapData.width = (data.srvMap.width - 4) * mapTileScale;
+			mapData.height = (data.srvMap.height - 4) * mapTileScale;
+			setupMap(mapData, mapTileScale);
+			tiles = mapData.tiles;
+		}
+	});
+
 	socket.on("gotit", (client, init, currentTime) => {
 		console.log("gotit", client, init, currentTime);
 		player.name = client.name ? client.name : player.name;
@@ -164,8 +158,16 @@ io.on("connection", (socket: Socket) => {
 		player.dead = false;
 		player.onScreen = true;
 		player.angle = 0;
-		player.x = 128;
-		player.y = 128;
+		player.x = 0;
+		player.y = 0;
+		for (let i = 0; i < tiles.length; i++) {
+			let tl = tiles[i];
+			let mid = tl.scale / 2;
+			if (tl.spriteIndex === 2) {
+				player.x = tl.x + mid;
+				player.y = tl.y + mid;
+			}
+		}
 
 		const gameSetup = {
 			mapData: mapData,

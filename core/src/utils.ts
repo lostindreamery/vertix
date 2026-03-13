@@ -146,9 +146,11 @@ export function setupMap(a: any, mapTileScale: number) {
 					n.neighbours = 4;
 					n.edgeTile = true;
 				}
+				/*
 				if (n.spriteIndex === 0 && randomInt(0, 2) === 0) {
 					n.spriteIndex = randomInt(1, 2);
 				}
+				*/
 			} else {
 				let rand = randomInt(0, 10);
 				n.spriteIndex = 0;
