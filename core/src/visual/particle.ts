@@ -63,7 +63,9 @@ class Particle {
 	draw() {
 		if (
 			!this.active ||
+            //@ts-ignore todo
 			!window.particleSprites[this.spriteIndex] ||
+            //@ts-ignore todo
 			!isImageOk(window.particleSprites[this.spriteIndex])
 		)
 			return;
@@ -74,6 +76,7 @@ class Particle {
 			window.graph.translate(this.x - startX.get(), this.y - startY.get());
 			window.graph.rotate(this.rotation);
 			window.graph.drawImage(
+                //@ts-ignore todo
 				window.particleSprites[this.spriteIndex],
 				-(this.scale / 2),
 				-(this.scale / 2),
@@ -83,6 +86,7 @@ class Particle {
 			window.graph.restore();
 		} else {
 			window.graph.drawImage(
+                //@ts-ignore todo
 				window.particleSprites[this.spriteIndex],
 				this.x - startX.get() - this.scale / 2,
 				this.y - startY.get() - this.scale / 2,
@@ -150,7 +154,7 @@ export function particleCone(
 	speed: number,
 	scale: number,
 	spriteIndex: number,
-	m,
+	addBulletHole: boolean,
 ) {
 	if (localStorage.getItem("showParticles") !== "true") return;
 	for (let i = 0; i < count; ++i) {
@@ -168,7 +172,7 @@ export function particleCone(
 		tmpParticle.spriteIndex = 0;
 		tmpParticle.maxDuration = -1;
 		tmpParticle.duration = 0;
-		if (i === 0 && spriteIndex === 2 && m) {
+		if (i === 0 && spriteIndex === 2 && addBulletHole) {
 			tmpParticle.spriteIndex = 3;
 			tmpParticle.layer = 0;
 		} else {
