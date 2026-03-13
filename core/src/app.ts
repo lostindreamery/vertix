@@ -3,7 +3,7 @@ import { Howl } from "howler";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
-import type { GameMode, InputSendData, Player, Sprite, SpriteCanvas, Tile } from "./types.ts";
+import type { Account, GameMode, InputSendData, Player, Sprite, SpriteCanvas, Tile } from "./types.ts";
 import * as utils from "./utils.ts";
 import { appStore } from "./state.ts";
 import {
@@ -202,9 +202,9 @@ function selectedCMap(a) {
 	document.getElementById("customMapButton").innerHTML = b[b.length - 1];
 	if (a.files?.[0]) {
 		b = new FileReader();
-		b.onload = (_) => {
+		b.onload = () => {
 			var b = document.createElement("img");
-			b.onload = (_) => {
+			b.onload = () => {
 				let tmpCanvas = document.createElement("canvas");
 				tmpCanvas.width = b.width;
 				tmpCanvas.height = b.height;
@@ -442,7 +442,7 @@ var newUsernameInput = document.getElementById("newUsernameInput") as HTMLInputE
 var youtubeChannelInput = document.getElementById("youtubeChannelInput") as HTMLInputElement;
 var saveAccountData = document.getElementById("saveAccountData");
 var editProfileMessage = document.getElementById("editProfileMessage");
-function updateAccountPage(a) {
+function updateAccountPage(a: Account) {
 	player.get().account = a;
 	accStatRank.innerHTML = `<b>Rank:  </b>${a.rank}`;
 	accStatRankProg.style.width = `${a.rankPercent}%`;
@@ -485,21 +485,21 @@ var clanStatRank = document.getElementById("clanStatRank");
 var clanStatFounder = document.getElementById("clanStatFounder");
 var clanStatMembers = document.getElementById("clanStatMembers");
 var clanStatKD = document.getElementById("clanStatKD");
-function updateClanPage(a) {
-	clanStatRank.innerHTML = `<b>Rank:  </b>${a.level}`;
-	clanStatKD.innerHTML = `<b>Avg KD:  </b>${a.kd}`;
-	clanStatFounder.innerHTML = `<b>Founder:  </b>${a.founder}`;
-	clanStatMembers.innerHTML = `<b>Roster:</b>${a.members}`;
-	a = a.chatURL;
-	if (a !== "") {
-		if (!a.match(/^https?:\/\//i)) {
-			a = `http://${a}`;
+function updateClanPage(clanData: any) {
+	clanStatRank.innerHTML = `<b>Rank:  </b>${clanData.level}`;
+	clanStatKD.innerHTML = `<b>Avg KD:  </b>${clanData.kd}`;
+	clanStatFounder.innerHTML = `<b>Founder:  </b>${clanData.founder}`;
+	clanStatMembers.innerHTML = `<b>Roster:</b>${clanData.members}`;
+	let chatURL = clanData.chatURL;
+	if (chatURL !== "") {
+		if (!chatURL.match(/^https?:\/\//i)) {
+			chatURL = `http://${clanData}`;
 		}
-		clanChatLink.innerHTML = `<a target='_blank' href='${a}'>Clan Chat</a>`;
+		clanChatLink.innerHTML = `<a target='_blank' href='${chatURL}'>Clan Chat</a>`;
 	}
 }
-function showUserStatPage(a) {
-	window.open(`/profile.html?${a}`, "_blank");
+function showUserStatPage(userName: string) {
+	window.open(`/profile.html?${userName}`, "_blank");
 }
 var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
@@ -602,14 +602,12 @@ function mouseUp(event: MouseEvent) {
 	event.stopPropagation();
 	keys.lm = false;
 }
-mainCanvas.addEventListener("mousewheel", gameScroll, false);
-mainCanvas.addEventListener("DOMMouseScroll", gameScroll, false);
 var userScroll = 0;
-function gameScroll(event) {
+mainCanvas.addEventListener("wheel", (event) => {
 	event.preventDefault();
 	event.stopPropagation();
-	userScroll = Math.max(-1, Math.min(1, event.wheelDelta || -event.detail)) * -1;
-}
+	userScroll = Math.max(-1, Math.min(1, event.deltaY));
+})
 // todo: redo input handling to not use keycodes
 var keyMap: Record<string, boolean> = {};
 var showingScoreBoard = false;
@@ -2481,7 +2479,7 @@ function updateLeaderboard(data: number[]) {
 		console.error(err);
 	}
 }
-function updateTeamScores(a, b) {
+function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var redProgress = document.getElementById("redProgress");
 	var blueText = document.getElementById("blueText");
 	var blueProgress = document.getElementById("blueProgress");
@@ -2492,20 +2490,20 @@ function updateTeamScores(a, b) {
 			blueText.textContent = "A";
 			redProgCont.style.display = "";
 			if (player.get().team === "red") {
-				redProgress.setAttribute("style", `display:block;width:${b}%`);
-				redProgress.style.width = `${b}%`;
-				blueProgress.setAttribute("style", `display:block;width:${a}%`);
-				blueProgress.style.width = `${a}%`;
+				redProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
+				redProgress.style.width = `${scoreBlue}%`;
+				blueProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
+				blueProgress.style.width = `${scoreRed}%`;
 			} else {
-				redProgress.setAttribute("style", `display:block;width:${a}%`);
-				redProgress.style.width = `${a}%`;
-				blueProgress.setAttribute("style", `display:block;width:${b}%`);
-				blueProgress.style.width = `${b}%`;
+				redProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
+				redProgress.style.width = `${scoreRed}%`;
+				blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
+				blueProgress.style.width = `${scoreBlue}%`;
 			}
 		} else {
-			b = Math.round((player.get().score / a) * 100);
-			blueProgress.setAttribute("style", `display:block;width:${b}%`);
-			blueProgress.style.width = `${b}%`;
+			scoreBlue = Math.round((player.get().score / scoreRed) * 100);
+			blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
+			blueProgress.style.width = `${scoreBlue}%`;
 			blueText.textContent = "YOU";
 			redProgCont.style.display = "none";
 		}
@@ -2536,14 +2534,14 @@ function hideMenuUI() {
 	document.getElementById("namesBox").style.display = "none";
 	document.getElementById("linkBox").style.display = "none";
 }
-function hideUI(a) {
+function hideUI(hideChatbox: boolean) {
 	document.getElementById("status").style.display = "none";
 	document.getElementById("statContainer2").style.display = "none";
 	document.getElementById("actionBar").style.display = "none";
 	document.getElementById("conStatContainer").style.display = "none";
 	document.getElementById("score").style.display = "none";
 	document.getElementById("statContainer").style.display = "none";
-	if (a) {
+	if (hideChatbox) {
 		document.getElementById("chatbox").style.display = "none";
 	}
 }
