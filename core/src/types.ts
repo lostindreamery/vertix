@@ -66,7 +66,8 @@ export type Weapon = {
 	bRandScale: [number, number];
 	cAcc: number;
 	maxLife: number | null;
-	bulletsPerShot: number;
+  bulletsPerShot: number;
+  pierce: number;
 	pierceCount: number;
 	blastRadius?: number;
 	bounce: boolean;

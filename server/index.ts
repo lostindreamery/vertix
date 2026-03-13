@@ -307,11 +307,11 @@ io.on("connection", (socket: Socket) => {
 				bullet,
 			);
 			const updateBullet = () => {
-				if (bullet.active && bullet.lastHit.length > 0) {
+				if (bullet.lastHit.length > 0) {
 					for (let i = 0; i < bullet.lastHit.length; i++) {
 						updateHit(player, players[bullet.lastHit[i]], -bullet.dmg);
 					}
-				} else if (!bullet.active && bullet.explodeOnDeath) {
+				} else if (bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					for (let p = 0; p < players.length; p++) {
 						const tmpPlayer = players[p];
