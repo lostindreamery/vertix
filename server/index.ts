@@ -11,7 +11,7 @@ import {
 	roundNumber,
 	getDistance,
 } from "core/src/utils.ts";
-import { getSpawn, ServerProjectile } from "./utils.ts";
+import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 import type { Player, Tile, MapObjects } from "core/src/types.ts";
 import { genData } from "./genData.ts";
