@@ -3106,123 +3106,104 @@ function drawSprays() {
 		}
 	}
 }
-var tmpList: Record<
+var soundList: Record<
 	string,
 	{
 		loc: string;
 		id: string;
-		sound: Howl | null;
+		sound: Howl;
 		loop: boolean;
 		onload?: () => void;
 	}
 > = {};
-var soundList = [
+var soundMeta = [
 	{
 		loc: "weapons/smg",
 		id: "shot0",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/revolver",
 		id: "shot1",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/sniper",
 		id: "shot2",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/toygun",
 		id: "shot3",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/shotgun",
 		id: "shot4",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/grenades",
 		id: "shot5",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/rockets",
 		id: "shot6",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/pistol",
 		id: "shot7",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/minigun",
 		id: "shot8",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "weapons/flamethrower",
 		id: "shot9",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "characters/footstep1",
 		id: "step1",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "characters/jump1",
 		id: "jump1",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "characters/death1",
 		id: "death1",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "characters/kill1",
 		id: "kill1",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "special/explosion",
 		id: "explosion",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "special/score",
 		id: "score",
-		sound: null,
 		loop: false,
 	},
 	{
 		loc: "tracks/track1",
 		id: "track1",
-		sound: null,
 		loop: true,
 		onload: () => {
-			tmpList.track1.sound.play();
-			if (!player.get().dead || startingGame) {
-				tmpList.track1.sound.mute();
-			} else {
+			if (player.get().dead && !startingGame) {
+				soundList.track1.sound.play();
 				currentTrack = 1;
 			}
 		},
@@ -3230,13 +3211,10 @@ var soundList = [
 	{
 		loc: "tracks/track2",
 		id: "track2",
-		sound: null,
 		loop: true,
 		onload: () => {
-			tmpList.track2.sound.play();
-			if (player.get().dead || !gameStart || gameOver) {
-				tmpList.track2.sound.mute();
-			} else {
+			if (!player.get().dead && gameStart && !gameOver) {
+				soundList.track2.sound.play();
 				currentTrack = 2;
 			}
 		},
@@ -3247,43 +3225,46 @@ function loadSounds(base: string) {
 	if (!doSounds) {
 		return false;
 	}
-	tmpList = {};
-	for (let i = 0; i < soundList.length; ++i) {
-		let tmpSound = localStorage.getItem(`${base + soundList[i].loc}data`);
-		let tmpFormat = localStorage.getItem(`${base + soundList[i].loc}format`);
-		loadSound(tmpSound, soundList[i], tmpFormat);
+	soundList = {};
+	for (let i = 0; i < soundMeta.length; ++i) {
+		let tmpSound = localStorage.getItem(`${base + soundMeta[i].loc}data`);
+		let tmpFormat = localStorage.getItem(`${base + soundMeta[i].loc}format`);
+		loadSound(tmpSound, soundMeta[i], tmpFormat);
 	}
 }
-function loadSound(a: string, b: (typeof soundList)[number], d: string) {
-	if (tmpList[b.id] != undefined && tmpList[b.id].sound != null) {
-		tmpList[b.id].sound.stop();
-	}
-	tmpList[b.id] = b;
-	tmpList[b.id].sound = new Howl({
-		src: [a],
-		format: [d],
-		loop: b.loop,
-		onload: b.onload || (() => {}),
-	});
+function loadSound(src: string, sound: (typeof soundMeta)[number], format: string) {
+	soundList[sound.id]?.sound?.stop();
+
+	soundList[sound.id] = {
+		...sound,
+		sound: new Howl({
+			src,
+			format,
+			loop: sound.loop,
+			onload: sound.onload || (() => {}),
+		}),
+	};
 }
 var currentTrack = 0;
-function startSoundTrack(a) {
-	if (!doSounds || tmpList.track1 == undefined || tmpList.track2 == undefined) {
+function startSoundTrack(id: number) {
+	if (!doSounds || soundList.track1 == undefined || soundList.track2 == undefined) {
 		return false;
 	}
 	try {
-		if (a == 1) {
-			if (currentTrack != a) {
-				currentTrack = a;
-				tmpList.track1.sound.fade(0, 1, 1000);
+		if (id == 1) {
+			if (currentTrack != id) {
+				currentTrack = id;
+				soundList.track1.sound.play();
+				soundList.track1.sound.fade(0, 1, 1000);
 			}
-			tmpList.track2.sound.mute();
+			soundList.track2.sound.stop();
 		} else {
-			if (currentTrack != a) {
-				currentTrack = a;
-				tmpList.track2.sound.fade(0, 1, 1000);
+			if (currentTrack != id) {
+				currentTrack = id;
+				soundList.track2.sound.play();
+				soundList.track2.sound.fade(0, 1, 1000);
 			}
-			tmpList.track1.sound.mute();
+			soundList.track1.sound.stop();
 		}
 	} catch (b) {
 		console.log(b);
@@ -3297,7 +3278,7 @@ function playSound(soundId: string, x: number, y: number) {
 		try {
 			let tmpDist = getDistance(player.get().x, player.get().y, x, y);
 			if (tmpDist <= maxHearDist) {
-				let tmpSoundEntry = tmpList[soundId];
+				let tmpSoundEntry = soundList[soundId];
 				if (tmpSoundEntry !== undefined) {
 					let tmpSound = tmpSoundEntry.sound;
 					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
@@ -3313,8 +3294,8 @@ function stopAllSounds() {
 	if (!doSounds) {
 		return false;
 	}
-	for (let i = 0; i < soundList.length; ++i) {
-		tmpList[soundList[i].id].sound.stop();
+	for (let i = 0; i < soundMeta.length; ++i) {
+		soundList[soundMeta[i].id].sound.stop();
 	}
 }
 var spritesLoaded = false;
