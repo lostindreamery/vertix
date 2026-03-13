@@ -171,7 +171,7 @@ export type MapObjects = {
 };
 
 export type CustomMap = {
-  width: number;
-  height: number;
-  data: ImageDataArray;
-}
+	width: number;
+	height: number;
+	data: ImageDataArray;
+};

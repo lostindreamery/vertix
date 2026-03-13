@@ -207,27 +207,28 @@ function getFile() {
 	document.getElementById("upfile").click();
 }
 window.selectedCMap = (input: HTMLInputElement) => {
-  if (!input?.files[0]) return;
- 	var name = input.value.split("\\");
+	clearCustomMap();
+	if (!input?.files[0]) return;
+	var name = input.value.split("\\");
 	document.getElementById("customMapButton").innerHTML = name[name.length - 1];
-  let reader = new FileReader();
-  reader.onload = function (e) {
-    const img = document.createElement("img");
-    img.onload = function () {
-      let tmpCanvas = document.createElement("canvas");
+	let reader = new FileReader();
+	reader.onload = function (e) {
+		const img = document.createElement("img");
+		img.onload = function () {
+			let tmpCanvas = document.createElement("canvas");
 			tmpCanvas.width = img.width;
 			tmpCanvas.height = img.height;
 			tmpCanvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
-      customMap = {
-          width: img.width,
-          height: img.height,
-          data: tmpCanvas.getContext("2d").getImageData(0, 0, img.width, img.height).data
-      };
-    };
-    img.src = e.target.result as string;
-  };
-  reader.readAsDataURL(input.files[0]);
-}
+			customMap = {
+				width: img.width,
+				height: img.height,
+				data: tmpCanvas.getContext("2d").getImageData(0, 0, img.width, img.height).data,
+			};
+		};
+		img.src = e.target.result as string;
+	};
+	reader.readAsDataURL(input.files[0]);
+};
 function clearCustomMap() {
 	customMap = null;
 	document.getElementById("customMapButton").textContent = "Select Map";
