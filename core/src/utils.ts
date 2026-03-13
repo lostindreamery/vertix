@@ -53,7 +53,6 @@ export function shootNextBullet(
 		bullet.glowWidth = weapon.glowWidth;
 		bullet.glowHeight = weapon.glowHeight;
 		bullet.explodeOnDeath = weapon.explodeOnDeath;
-		//@ts-ignore weapon.pierce doesn't exist?
 		bullet.pierceCount = weapon.pierce;
 		bullet.blastRadius = weapon.blastRadius;
 		bullet.activate();

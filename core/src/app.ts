@@ -608,7 +608,6 @@ mainCanvas.addEventListener("wheel", (event) => {
 	event.stopPropagation();
 	userScroll = Math.max(-1, Math.min(1, event.deltaY));
 })
-// todo: redo input handling to not use keycodes
 var keyMap: Record<string, boolean> = {};
 var showingScoreBoard = false;
 var keyToChange: keyof typeof keysList | null = null;
