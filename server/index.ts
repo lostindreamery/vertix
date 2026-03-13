@@ -65,7 +65,7 @@ let mapData = {
 	gameMode: {
 		code: "tdm",
 		name: "Team Deathmatch",
-		score: 1500,
+		score: 100,
 		desc1: "Eliminate the enemy team",
 		desc2: "Eliminate the enemy team",
 		teams: true,
@@ -222,11 +222,6 @@ io.on("connection", (socket: Socket) => {
 			"lb",
 			players.flatMap((pl) => [pl.index]),
 		);
-		io.emit(
-			"ts",
-			player.team === "red" ? scoreRed : scoreBlue,
-			player.team === "red" ? scoreBlue : scoreBlue,
-		);
 	});
 	// socket.on("ftc", (playerIdx) => {
 	// 	io.emit("rsd", [
@@ -339,7 +334,7 @@ io.on("connection", (socket: Socket) => {
 			};
 			updateBullet();
 
-			const updateHit = (source: Player, dest: Player, dmg: number) => {
+      const updateHit = (source: Player, dest: Player, dmg: number) => {
 				if (dest?.dead) return;
 				dest.health += dmg;
 				io.emit("1", {
@@ -376,14 +371,26 @@ io.on("connection", (socket: Socket) => {
 					players.flatMap((pl) => [pl.index]),
 				);
 
-				if (source.team === "red") scoreRed += 1;
-				else scoreBlue += 1;
+				if (source.team === "red") scoreRed += 20;
+				else scoreBlue += 20;
 
 				io.emit(
 					"ts",
 					dest.team === "red" ? scoreRed : scoreBlue,
 					source.team === "red" ? scoreRed : scoreBlue,
-				);
+        );
+        if (scoreRed >= mapData.gameMode.score || scoreBlue >= mapData.gameMode.score) {
+          io.emit("7", scoreRed > scoreBlue ? "red" : "blue", players, {}, false);
+          let timeLeft = 15;
+          setInterval(() => {
+            if (timeLeft >= 0) {
+              io.emit("8", timeLeft--);
+            } else {
+              //start new game
+              return;
+            }
+          }, 1000);
+        }
 			};
 		}
 	});

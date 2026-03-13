@@ -1645,16 +1645,16 @@ function setupSocket(sock: Socket) {
 			startBigAnimText(a, d, 2000, true, "#ffffff", "#5151d9", true, e);
 		}
 	});
-	sock.on("7", (a, d, e, f) => {
+	sock.on("7", (winner, userList, modeVoteData, isFading) => {
 		try {
 			gameOver = true;
 			document.getElementById("startMenuWrapper").style.display = "none";
-			showStatTable(d, e, a, false, f, true);
+			showStatTable(userList, modeVoteData, winner, false, isFading, true);
 			startSoundTrack(1);
 		} catch (h) {
 			console.log(h);
 		}
-	});
+  });
 	sock.on("8", (a) => {
 		document.getElementById("nextGameTimer").textContent = `${a}: UNTIL NEXT ROUND`;
 	});
