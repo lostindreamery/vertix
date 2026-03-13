@@ -3290,6 +3290,8 @@ function startSoundTrack(a) {
 	}
 }
 var maxHearDist = 1500;
+//@ts-ignore todo
+window.playSound = playSound;
 function playSound(soundId: string, x: number, y: number) {
 	if (!kicked && doSounds) {
 		try {

@@ -216,8 +216,8 @@ export function createExplosion(x: number, y: number, scale: number) {
 		let tmpDir = getAngle(x, player.get().x, y, player.get().y);
 		screenShake(scale * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
 	}
-	// fix when sounds are moved to a separate file
-	// playSound("explosion", x, y);
+	//@ts-ignore todo
+	window.playSound("explosion", x, y);
 	createSmokePuff(x, y, scale, true, 1);
 }
 export function createSmokePuff(x: number, y: number, scale: number, hole: boolean, speed: number) {
