@@ -261,12 +261,6 @@ io.on("connection", (socket: Socket) => {
 	socket.on("0", (targetF) => {
 		player.targetF = targetF;
 	});
-
-	//TODO: socket.emit stuff
-	//socket.emit("upd", {})  //updateUserValue
-	//socket.emit("tprt", { indx: 0, newX: 0, newY: 0 })
-
-	//TODO: socket.on stuff
 	socket.on("1", (x, y, jumpY, targetF, targetD, currentTime) => {
 		const currentWeapon = getCurrentWeapon(player);
 		if (!currentWeapon) return;
@@ -334,7 +328,7 @@ io.on("connection", (socket: Socket) => {
 			};
 			updateBullet();
 
-      const updateHit = (source: Player, dest: Player, dmg: number) => {
+			const updateHit = (source: Player, dest: Player, dmg: number) => {
 				if (dest?.dead) return;
 				dest.health += dmg;
 				io.emit("1", {
@@ -343,7 +337,7 @@ io.on("connection", (socket: Socket) => {
 					dir: d,
 					amount: dmg,
 					bi: -1,
-					h: dest.health,
+					h: dest.health, //undefined sometimes
 				});
 				const dead = dest.health <= 0;
 				if (!dead) return;
@@ -371,26 +365,55 @@ io.on("connection", (socket: Socket) => {
 					players.flatMap((pl) => [pl.index]),
 				);
 
-				if (source.team === "red") scoreRed += 20;
-				else scoreBlue += 20;
+				source.team === "red" ? (scoreRed += 20) : (scoreBlue += 20);
 
-				io.emit(
-					"ts",
-					dest.team === "red" ? scoreRed : scoreBlue,
-					source.team === "red" ? scoreRed : scoreBlue,
-        );
-        if (scoreRed >= mapData.gameMode.score || scoreBlue >= mapData.gameMode.score) {
-          io.emit("7", scoreRed > scoreBlue ? "red" : "blue", players, {}, false);
-          let timeLeft = 15;
-          setInterval(() => {
-            if (timeLeft >= 0) {
-              io.emit("8", timeLeft--);
-            } else {
-              //start new game
-              return;
-            }
-          }, 1000);
-        }
+				io.emit("ts", scoreRed, scoreBlue);
+				if (
+					scoreRed >= mapData.gameMode.score ||
+					scoreBlue >= mapData.gameMode.score
+				) {
+					io.emit(
+						"7",
+						scoreRed > scoreBlue ? "red" : "blue",
+						players,
+						{},
+						false,
+					);
+					let timeLeft = 15;
+					let timer = setInterval(() => {
+						if (timeLeft >= 0) {
+							io.emit("8", timeLeft--);
+						} else {
+							scoreRed = 0;
+							scoreBlue = 0;
+							for (let i = 0; i < players.length; i++) {
+								players[i].score = 0;
+								players[i].kills = 0;
+								players[i].deaths = 0;
+								io.emit(
+									"welcome",
+									{
+										id: players[i].id,
+										room: players[i].room,
+										name: players[i].name,
+										classIndex: players[i].classIndex,
+									},
+									true,
+								);
+							}
+							io.emit(
+								"lb",
+								players.flatMap((pl) => [pl.index]),
+							);
+							io.emit(
+								"ts",
+								dest.team === "red" ? scoreRed : scoreBlue,
+								source.team === "red" ? scoreRed : scoreBlue,
+							);
+							clearInterval(timer);
+						}
+					}, 1000);
+				}
 			};
 		}
 	});
@@ -418,12 +441,13 @@ io.on("connection", (socket: Socket) => {
 		}
 		wallCol(player, { tiles }, { clutter });
 		player.x = Math.round(player.x);
-		player.y = Math.round(player.y);
+    player.y = Math.round(player.y);
+    // TODO: gamemode objectve
+		//socket.emit("tprt", { indx: 0, newX: 0, newY: 0 })
 		io.emit(
 			"rsd",
 			players.flatMap((pl) => [6, pl.index, pl.x, pl.y, pl.angle, inputNumber]),
 		);
-		//console.log("4", horizontalDT, verticalDT, currentTime, inputNumber, space, delta);
 	});
 	socket.on("create", (lobby) => {});
 });

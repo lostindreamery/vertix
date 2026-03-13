@@ -3,7 +3,15 @@ import { Howl } from "howler";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
-import type { Account, GameMode, InputSendData, Player, Sprite, SpriteCanvas, Tile } from "./types.ts";
+import type {
+	Account,
+	GameMode,
+	InputSendData,
+	Player,
+	Sprite,
+	SpriteCanvas,
+	Tile,
+} from "./types.ts";
 import * as utils from "./utils.ts";
 import { appStore } from "./state.ts";
 import {
@@ -607,7 +615,7 @@ mainCanvas.addEventListener("wheel", (event) => {
 	event.preventDefault();
 	event.stopPropagation();
 	userScroll = Math.max(-1, Math.min(1, event.deltaY));
-})
+});
 var keyMap: Record<string, boolean> = {};
 var showingScoreBoard = false;
 var keyToChange: keyof typeof keysList | null = null;
@@ -1654,7 +1662,7 @@ function setupSocket(sock: Socket) {
 		} catch (h) {
 			console.log(h);
 		}
-  });
+	});
 	sock.on("8", (a) => {
 		document.getElementById("nextGameTimer").textContent = `${a}: UNTIL NEXT ROUND`;
 	});
