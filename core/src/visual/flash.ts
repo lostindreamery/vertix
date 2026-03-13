@@ -1,0 +1,69 @@
+import { appStore } from "../state.ts";
+
+const startX = appStore.select("startX");
+const startY = appStore.select("startY");
+
+export class FlashGlow {
+	initScale = 0;
+	scale = 0;
+	y = 0;
+	x = 0;
+	active = false;
+	maxDuration = 0;
+	duration = 0;
+
+	update(delta: number) {
+		if (!(this.active && this.maxDuration > 0)) return;
+		this.duration += delta;
+		let tmpScale = Math.max(0, 1 - this.duration / this.maxDuration);
+		this.scale = this.initScale * tmpScale;
+		if (this.scale < 1) {
+			this.active = false;
+		}
+		if (this.duration >= this.maxDuration) {
+			this.active = false;
+		}
+	}
+
+	draw() {
+		if (!this.active) return;
+		window.graph.drawImage(
+			//@ts-ignore temporary
+			window.lightSprite,
+			this.x - startX.get() - this.scale / 2,
+			this.y - startY.get() - this.scale / 2,
+			this.scale,
+			this.scale,
+		);
+	}
+}
+
+var glowIntensity = 0.2;
+var flashGlows: FlashGlow[] = [];
+var glowIndex = 0;
+for (let i = 0; i < 30; ++i) {
+	flashGlows.push(new FlashGlow());
+}
+export function updateFlashGlows(delta: number) {
+	for (let i = 0; i < flashGlows.length; ++i) {
+		let tmpObject = flashGlows[i];
+		tmpObject.update(delta);
+		tmpObject.draw();
+	}
+}
+
+export function createFlash(x: number, y: number, scale: number) {
+	console.log("!!!!!!!")
+	glowIndex++;
+	if (glowIndex >= flashGlows.length) {
+		glowIndex = 0;
+	}
+	let tmpGlow = flashGlows[glowIndex];
+	tmpGlow.x = x;
+	tmpGlow.y = y;
+	tmpGlow.scale = 0;
+	tmpGlow.initScale = scale * 220;
+	tmpGlow.duration = 0;
+	tmpGlow.maxDuration = 180;
+	tmpGlow.active = true;
+}

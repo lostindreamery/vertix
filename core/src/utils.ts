@@ -1,3 +1,4 @@
+import { appStore } from "./state.ts";
 import type { Player, Tile } from "./types.ts";
 
 var bulletIndex = 0;
@@ -382,4 +383,13 @@ export function linearInterpolate(current: number, target: number, step: number)
 }
 export function isImageOk(img: HTMLImageElement) {
 	return img.complete && img.naturalWidth !== 0;
+}
+
+export function canSee(x: number, y: number, width: number, height: number) {
+	return (
+		x + width > 0 &&
+		y + height > 0 &&
+		x < appStore.get().maxScreenWidth &&
+		y < appStore.get().maxScreenHeight
+	);
 }

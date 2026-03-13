@@ -15,6 +15,9 @@ import {
 	updateAnimTexts,
 	updateNotifications,
 } from "./visual/animtext.ts";
+import { screenShake, updateScreenShake } from "./visual/shake.ts";
+import { createExplosion, createLiquid, createSmokePuff, particleCone, stillDustParticle, updateParticles } from "./visual/particle.ts";
+import { updateFlashGlows } from "./visual/flash.ts";
 
 const {
 	shootNextBullet,
@@ -26,6 +29,7 @@ const {
 	getAngle,
 	randomFloat,
 	randomInt,
+	canSee,
 } = utils;
 
 let playerName: string | undefined;
@@ -432,7 +436,7 @@ var youtubeChannelInput = document.getElementById("youtubeChannelInput") as HTML
 var saveAccountData = document.getElementById("saveAccountData");
 var editProfileMessage = document.getElementById("editProfileMessage");
 function updateAccountPage(a) {
-	player.account = a;
+	player.get().account = a;
 	accStatRank.innerHTML = `<b>Rank:  </b>${a.rank}`;
 	accStatRankProg.style.width = `${a.rankPercent}%`;
 	accStatKills.innerHTML = `<b>Kills:  </b>${a.kills}`;
@@ -441,10 +445,10 @@ function updateAccountPage(a) {
 	accStatWorldRank.innerHTML = `<b>World Rank:  </b>${a.worldRank}`;
 	accStatLikes.innerHTML = `<b>Likes:  </b>${a.likes}`;
 	profileButton.onclick = () => {
-		showUserStatPage(player.account.user_name);
+		showUserStatPage(player.get().account.user_name);
 	};
-	newUsernameInput.value = player.account.user_name;
-	youtubeChannelInput.value = player.account.channel;
+	newUsernameInput.value = player.get().account.user_name;
+	youtubeChannelInput.value = player.get().account.channel;
 	saveAccountData.onclick = () => {
 		socket.emit("dbEditUser", {
 			userName: newUsernameInput.value,
@@ -520,10 +524,7 @@ var playerConfig = {
 	textBorderSize: 3,
 	defaultSize: 30,
 };
-var player: Player = {
-	dead: true,
-	weapons: [],
-} as Player; // hack, since maybe this is accessed before gameSetup?
+const player = appStore.select("player");
 var target = {
 	f: 0,
 	d: 0,
@@ -533,9 +534,8 @@ var gameObjects: any = []; // todo
 //@ts-ignore
 window.gameObjects = gameObjects;
 var bullets: Projectile[] = [];
-var gameMap: any = null; // todo
-//@ts-ignore
-window.getGameMap = () => gameMap;
+let gameMap = appStore.select("gameMap");
+
 var mapTileScale = 0;
 var leaderboard = [];
 const keys = {
@@ -567,7 +567,7 @@ function focusGame() {
 function gameInput(event: MouseEvent) {
 	event.preventDefault();
 	event.stopPropagation();
-	var b = getCurrentWeapon(player)?.yOffset ?? 0;
+	var b = getCurrentWeapon(player.get())?.yOffset ?? 0;
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 	lastAngle = target.f;
@@ -737,7 +737,7 @@ function keyDown(event: KeyboardEvent) {
 			!!keyMap[keysList.leaderboardKey] &&
 			!!gameStart &&
 			!showingScoreBoard &&
-			!player.dead &&
+			!player.get().dead &&
 			!gameOver
 		) {
 			showingScoreBoard = true;
@@ -768,10 +768,10 @@ function keyUp(event: KeyboardEvent) {
 		keys.rl = false;
 	}
 	if (event.key === keysList.incWeapKey) {
-		playerSwapWeapon(findUserByIndex(player.index), 1);
+		playerSwapWeapon(findUserByIndex(player.get().index), 1);
 	}
 	if (event.key === keysList.decWeapKey) {
-		playerSwapWeapon(findUserByIndex(player.index), -1);
+		playerSwapWeapon(findUserByIndex(player.get().index), -1);
 	}
 	if (event.key === keysList.sprayKey) {
 		sendSpray();
@@ -779,7 +779,7 @@ function keyUp(event: KeyboardEvent) {
 	if (
 		event.key === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
-		!player.dead &&
+		!player.get().dead &&
 		!gameOver &&
 		!gameOver
 	) {
@@ -820,10 +820,10 @@ class ChatManager {
 			if (msg !== "") {
 				socket.emit("cht", msg.substring(0, 50), currentChatType);
 				this.addChatLine(
-					player.name,
+					player.get().name,
 					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg,
 					true,
-					player.team,
+					player.get().team,
 				);
 				chatInput.value = "";
 				mainCanvas.focus();
@@ -853,7 +853,7 @@ class ChatManager {
 				source = "notif";
 			}
 		} else {
-			source = player.team === type ? "blue" : "red";
+			source = player.get().team === type ? "blue" : "red";
 		}
 		this.chatLineCounter++;
 		listElem.className = source;
@@ -880,11 +880,11 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 	try {
 		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
-			if (tmpChatUser.index === player.index) return;
+			if (tmpChatUser.index === player.get().index) return;
 			chat.addChatLine(
 				tmpChatUser.name,
 				a[1],
-				tmpChatUser.index === player.index,
+				tmpChatUser.index === player.get().index,
 				tmpChatUser.team,
 			);
 		} else if (a[0] === -1) {
@@ -1226,15 +1226,15 @@ function setupSocket(sock: Socket) {
 		console.error(`ERROR: ${errorMsg}`);
 	});
 	sock.on("welcome", (b, d) => {
-		player.id = b.id;
-		player.room = b.room;
-		room = player.room;
-		player.name = playerName;
-		player.classIndex = playerClassIndex;
-		b.name = player.name;
+		player.get().id = b.id;
+		player.get().room = b.room;
+		room = player.get().room;
+		player.get().name = playerName;
+		player.get().classIndex = playerClassIndex;
+		b.name = player.get().name;
 		b.classIndex = playerClassIndex;
 		sock.emit("gotit", b, d, Date.now(), false);
-		player.dead = true;
+		player.get().dead = true;
 		if (d) {
 			deactiveAllAnimTexts();
 			gameStart = false;
@@ -1279,8 +1279,8 @@ function setupSocket(sock: Socket) {
 			localStorage.setItem("logKey", a.logKey);
 			localStorage.setItem("userName", a.text);
 			loggedIn = true;
-			player.loggedIn = true;
-			const user = findUserByIndex(player.index);
+			player.get().loggedIn = true;
+			const user = findUserByIndex(player.get().index);
 			if (user) {
 				user.loggedIn = true;
 			}
@@ -1332,8 +1332,8 @@ function setupSocket(sock: Socket) {
 			clanSignUp.style.display = "none";
 			clanStats.style.display = "block";
 			clanHeader.innerHTML = `[${a}] Clan:`;
-			player.account.clan = a;
-			const user = findUserByIndex(player.index);
+			player.get().account.clan = a;
+			const user = findUserByIndex(player.get().index);
 			if (user) {
 				user.account.clan = a;
 			}
@@ -1375,7 +1375,7 @@ function setupSocket(sock: Socket) {
 	sock.on("dbChangeUserR", (a, d) => {
 		if (d) {
 			localStorage.setItem("userName", a);
-			player.account.user_name = a;
+			player.get().account.user_name = a;
 			editProfileMessage.textContent = "Success. Account Updated.";
 		} else {
 			editProfileMessage.innerHTML = a;
@@ -1390,28 +1390,28 @@ function setupSocket(sock: Socket) {
 	sock.on("gameSetup", (a, d, e) => {
 		a = JSON.parse(a);
 		if (d) {
-			gameMap = a.mapData;
-			gameMap.tiles = [];
-			gameWidth = gameMap.width;
-			gameHeight = gameMap.height;
+			gameMap.set(a.mapData);
+			gameMap.select("tiles").set([]);
+			gameWidth = gameMap.get().width;
+			gameHeight = gameMap.get().height;
 			mapTileScale = a.tileScale;
 			gameObjects = a.usersInRoom;
 			for (let d = 0; d < gameObjects.length; ++d) {
 				gameObjects[d].type = "player";
 			}
-			gameMode = gameMap.gameMode;
+			gameMode = gameMap.get().gameMode;
 			if (a.you.team === "blue") {
 				document.getElementById("gameModeText").textContent = gameMode.desc2;
 			} else {
 				document.getElementById("gameModeText").textContent = gameMode.desc1;
 			}
 			currentLikeButton = "";
-			for (let d = 0; d < gameMap.clutter.length; ++d) {
-				const b = gameMap.clutter[d];
+			for (let d = 0; d < gameMap.get().clutter.length; ++d) {
+				const b = gameMap.get().clutter[d];
 				b.type = "clutter";
 				gameObjects.push(b);
 			}
-			setupMap(gameMap, mapTileScale);
+			setupMap(gameMap.get(), mapTileScale);
 			cachedMiniMap = null;
 			deactivateSprays();
 			for (let d = 0; d < 100; ++d) {
@@ -1428,14 +1428,14 @@ function setupSocket(sock: Socket) {
 		maxScreenWidth.set(a.maxScreenWidth * a.viewMult);
 		viewMult.set(a.viewMult);
 		a.you.type = "player";
-		player = a.you;
+		player.set(a.you);
 		e = findUserByIndex(a.you.index);
 		if (e != null) {
 			gameObjects[gameObjects.indexOf(e)] = a.you;
 		} else {
 			gameObjects.push(a.you);
 		}
-		updateWeaponUI(player, true);
+		updateWeaponUI(player.get(), true);
 		if (inMainMenu) {
 			$("#loadingWrapper").fadeOut(0, () => {});
 			inMainMenu = false;
@@ -1463,14 +1463,14 @@ function setupSocket(sock: Socket) {
 		var b = findUserByIndex(a.gID);
 		var e = Math.abs(a.amount);
 		if (
-			(a.dID != player.index || a.gID == player.index) &&
+			(a.dID != player.get().index || a.gID == player.get().index) &&
 			a.amount <= 0 &&
-			a.gID == player.index &&
+			a.gID == player.get().index &&
 			e != 0
 		) {
 			screenShake(e / 2, a.dir);
 		}
-		if (a.dID != null && a.dID == player.index && b != null && e > 0 && b.onScreen) {
+		if (a.dID != null && a.dID == player.get().index && b != null && e > 0 && b.onScreen) {
 			if (a.amount < 0) {
 				startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#d95151", e / 10);
 			} else {
@@ -1479,7 +1479,7 @@ function setupSocket(sock: Socket) {
 		}
 		if (a.bi != null) {
 			let svb = findServerBullet(a.bi);
-			if (svb != undefined && svb.owner.index != player.index) {
+			if (svb?.owner.index !== player.get().index) {
 				if (b.onScreen && a.amount < 0) {
 					particleCone(
 						12,
@@ -1499,7 +1499,7 @@ function setupSocket(sock: Socket) {
 		}
 		if (b != null) {
 			b.health = a.h;
-			if (b.index == player.index) {
+			if (b.index == player.get().index) {
 				updatePlayerInfo(b);
 				updateUiStats(b);
 			}
@@ -1509,7 +1509,7 @@ function setupSocket(sock: Socket) {
 	sock.on("jum", otherJump);
 	sock.on("ex", createExplosion);
 	sock.on("r", (a) => {
-		var b = findUserByIndex(player.index);
+		var b = findUserByIndex(player.get().index);
 		if (b != null) {
 			/*
       if (b.weapons[a].ammo == b.weapons[a].maxAmmo) {
@@ -1526,8 +1526,8 @@ function setupSocket(sock: Socket) {
 		var destPlayer = findUserByIndex(event.gID);
 		var sourcePlayer = findUserByIndex(event.dID);
 		destPlayer.dead = true;
-		if (event.kB && event.gID !== player.index) {
-			if (event.dID === player.index) {
+		if (event.kB && event.gID !== player.get().index) {
+			if (event.dID === player.get().index) {
 				startBigAnimText(
 					"BOSS SLAIN",
 					`${event.sS} POINTS`,
@@ -1541,7 +1541,7 @@ function setupSocket(sock: Socket) {
 			} else {
 				showNotification(`${sourcePlayer.name} slayed the boss`);
 			}
-		} else if (event.dID === player.index && event.gID !== player.index) {
+		} else if (event.dID === player.get().index && event.gID !== player.get().index) {
 			playSound("kill1", sourcePlayer.x, sourcePlayer.y);
 			let killMsg = "";
 			if (destPlayer.team != sourcePlayer.team) {
@@ -1571,25 +1571,26 @@ function setupSocket(sock: Socket) {
 			}
 			startBigAnimText(killMsg, `${event.sS} POINTS`, 2000, true, "#ffffff", "#5151d9", true, 1.25);
 		}
-		if (event.gID === player.index) {
+		if (event.gID === player.get().index) {
 			hideStatTable();
 			gameStart = false;
 			hideUI(false);
-			player.dead = true;
+			player.get().dead = true;
 			window.setTimeout(() => {
 				if (!gameOver) {
 					document.getElementById("startMenuWrapper").style.display = "block";
 					document.getElementById("linkBox").style.display = "block";
 				}
 			}, 1300);
-			playSound("death1", player.x, player.y);
+			playSound("death1", player.get().x, player.get().y);
 			startSoundTrack(1);
 		}
 	});
 	sock.on("4", (a, d, e) => {
 		if (e == 0) {
-			if (gameMap != null && a.active != undefined) {
-				gameMap.pickups[d].active = a.active;
+			if (gameMap.get() != null && a.active != undefined) {
+				// typing thing?
+				gameMap.select("pickups").select(d).select("active").set(a.active);
 			}
 		} else {
 			for (e = 0; e < gameObjects.length; ++e) {
@@ -1613,9 +1614,9 @@ function setupSocket(sock: Socket) {
 			b.x = a.newX;
 			b.y = a.newY;
 			createSmokePuff(b.x, b.y, 5, false, 1);
-			if (a.indx === player.index) {
-				player.x = a.newX;
-				player.y = a.newY;
+			if (a.indx === player.get().index) {
+				player.get().x = a.newX;
+				player.get().y = a.newY;
 				startBigAnimText(
 					"ZONE ENTERED",
 					`+${a.scor} POINTS`,
@@ -1636,7 +1637,7 @@ function setupSocket(sock: Socket) {
 		showNotification(a);
 	});
 	sock.on("6", (a, d, e) => {
-		if (!player.dead) {
+		if (!player.get().dead) {
 			startBigAnimText(a, d, 2000, true, "#ffffff", "#5151d9", true, e);
 		}
 	});
@@ -1683,13 +1684,13 @@ function showStatTable(
 			document.getElementById("winningTeamText").textContent = "";
 			document.getElementById("voteModeContainer").textContent = "";
 		} else {
-			let isWinner = player.team === winner || player.id === winner;
+			let isWinner = player.get().team === winner || player.get().id === winner;
 			if (!isFading) {
 				if (isWinner) {
 					startBigAnimText("Victory", "Well Played!", 2500, true, "#5151d9", "#ffffff", false, 2);
 					document.getElementById("winningTeamText").textContent = "VICTORY";
 					document.getElementById("winningTeamText").style.color = "#5151d9";
-				} else if (player.team != "") {
+				} else if (player.get().team != "") {
 					startBigAnimText("Defeat", "Bad Luck!", 2500, true, "#d95151", "#ffffff", false, 2);
 					document.getElementById("winningTeamText").textContent = "DEFEAT";
 					document.getElementById("winningTeamText").style.color = "#d95151";
@@ -1777,9 +1778,9 @@ function showStatTable(
 						className: "contL",
 						canClick: userList[g].loggedIn,
 						color:
-							userList[g].index == player.index
+							userList[g].index == player.get().index
 								? "#fff"
-								: userList[g].team != player.team
+								: userList[g].team != player.get().team
 									? "#d95151"
 									: "#5151d9",
 						id: null,
@@ -1969,7 +1970,7 @@ function addRowToStatTable(data, b) {
 			} else {
 				btn.setAttribute("class", "gameStatLikeButton");
 			}
-			btn.style.display = m.pos === player.index ? "none" : "block";
+			btn.style.display = m.pos === player.get().index ? "none" : "block";
 			trow.appendChild(btn);
 			let tmpDiv = document.createElement("div");
 			tmpDiv.innerHTML = data[f].text;
@@ -1986,7 +1987,7 @@ function addRowToStatTable(data, b) {
 }
 function addUser(a) {
 	a = JSON.parse(a);
-	if (a.index !== player.index) {
+	if (a.index !== player.get().index) {
 		a.type = "player";
 		const b = findUserByIndex(a.index);
 		if (b == null) {
@@ -1997,7 +1998,7 @@ function addUser(a) {
 	}
 }
 function removeUser(userIndex: number) {
-	if (userIndex !== player.index) {
+	if (userIndex !== player.get().index) {
 		let tmpUser = findUserByIndex(userIndex);
 		if (tmpUser != null) {
 			gameObjects.splice(gameObjects.indexOf(tmpUser), 1);
@@ -2040,7 +2041,7 @@ function updateUserValue(a) {
 		if (a.sp != undefined) {
 			tmpUser.spawnProtection = a.sp;
 		}
-		if (a.wi != undefined && a.i != player.index) {
+		if (a.wi != undefined && a.i != player.get().index) {
 			playerEquipWeapon(tmpUser, a.wi);
 		}
 		if (a.l != undefined) {
@@ -2063,7 +2064,7 @@ function updateUserValue(a) {
 			tmpUser.totalHealing = a.hea;
 			b = true;
 		}
-		if (tmpUser.index == player.index) {
+		if (tmpUser.index == player.get().index) {
 			updatePlayerInfo(tmpUser);
 			updateUiStats(tmpUser);
 		}
@@ -2098,7 +2099,7 @@ function receiveServerData(a: number[]) {
 		for (let d = 0; d < a.length; ) {
 			let b = a[0 + d];
 			const tmpUser = findUserByIndex(a[1 + d]);
-			if (a[1 + d] === player.index && tmpUser != null) {
+			if (a[1 + d] === player.get().index && tmpUser != null) {
 				if (b > 2) {
 					tmpUser.x = a[2 + d];
 				}
@@ -2146,7 +2147,7 @@ function receiveServerData(a: number[]) {
 		}
 	}
 	for (let i = 0; i < gameObjects.length; i++) {
-		if (gameObjects[i].index === player.index) {
+		if (gameObjects[i].index === player.get().index) {
 			if (gameObjects[i].dead || gameOver || thisInput.length > 80) {
 				thisInput = [];
 			}
@@ -2169,7 +2170,7 @@ function receiveServerData(a: number[]) {
 						gameObjects[i].oldY = gameObjects[i].y;
 						gameObjects[i].x += hdt * gameObjects[i].speed * thisInput[f].delta;
 						gameObjects[i].y += vdt * gameObjects[i].speed * thisInput[f].delta;
-						wallCol(gameObjects[i], gameMap, gameObjects);
+						wallCol(gameObjects[i], gameMap.get(), gameObjects);
 						f++;
 					}
 				}
@@ -2181,14 +2182,14 @@ function receiveServerData(a: number[]) {
 	}
 }
 function updatePlayerInfo(a: Partial<Player>) {
-	player.x = a.x;
-	player.y = a.y;
-	player.dead = a.dead;
-	if (player.score < a.score) {
-		playSound("score", player.x, player.y);
+	player.get().x = a.x;
+	player.get().y = a.y;
+	player.get().dead = a.dead;
+	if (player.get().score < a.score) {
+		playSound("score", player.get().x, player.get().y);
 	}
-	player.score = a.score;
-	player.health = a.health;
+	player.get().score = a.score;
+	player.get().health = a.health;
 }
 var currentHat = document.getElementById("currentHat");
 var hatList = document.getElementById("hatList");
@@ -2445,18 +2446,18 @@ function updateLeaderboard(data: number[]) {
 			let tmpPlayer = findUserByIndex(data[0 + i]);
 			if (tmpPlayer == null) continue;
 			lbContent += "<br />";
-			if (tmpPlayer.index === player.index) {
+			if (tmpPlayer.index === player.get().index) {
 				lbContent +=
 					'<span class="me">' +
 					(i + 1) +
 					". " +
-					player.name +
-					(player.account.clan ? ` [${player.account.clan}]` : "") +
+					player.get().name +
+					(player.get().account.clan ? ` [${player.get().account.clan}]` : "") +
 					"</span>";
 			} else if (tmpPlayer.name) {
 				lbContent +=
 					'<span class="' +
-					(tmpPlayer.team !== player.team ? "red" : "blue") +
+					(tmpPlayer.team !== player.get().team ? "red" : "blue") +
 					'">' +
 					(i + 1) +
 					". " +
@@ -2483,7 +2484,7 @@ function updateTeamScores(a, b) {
 		if (gameMode.teams) {
 			blueText.textContent = "A";
 			redProgCont.style.display = "";
-			if (player.team === "red") {
+			if (player.get().team === "red") {
 				redProgress.setAttribute("style", `display:block;width:${b}%`);
 				redProgress.style.width = `${b}%`;
 				blueProgress.setAttribute("style", `display:block;width:${a}%`);
@@ -2495,7 +2496,7 @@ function updateTeamScores(a, b) {
 				blueProgress.style.width = `${b}%`;
 			}
 		} else {
-			b = Math.round((player.score / a) * 100);
+			b = Math.round((player.get().score / a) * 100);
 			blueProgress.setAttribute("style", `display:block;width:${b}%`);
 			blueProgress.style.width = `${b}%`;
 			blueText.textContent = "YOU";
@@ -2596,14 +2597,14 @@ function updateGameLoop() {
 	if (clientPrediction) {
 		for (let e = 0; e < gameObjects.length; e++) {
 			if (gameObjects[e].type === "player") {
-				if (gameObjects[e].index === player.index) {
+				if (gameObjects[e].index === player.get().index) {
 					gameObjects[e].oldX = gameObjects[e].x;
 					gameObjects[e].oldY = gameObjects[e].y;
 					if (!gameObjects[e].dead && !gameOver) {
 						gameObjects[e].x += b * gameObjects[e].speed * delta;
 						gameObjects[e].y += d * gameObjects[e].speed * delta;
 					}
-					wallCol(gameObjects[e], gameMap, gameObjects);
+					wallCol(gameObjects[e], gameMap.get(), gameObjects);
 					gameObjects[e].x = Math.round(gameObjects[e].x);
 					gameObjects[e].y = Math.round(gameObjects[e].y);
 					gameObjects[e].angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
@@ -2620,7 +2621,7 @@ function updateGameLoop() {
 					if (gameObjects[e].jumpCountdown > 0) {
 						gameObjects[e].jumpCountdown -= delta;
 					}
-					if (keys.s === 1 && gameObjects[e].jumpCountdown <= 0 && !gameOver) {
+					if (keys.s && gameObjects[e].jumpCountdown <= 0 && !gameOver) {
 						playerJump(gameObjects[e]);
 						doJump = 1;
 					}
@@ -2637,7 +2638,7 @@ function updateGameLoop() {
 					}
 					gameObjects[e].jumpY = Math.round(gameObjects[e].jumpY);
 				}
-				if (gameObjects[e].index == player.index && !gameOver) {
+				if (gameObjects[e].index == player.get().index && !gameOver) {
 					let sendData = {
 						hdt: b,
 						vdt: d,
@@ -2653,10 +2654,10 @@ function updateGameLoop() {
 						playerSwapWeapon(gameObjects[e], userScroll);
 						userScroll = 0;
 					}
-					if (keys.rl == 1 && !gameOver) {
+					if (keys.rl && !gameOver) {
 						playerReload(gameObjects[e], true);
 					}
-					if (keys.lm == 1 && !gameOver && player.weapons.length > 0) {
+					if (keys.lm && !gameOver && player.get().weapons.length > 0) {
 						keyd = 0;
 						if (
 							currentTime - getCurrentWeapon(gameObjects[e]).lastShot >=
@@ -2670,7 +2671,7 @@ function updateGameLoop() {
 					gameObjects[e].animIndex = 0;
 				} else {
 					let f = Math.abs(b) + Math.abs(d);
-					if (gameObjects[e].index != player.index) {
+					if (gameObjects[e].index != player.get().index) {
 						f = Math.abs(gameObjects[e].xSpeed) + Math.abs(gameObjects[e].ySpeed);
 					}
 					if (f > 0) {
@@ -2704,7 +2705,7 @@ function updateGameLoop() {
 			if (gameOverFade && showUIFade) {
 				drawOverlay(graph, true, false);
 			}
-		} else if (player.dead && !inMainMenu) {
+		} else if (player.get().dead && !inMainMenu) {
 			doGame(delta);
 			drawOverlay(graph, true, false);
 		} else if (gameStart) {
@@ -2742,7 +2743,7 @@ function updateGameLoop() {
 }
 function otherJump(userIdx: number) {
 	var tmpPlayer = findUserByIndex(userIdx);
-	if (tmpPlayer != undefined && tmpPlayer != null && player.index != userIdx) {
+	if (tmpPlayer != undefined && tmpPlayer != null && player.get().index != userIdx) {
 		playerJump(tmpPlayer);
 	}
 }
@@ -2787,16 +2788,16 @@ function doGame(delta: number) {
 	updateScreenShake(/*delta*/);
 	if (target != null) {
 		startX.set(
-			player.x -
+			player.get().x -
 				maxScreenWidth.get() / 2 +
-				-screenSkX +
+				-appStore.get().shake.x +
 				target.dOffset * Math.cos(target.f + Math.PI),
 		);
 		startY.set(
-			player.y -
+			player.get().y -
 				20 -
 				maxScreenHeight.get() / 2 +
-				-screenSkY +
+				-appStore.get().shake.y +
 				target.dOffset * Math.sin(target.f + Math.PI),
 		);
 		if (fillCounter > 1 && socket) {
@@ -2854,11 +2855,11 @@ function drawEdgeShader() {
 	try {
 		if (grd == null) {
 			grd = graph.createRadialGradient(
-				player.x - startX.get(),
-				player.y - startY.get(),
+				player.get().x - startX.get(),
+				player.get().y - startY.get(),
 				0,
-				player.x - startX.get(),
-				player.y - startY.get(),
+				player.get().x - startX.get(),
+				player.get().y - startY.get(),
 				maxScreenWidth.get() / 2,
 			);
 			grd.addColorStop(0, "rgba(0,0,0,0.0)");
@@ -2871,61 +2872,6 @@ function drawEdgeShader() {
 	}
 }
 
-class FlashGlow {
-	initScale = 0;
-	scale = 0;
-	y = 0;
-	x = 0;
-	active = false;
-	maxDuration = 0;
-	duration = 0;
-
-	update(delta: number) {
-		if (!(this.active && this.maxDuration > 0)) return;
-		this.duration += delta;
-		let tmpScale = Math.max(0, 1 - this.duration / this.maxDuration);
-		this.scale = this.initScale * tmpScale;
-		if (this.scale < 1) {
-			this.active = false;
-		}
-		if (this.duration >= this.maxDuration) {
-			this.active = false;
-		}
-	}
-
-	draw() {
-		if (!this.active) return;
-		graph.drawImage(
-			lightSprite,
-			this.x - startX.get() - this.scale / 2,
-			this.y - startY.get() - this.scale / 2,
-			this.scale,
-			this.scale,
-		);
-	}
-}
-
-var glowIntensity = 0.2;
-var flashGlows: FlashGlow[] = [];
-var glowIndex = 0;
-for (let i = 0; i < 30; ++i) {
-	flashGlows.push(new FlashGlow());
-}
-
-function createFlash(x: number, y: number, scale: number) {
-	glowIndex++;
-	if (glowIndex >= flashGlows.length) {
-		glowIndex = 0;
-	}
-	let tmpGlow = flashGlows[glowIndex];
-	tmpGlow.x = x;
-	tmpGlow.y = y;
-	tmpGlow.scale = 0;
-	tmpGlow.initScale = scale * 220;
-	tmpGlow.duration = 0;
-	tmpGlow.maxDuration = 180;
-	tmpGlow.active = true;
-}
 function drawGameLights(delta: number) {
 	if (!lightSprite) return;
 	graph.globalCompositeOperation = "lighter";
@@ -2959,11 +2905,7 @@ function drawGameLights(delta: number) {
 	}
 	if (showGlows) {
 		graph.globalAlpha = 0.2;
-		for (let i = 0; i < flashGlows.length; ++i) {
-			let tmpObject = flashGlows[i];
-			tmpObject.update(delta);
-			tmpObject.draw();
-		}
+		updateFlashGlows(delta);
 	}
 	graph.globalCompositeOperation = "source-over";
 }
@@ -2975,17 +2917,17 @@ var pingGrow = 0.4;
 var cachedMiniMap: HTMLCanvasElement | null = null;
 function getCachedMiniMap() {
 	fillCounter++;
-	if (cachedMiniMap == null && gameMap !== undefined && gameMap.tiles.length > 0) {
+	if (cachedMiniMap == null && gameMap.get() && gameMap.get().tiles.length > 0) {
 		let baseCanvasElem = document.createElement("canvas");
 		let baseCtx = baseCanvasElem.getContext("2d");
 		baseCanvasElem.width = mapScale;
 		baseCanvasElem.height = mapScale;
 		baseCtx.fillStyle = "#fff";
-		for (let i = 0; i < gameMap.tiles.length; ++i) {
-			if (gameMap.tiles[i].wall) {
+		for (let i = 0; i < gameMap.get().tiles.length; ++i) {
+			if (gameMap.get().tiles[i].wall) {
 				baseCtx.fillRect(
-					(gameMap.tiles[i].x / gameWidth) * mapScale,
-					(gameMap.tiles[i].y / gameHeight) * mapScale,
+					(gameMap.get().tiles[i].x / gameWidth) * mapScale,
+					(gameMap.get().tiles[i].y / gameHeight) * mapScale,
 					((mapTileScale * 1.08) / gameWidth) * mapScale,
 					((mapTileScale * 1.08) / gameWidth) * mapScale,
 				);
@@ -2998,12 +2940,13 @@ function getCachedMiniMap() {
 		finalCtx.globalAlpha = 0.1;
 		finalCtx.drawImage(baseCanvasElem, 0, 0);
 		finalCtx.globalAlpha = 1;
-		for (let d = 0; d < gameMap.tiles.length; ++d) {
-			if (gameMap.tiles[d].hardPoint) {
-				finalCtx.fillStyle = gameMap.tiles[d].objTeam === player.team ? "#5151d9" : "#d95151";
+		for (let d = 0; d < gameMap.get().tiles.length; ++d) {
+			if (gameMap.get().tiles[d].hardPoint) {
+				finalCtx.fillStyle =
+					gameMap.get().tiles[d].objTeam === player.get().team ? "#5151d9" : "#d95151";
 				finalCtx.fillRect(
-					(gameMap.tiles[d].x / gameWidth) * mapScale,
-					(gameMap.tiles[d].y / gameHeight) * mapScale,
+					(gameMap.get().tiles[d].x / gameWidth) * mapScale,
+					(gameMap.get().tiles[d].y / gameHeight) * mapScale,
 					((mapTileScale * 1.08) / gameWidth) * mapScale,
 					((mapTileScale * 1.08) / gameWidth) * mapScale,
 				);
@@ -3024,12 +2967,12 @@ function drawMiniMap() {
 		if (
 			gameObjects[i].type === "player" &&
 			gameObjects[i].onScreen &&
-			(gameObjects[i].index === player.index ||
-				gameObjects[i].team === player.team ||
+			(gameObjects[i].index === player.get().index ||
+				gameObjects[i].team === player.get().team ||
 				gameObjects[i].isBoss)
 		) {
 			mapContext.fillStyle =
-				gameObjects[i].index === player.index
+				gameObjects[i].index === player.get().index
 					? "#fff"
 					: gameObjects[i].isBoss
 						? "#db4fcd"
@@ -3047,19 +2990,19 @@ function drawMiniMap() {
 			mapContext.fill();
 		}
 	}
-	if (gameMap != null) {
+	if (gameMap.get()) {
 		mapContext.globalAlpha = 1;
-		for (let i = 0; i < gameMap.pickups.length; ++i) {
-			if (gameMap.pickups[i].active) {
-				if (gameMap.pickups[i].type === "lootcrate") {
+		for (let i = 0; i < gameMap.get().pickups.length; ++i) {
+			if (gameMap.get().pickups[i].active) {
+				if (gameMap.get().pickups[i].type === "lootcrate") {
 					mapContext.fillStyle = "#ffd100";
-				} else if (gameMap.pickups[i].type === "healthpack") {
+				} else if (gameMap.get().pickups[i].type === "healthpack") {
 					mapContext.fillStyle = "#5ed951";
 				}
 				mapContext.beginPath();
 				mapContext.arc(
-					(gameMap.pickups[i].x / gameWidth) * mapScale,
-					(gameMap.pickups[i].y / gameHeight) * mapScale,
+					(gameMap.get().pickups[i].x / gameWidth) * mapScale,
+					(gameMap.get().pickups[i].y / gameHeight) * mapScale,
 					pingScale,
 					0,
 					Math.PI * 2,
@@ -3078,27 +3021,6 @@ function calculateUIScale() {
 }
 function drawMenuBackground() {}
 function drawUI() {}
-var screenSkX = 0;
-var screenShackeScale = 0;
-var screenSkY = 0;
-var screenSkRed = 0.5;
-var screenSkDir = 0;
-function screenShake(scale: number, dir: number) {
-	if (screenShackeScale < scale) {
-		screenShackeScale = scale;
-		screenSkDir = dir;
-	}
-}
-function updateScreenShake() {
-	if (screenShackeScale > 0) {
-		screenSkX = screenShackeScale * Math.cos(screenSkDir);
-		screenSkY = screenShackeScale * Math.sin(screenSkDir);
-		screenShackeScale *= screenSkRed;
-		if (screenShackeScale <= 0.1) {
-			screenShackeScale = 0;
-		}
-	}
-}
 var userSprays: Sprite[] = [];
 var cachedSprays: Record<string, SpriteCanvas> = {};
 function createSpray(plrIdx: number, x: number, y: number) {
@@ -3291,7 +3213,7 @@ var soundList = [
 		loop: true,
 		onload: () => {
 			tmpList.track1.sound.play();
-			if (!player.dead || startingGame) {
+			if (!player.get().dead || startingGame) {
 				tmpList.track1.sound.mute();
 			} else {
 				currentTrack = 1;
@@ -3305,7 +3227,7 @@ var soundList = [
 		loop: true,
 		onload: () => {
 			tmpList.track2.sound.play();
-			if (player.dead || !gameStart || gameOver) {
+			if (player.get().dead || !gameStart || gameOver) {
 				tmpList.track2.sound.mute();
 			} else {
 				currentTrack = 2;
@@ -3364,7 +3286,7 @@ var maxHearDist = 1500;
 function playSound(soundId: string, x: number, y: number) {
 	if (!kicked && doSounds) {
 		try {
-			let tmpDist = getDistance(player.x, player.y, x, y);
+			let tmpDist = getDistance(player.get().x, player.get().y, x, y);
 			if (tmpDist <= maxHearDist) {
 				let tmpSoundEntry = tmpList[soundId];
 				if (tmpSoundEntry !== undefined) {
@@ -3553,7 +3475,7 @@ class Projectile {
 							}
 						}
 					}
-					if (this.active && this.owner.index == player.index) {
+					if (this.active && this.owner.index == player.get().index) {
 						for (let i = 0; i < players.length; i++) {
 							let tmpPlayer = players[i];
 							if (
@@ -3788,7 +3710,7 @@ function updateWeaponUI(tmpPlayer: Player, force: boolean) {
 function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
 	// for some reason, the action cooldown elements sometimes aren't created?
 	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
-		updateWeaponUI(player, true);
+		updateWeaponUI(player.get(), true);
 	}
 	let tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
@@ -3870,7 +3792,7 @@ function findServerBullet(bulletIndex: number) {
 }
 function someoneShot(evt: any) {
 	// todo
-	if (evt.i !== player.index) {
+	if (evt.i !== player.get().index) {
 		let tmpPlayer = findUserByIndex(evt.i);
 		if (tmpPlayer != null) {
 			shootNextBullet(evt, tmpPlayer, target.d, currentTime, getNextBullet(bullets));
@@ -3880,7 +3802,7 @@ function someoneShot(evt: any) {
 function updateBullets(delta: number) {
 	graph.globalAlpha = 1;
 	for (const bullet of bullets) {
-		bullet.update(delta, currentTime, gameObjects, gameMap.tiles, gameObjects);
+		bullet.update(delta, currentTime, gameObjects, gameMap.get().tiles, gameObjects);
 		if (bullet.active) {
 			let b = bullet.x - startX.get();
 			let d = bullet.y - startY.get();
@@ -4173,6 +4095,8 @@ function loadDefaultSprites(base: string) {
 	ambientSprites = [];
 	wallSpritesSeg = [];
 	particleSprites = [];
+	//@ts-ignore temporary
+	window.particleSprites = particleSprites;
 	bulletSprites = [];
 	cachedWeaponSprites = {};
 	flagSprites.push(getSprite(`${base}flags/flagb1`));
@@ -4190,6 +4114,8 @@ function loadDefaultSprites(base: string) {
 	ambientSprites.push(getSprite(`${base}ambient1`));
 	darkFillerSprite = getSprite(`${base}darkfiller`);
 	lightSprite = getSprite(`${base}lighting`);
+	//@ts-ignore temporary
+	window.lightSprite = lightSprite;
 	floorSprites.push(getSprite(`${base}ground1`));
 	floorSprites.push(getSprite(`${base}ground2`));
 	floorSprites.push(getSprite(`${base}ground3`));
@@ -4566,7 +4492,7 @@ function drawGameObjects(delta: number) {
 	for (let i = 0; i < gameObjects.length; i++) {
 		let tmpObject = gameObjects[i];
 		if (tmpObject.type === "player") {
-			if (!tmpObject.dead && (tmpObject.index === player.index || tmpObject.onScreen)) {
+			if (!tmpObject.dead && (tmpObject.index === player.get().index || tmpObject.onScreen)) {
 				if (tmpObject.jumpY === undefined) {
 					tmpObject.jumpY = 0;
 				}
@@ -4736,7 +4662,7 @@ function drawGameObjects(delta: number) {
 				if (tmpObject.spawnProtection > 0) {
 					playerContext.globalCompositeOperation = "source-atop";
 					playerContext.fillStyle =
-						tmpObject.team != player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
+						tmpObject.team != player.get().team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
 					playerContext.fillRect(
 						-playerCanvas.width / 2,
 						-playerCanvas.height / 2,
@@ -4786,7 +4712,7 @@ function drawGameObjects(delta: number) {
 			}
 			drawSprite(
 				graph,
-				flagSprites[tmpObject.ai + (tmpObject.team == player.team ? 0 : 3)],
+				flagSprites[tmpObject.ai + (tmpObject.team == player.get().team ? 0 : 3)],
 				tmpObject.x - tmpObject.w / 2 - startX.get(),
 				tmpObject.y - tmpObject.h - startY.get(),
 				tmpObject.w,
@@ -4833,7 +4759,7 @@ function drawPlayerNames() {
 		if (
 			tmpObject.type !== "player" ||
 			tmpObject.dead ||
-			(tmpObject.index !== player.index && !tmpObject.onScreen)
+			(tmpObject.index !== player.get().index && !tmpObject.onScreen)
 		)
 			continue;
 
@@ -4847,7 +4773,7 @@ function drawPlayerNames() {
 		let playerName = tmpObject.name;
 		let rankText = tmpObject.loggedIn ? tmpObject.account.rank : "";
 		// h = graph.measureText(playerName);
-		let nameColor = tmpObject.team !== player.team ? "#d95151" : "#5151d9";
+		let nameColor = tmpObject.team !== player.get().team ? "#d95151" : "#5151d9";
 		if (showNames) {
 			let renderedName = renderShadedAnimText(playerName, d * textSizeMult, "#ffffff", 5, "");
 			if (renderedName != undefined) {
@@ -5057,75 +4983,23 @@ function renderSideWalks(
 	}
 }
 function drawMap(layer: number) {
-	if (gameMap != null) {
-		for (let i = 0; i < gameMap.tiles.length; ++i) {
-			let tile = gameMap.tiles[i];
-			if (layer === 0) {
-				if (
-					!tile.wall &&
-					canSee(tile.x - startX.get(), tile.y - startY.get(), mapTileScale, mapTileScale)
-				) {
-					let tmpTlSprite = getCachedFloor(tile);
-					if (tmpTlSprite !== undefined) {
-						drawSprite(
-							graph,
-							tmpTlSprite,
-							tile.x - startX.get(),
-							tile.y - startY.get(),
-							tmpTlSprite.width,
-							tmpTlSprite.height,
-							0,
-							false,
-							0,
-							0,
-							0,
-						);
-					}
-				}
-			} else if (layer === 1) {
-				if (
-					tile.wall &&
-					!tile.bottom &&
-					canSee(
-						tile.x - startX.get(),
-						tile.y - startY.get() + mapTileScale * 0.5,
-						mapTileScale,
-						mapTileScale * 0.75,
-					)
-				) {
-					drawSprite(
-						graph,
-						wallSpritesSeg[tile.spriteIndex],
-						tile.x - startX.get(),
-						tile.y + Math.round(mapTileScale / 2) - startY.get(),
-						mapTileScale,
-						mapTileScale / 2,
-						0,
-						true,
-						-(tile.scale / 2),
-						0.5,
-						tile.scale,
-					);
-				}
-			} else if (
-				layer === 2 &&
-				tile.wall &&
-				canSee(
-					tile.x - startX.get(),
-					tile.y - startY.get() - mapTileScale * 0.5,
-					mapTileScale,
-					mapTileScale,
-				)
+	if (!gameMap.get()) return;
+	for (let i = 0; i < gameMap.get().tiles.length; ++i) {
+		let tile = gameMap.get().tiles[i];
+		if (layer === 0) {
+			if (
+				!tile.wall &&
+				canSee(tile.x - startX.get(), tile.y - startY.get(), mapTileScale, mapTileScale)
 			) {
-				let tmpTlSprite = getCachedWall(tile);
+				let tmpTlSprite = getCachedFloor(tile);
 				if (tmpTlSprite !== undefined) {
 					drawSprite(
 						graph,
 						tmpTlSprite,
 						tile.x - startX.get(),
-						Math.round(tile.y - mapTileScale / 2 - startY.get()),
-						mapTileScale,
-						mapTileScale,
+						tile.y - startY.get(),
+						tmpTlSprite.width,
+						tmpTlSprite.height,
 						0,
 						false,
 						0,
@@ -5134,43 +5008,94 @@ function drawMap(layer: number) {
 					);
 				}
 			}
+		} else if (layer === 1) {
+			if (
+				tile.wall &&
+				!tile.bottom &&
+				canSee(
+					tile.x - startX.get(),
+					tile.y - startY.get() + mapTileScale * 0.5,
+					mapTileScale,
+					mapTileScale * 0.75,
+				)
+			) {
+				drawSprite(
+					graph,
+					wallSpritesSeg[tile.spriteIndex],
+					tile.x - startX.get(),
+					tile.y + Math.round(mapTileScale / 2) - startY.get(),
+					mapTileScale,
+					mapTileScale / 2,
+					0,
+					true,
+					-(tile.scale / 2),
+					0.5,
+					tile.scale,
+				);
+			}
+		} else if (
+			layer === 2 &&
+			tile.wall &&
+			canSee(
+				tile.x - startX.get(),
+				tile.y - startY.get() - mapTileScale * 0.5,
+				mapTileScale,
+				mapTileScale,
+			)
+		) {
+			let tmpTlSprite = getCachedWall(tile);
+			if (tmpTlSprite !== undefined) {
+				drawSprite(
+					graph,
+					tmpTlSprite,
+					tile.x - startX.get(),
+					Math.round(tile.y - mapTileScale / 2 - startY.get()),
+					mapTileScale,
+					mapTileScale,
+					0,
+					false,
+					0,
+					0,
+					0,
+				);
+			}
 		}
-		if (layer === 0) {
-			for (let i = 0; i < gameMap.pickups.length; ++i) {
-				let tmpPickup = gameMap.pickups[i];
-				if (
-					tmpPickup.active &&
-					canSee(tmpPickup.x - startX.get(), tmpPickup.y - startY.get(), 0, 0)
-				) {
-					if (tmpPickup.type === "healthpack") {
-						drawSprite(
-							graph,
-							healthPackSprite,
-							tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
-							tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
-							tmpPickup.scale,
-							tmpPickup.scale,
-							0,
-							true,
-							0,
-							0.5,
-							0,
-						);
-					} else {
-						drawSprite(
-							graph,
-							lootCrateSprite,
-							tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
-							tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
-							tmpPickup.scale,
-							tmpPickup.scale,
-							0,
-							true,
-							0,
-							0.5,
-							0,
-						);
-					}
+	}
+	if (layer === 0) {
+		for (let i = 0; i < gameMap.get().pickups.length; ++i) {
+			let tmpPickup = gameMap.get().pickups[i];
+			if (
+				tmpPickup.active &&
+				canSee(tmpPickup.x - startX.get(), tmpPickup.y - startY.get(), 0, 0)
+			) {
+				if (tmpPickup.type === "healthpack") {
+					drawSprite(
+						graph,
+						healthPackSprite,
+						tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
+						tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
+						tmpPickup.scale,
+						tmpPickup.scale,
+						0,
+						true,
+						0,
+						0.5,
+						0,
+					);
+				} else {
+					drawSprite(
+						graph,
+						lootCrateSprite,
+						tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
+						tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
+						tmpPickup.scale,
+						tmpPickup.scale,
+						0,
+						true,
+						0,
+						0.5,
+						0,
+					);
 				}
 			}
 		}
@@ -5241,278 +5166,7 @@ function getCachedShadow(sprite: Sprite | SpriteCanvas, width: number, height: n
 	}
 	return cachedShadows[sprite.index];
 }
-function canSee(a, b, d, e) {
-	return a + d > 0 && b + e > 0 && a < maxScreenWidth.get() && b < maxScreenHeight.get();
-}
-class Particle {
-	rotation = 0;
-	initScale = 0;
-	scale = 0;
-	dir = 0;
-	initSpeed = 0;
-	speed = 0;
-	y = 0;
-	x = 0;
-	active = false;
-	layer = 0;
-	spriteIndex = 0;
-	alpha = 1;
-	fadeSpeed = 0;
-	forceShow = false;
-	checkCollisions = false;
-	tmpScale = 0;
-	maxDuration = 0;
-	duration = 0;
-	update(delta: number) {
-		if (!this.active) return;
-		if (this.maxDuration > 0) {
-			this.duration += delta;
-			this.tmpScale = 1 - this.duration / this.maxDuration;
-			this.tmpScale = this.tmpScale < 0 ? 0 : this.tmpScale;
-			this.scale = this.initScale * this.tmpScale;
-			if (this.scale < 1) {
-				this.active = false;
-			}
-			this.speed = this.initSpeed * this.tmpScale;
-			if (this.speed <= 0.01) {
-				this.speed = 0;
-			} else {
-				this.x += this.speed * delta * Math.cos(this.dir);
-				this.y += this.speed * delta * Math.sin(this.dir);
-			}
-			if (this.duration >= this.maxDuration) {
-				this.active = false;
-			}
-		}
-		if (this.alpha > 0) {
-			this.alpha -= this.fadeSpeed * delta;
-		}
-		if (this.alpha <= 0) {
-			this.alpha = 0;
-			this.active = false;
-		}
-		if (this.checkCollisions) {
-			this.checkInWall();
-		}
-	}
-	draw() {
-		if (
-			!this.active ||
-			!particleSprites[this.spriteIndex] ||
-			!utils.isImageOk(particleSprites[this.spriteIndex])
-		)
-			return;
 
-		graph.globalAlpha = this.alpha;
-		if (this.rotation !== 0) {
-			graph.save();
-			graph.translate(this.x - startX.get(), this.y - startY.get());
-			graph.rotate(this.rotation);
-			graph.drawImage(
-				particleSprites[this.spriteIndex],
-				-(this.scale / 2),
-				-(this.scale / 2),
-				this.scale,
-				this.scale,
-			);
-			graph.restore();
-		} else {
-			graph.drawImage(
-				particleSprites[this.spriteIndex],
-				this.x - startX.get() - this.scale / 2,
-				this.y - startY.get() - this.scale / 2,
-				this.scale,
-				this.scale,
-			);
-		}
-	}
-
-	checkInWall() {
-		gameMap.tiles.forEach((tmpTl: Tile) => {
-			if (!tmpTl.wall || !tmpTl.hasCollision) return;
-			if (
-				this.x >= tmpTl.x &&
-				this.x <= tmpTl.x + tmpTl.scale &&
-				this.y > tmpTl.y &&
-				this.y < tmpTl.y + tmpTl.scale - player.height
-			) {
-				this.active = false;
-			}
-		});
-	}
-}
-var cachedParticles: Particle[] = [];
-var particleIndex = 0;
-for (let i = 0; i < 700; ++i) {
-	cachedParticles.push(new Particle());
-}
-function updateParticles(delta: number, layer: number) {
-	for (let i = 0; i < cachedParticles.length; ++i) {
-		if (
-			(showParticles || cachedParticles[i].forceShow) &&
-			cachedParticles[i].active &&
-			canSee(
-				cachedParticles[i].x - startX.get(),
-				cachedParticles[i].y - startY.get(),
-				cachedParticles[i].scale,
-				cachedParticles[i].scale,
-			)
-		) {
-			if (layer === cachedParticles[i].layer) {
-				cachedParticles[i].update(delta);
-				cachedParticles[i].draw();
-			}
-		} else {
-			cachedParticles[i].active = false;
-		}
-	}
-	graph.globalAlpha = 1;
-}
-
-function getReadyParticle() {
-	particleIndex++;
-	if (particleIndex >= cachedParticles.length) {
-		particleIndex = 0;
-	}
-	return cachedParticles[particleIndex];
-}
-function particleCone(
-	count: number,
-	x: number,
-	y: number,
-	dir: number,
-	spread: number,
-	speed: number,
-	scale: number,
-	spriteIndex: number,
-	m,
-) {
-	if (!showParticles) return;
-	for (let i = 0; i < count; ++i) {
-		let tmpParticle = getReadyParticle();
-		tmpParticle.forceShow = false;
-		tmpParticle.checkCollisions = false;
-		tmpParticle.x = x;
-		tmpParticle.y = y;
-		tmpParticle.rotation = 0;
-		tmpParticle.alpha = 1;
-		tmpParticle.speed = 0;
-		tmpParticle.fadeSpeed = 0;
-		tmpParticle.initSpeed = 0;
-		tmpParticle.initScale = randomFloat(3, 9);
-		tmpParticle.spriteIndex = 0;
-		tmpParticle.maxDuration = -1;
-		tmpParticle.duration = 0;
-		if (i === 0 && spriteIndex === 2 && m) {
-			tmpParticle.spriteIndex = 3;
-			tmpParticle.layer = 0;
-		} else {
-			tmpParticle.dir = dir + randomFloat(-spread, spread);
-			tmpParticle.initScale = scale * randomFloat(1.5, 1.8);
-			tmpParticle.initSpeed = speed * randomFloat(0.3, 1.3);
-			tmpParticle.maxDuration = randomFloat(0.8, 1.1) * 360;
-			tmpParticle.spriteIndex = spriteIndex;
-			tmpParticle.layer = randomInt(0, 1);
-		}
-		tmpParticle.scale = tmpParticle.initScale;
-		tmpParticle.active = true;
-	}
-}
-var liquidSpread = 35;
-function createLiquid(x: number, y: number, _dir: number, spriteIndex: number) {
-	let tmpParticle = getReadyParticle();
-	tmpParticle.x = x + randomFloat(-liquidSpread, liquidSpread);
-	tmpParticle.y = y + randomFloat(-liquidSpread, liquidSpread);
-	tmpParticle.initSpeed = 0;
-	tmpParticle.maxDuration = -1;
-	tmpParticle.duration = 0;
-	tmpParticle.initScale = randomFloat(60, 150);
-	tmpParticle.scale = tmpParticle.initScale;
-	tmpParticle.rotation = randomInt(0, 5);
-	tmpParticle.alpha = randomFloat(0.3, 0.5);
-	tmpParticle.fadeSpeed = 0.00002;
-	tmpParticle.checkCollisions = false;
-	tmpParticle.spriteIndex = randomInt(spriteIndex, spriteIndex + 1);
-	tmpParticle.layer = 0;
-	tmpParticle.forceShow = false;
-	tmpParticle.active = true;
-}
-var maxShakeDist = 2000;
-var maxExplosionDuration = 400;
-var maxShake = 9;
-
-function createExplosion(x: number, y: number, scale: number) {
-	let tmpDist = getDistance(x, y, player.x, player.y);
-	if (tmpDist <= maxShakeDist) {
-		let tmpDir = getAngle(x, player.x, y, player.y);
-		screenShake(scale * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
-	}
-	playSound("explosion", x, y);
-	createSmokePuff(x, y, scale, true, 1);
-}
-function createSmokePuff(x: number, y: number, scale: number, hole: boolean, speed: number) {
-	createFlash(x, y, scale);
-	for (let i = 0; i < 30; ++i) {
-		let tmpParticle = getReadyParticle();
-		tmpParticle.dir = Math.round(randomFloat(-Math.PI, Math.PI) / (Math.PI / 3)) * (Math.PI / 3);
-		tmpParticle.forceShow = true;
-		tmpParticle.spriteIndex = 2;
-		tmpParticle.checkCollisions = true;
-		tmpParticle.alpha = 1;
-		tmpParticle.fadeSpeed = 0;
-		tmpParticle.initSpeed = 0;
-		tmpParticle.maxDuration = -1;
-		tmpParticle.duration = 0;
-		tmpParticle.layer = 1;
-		tmpParticle.rotation = 0;
-		if (i === 0 && hole) {
-			tmpParticle.x = x;
-			tmpParticle.y = y;
-			tmpParticle.initScale = randomFloat(50, 60) * scale;
-			tmpParticle.rotation = randomInt(0, 5);
-			tmpParticle.speed = 0;
-			tmpParticle.fadeSpeed = 0.0002;
-			tmpParticle.checkCollisions = false;
-			tmpParticle.spriteIndex = 6;
-			tmpParticle.layer = 0;
-		} else if (i <= 10) {
-			let tmpDist = i * scale;
-			tmpParticle.x = x + tmpDist * Math.cos(tmpParticle.dir);
-			tmpParticle.y = y + tmpDist * Math.sin(tmpParticle.dir);
-			tmpParticle.initScale = randomFloat(30, 33) * scale;
-			tmpParticle.initSpeed = (3 / tmpParticle.initScale) * scale * speed;
-			tmpParticle.maxDuration = maxExplosionDuration * 0.8;
-		} else {
-			let tmpDist = randomFloat(0, 10) * scale;
-			tmpParticle.x = x + tmpDist * Math.cos(tmpParticle.dir);
-			tmpParticle.y = y + tmpDist * Math.sin(tmpParticle.dir);
-			let rand = randomFloat(0.7, 1.4);
-			tmpParticle.initScale = scale * 11 * rand;
-			tmpParticle.initSpeed = (((12 / tmpParticle.initScale) * scale) / rand) * speed;
-			tmpParticle.maxDuration = maxExplosionDuration * rand;
-		}
-		tmpParticle.scale = tmpParticle.initScale;
-		tmpParticle.active = true;
-	}
-}
-function stillDustParticle(x: number, y: number, force: boolean) {
-	let tmpParticle = getReadyParticle();
-	tmpParticle.x = x + randomInt(-10, 10);
-	tmpParticle.y = y;
-	tmpParticle.initScale = randomFloat(18, 25);
-	tmpParticle.initSpeed = 0.05;
-	tmpParticle.maxDuration = 600;
-	tmpParticle.duration = 0;
-	tmpParticle.dir = randomFloat(0, Math.PI * 2);
-	tmpParticle.rotation = 0;
-	tmpParticle.spriteIndex = 2;
-	tmpParticle.layer = force ? 1 : 0;
-	tmpParticle.alpha = 1;
-	tmpParticle.fadeSpeed = 0;
-	tmpParticle.checkCollisions = false;
-	tmpParticle.forceShow = force;
-	tmpParticle.active = true;
-}
 var then = Date.now();
 let elapsed: number | undefined;
 function callUpdate() {
