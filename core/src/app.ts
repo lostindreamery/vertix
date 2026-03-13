@@ -16,7 +16,14 @@ import {
 	updateNotifications,
 } from "./visual/animtext.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
-import { createExplosion, createLiquid, createSmokePuff, particleCone, stillDustParticle, updateParticles } from "./visual/particle.ts";
+import {
+	createExplosion,
+	createLiquid,
+	createSmokePuff,
+	particleCone,
+	stillDustParticle,
+	updateParticles,
+} from "./visual/particle.ts";
 import { updateFlashGlows } from "./visual/flash.ts";
 
 const {

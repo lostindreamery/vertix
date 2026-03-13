@@ -53,7 +53,6 @@ export function updateFlashGlows(delta: number) {
 }
 
 export function createFlash(x: number, y: number, scale: number) {
-	console.log("!!!!!!!")
 	glowIndex++;
 	if (glowIndex >= flashGlows.length) {
 		glowIndex = 0;

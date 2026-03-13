@@ -17,6 +17,6 @@ export const appStore = store({
 		x: 0,
 		y: 0,
 		scale: 0,
-		dir: 0		
-	}
+		dir: 0,
+	},
 });

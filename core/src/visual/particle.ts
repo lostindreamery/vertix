@@ -63,9 +63,9 @@ class Particle {
 	draw() {
 		if (
 			!this.active ||
-            //@ts-ignore todo
+			//@ts-ignore todo
 			!window.particleSprites[this.spriteIndex] ||
-            //@ts-ignore todo
+			//@ts-ignore todo
 			!isImageOk(window.particleSprites[this.spriteIndex])
 		)
 			return;
@@ -76,7 +76,7 @@ class Particle {
 			window.graph.translate(this.x - startX.get(), this.y - startY.get());
 			window.graph.rotate(this.rotation);
 			window.graph.drawImage(
-                //@ts-ignore todo
+				//@ts-ignore todo
 				window.particleSprites[this.spriteIndex],
 				-(this.scale / 2),
 				-(this.scale / 2),
@@ -86,7 +86,7 @@ class Particle {
 			window.graph.restore();
 		} else {
 			window.graph.drawImage(
-                //@ts-ignore todo
+				//@ts-ignore todo
 				window.particleSprites[this.spriteIndex],
 				this.x - startX.get() - this.scale / 2,
 				this.y - startY.get() - this.scale / 2,
@@ -216,7 +216,7 @@ export function createExplosion(x: number, y: number, scale: number) {
 		let tmpDir = getAngle(x, player.get().x, y, player.get().y);
 		screenShake(scale * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
 	}
-    // fix when sounds are moved to a separate file
+	// fix when sounds are moved to a separate file
 	// playSound("explosion", x, y);
 	createSmokePuff(x, y, scale, true, 1);
 }
