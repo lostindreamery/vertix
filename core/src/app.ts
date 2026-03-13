@@ -3669,9 +3669,9 @@ function updateWeaponUI(tmpPlayer: Player, force: boolean) {
 		return false;
 	}
 	if (force) {
-		actionBar.textContent = "";
+		actionBar.innerHTML = "";
 	}
-	if (actionBar.textContent === "") {
+	if (actionBar.innerHTML === "") {
 		for (let i = 0; i < tmpPlayer.weapons.length; ++i) {
 			let actionContainer = document.createElement("div");
 			actionContainer.id = `actionContainer${i}`;
@@ -3700,7 +3700,7 @@ function updateWeaponUI(tmpPlayer: Player, force: boolean) {
 function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
 	// for some reason, the action cooldown elements sometimes aren't created?
 	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
-		updateWeaponUI(player.get(), true);
+		updateWeaponUI(player.get(), false);
 	}
 	let tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
