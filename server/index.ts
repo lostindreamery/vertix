@@ -13,7 +13,8 @@ import {
 } from "core/src/utils.ts";
 import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
-import type { Player } from "core/src/types.ts";
+import type { Player, Tile, MapObjects } from "core/src/types.ts";
+import { genData } from "./genData.ts";
 
 const app = new Hono();
 app.use(
@@ -47,20 +48,27 @@ const io = new Server({
 let bullets = [];
 let players: Player[] = [];
 let mapTileScale = 256;
-// biome-ignore format: temp map data
-let genData = { "width": 16, "height": 16, "data": [255, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255] };
-let tiles: any[] = [];
-// TODO: auto generate clutter
-let clutter = [
-	{
-		i: 0,
-		x: 128 + mapTileScale,
-		y: 128,
-		w: 64,
-		h: 64,
-		active: true,
-	},
-];
+let tiles: Tile[] = [];
+let clutter: MapObjects[] = [];
+let pickups: MapObjects[] = [];
+
+// TODO: auto generate map objects
+clutter.push({
+	i: 0,
+	x: 128 + mapTileScale,
+	y: 128,
+	w: 64,
+	h: 64,
+	active: true,
+});
+pickups.push({
+	type: "healthpack",
+	x: 128,
+	y: 128 + mapTileScale,
+	scale: 64,
+	active: true,
+});
+
 let mapData = {
 	gameMode: {
 		code: "tdm",
@@ -72,26 +80,17 @@ let mapData = {
 	},
 	clutter: clutter,
 	genData: genData,
-	pickups: [
-		{
-			i: 0,
-			x: 128,
-			y: 128 + mapTileScale,
-			scale: 64,
-			active: true,
-		},
-	],
+	pickups: pickups,
 	tiles: tiles,
 	width: (genData.width - 4) * mapTileScale,
 	height: (genData.height - 4) * mapTileScale,
 };
 setupMap(mapData, mapTileScale);
+let scoreRed = 0;
+let scoreBlue = 0;
 for (let i = 0; i < 100; i++) {
 	bullets.push(new ServerProjectile());
 }
-
-let scoreRed = 0;
-let scoreBlue = 0;
 
 io.on("connection", (socket: Socket) => {
 	console.log("con", socket.id);
@@ -148,31 +147,6 @@ io.on("connection", (socket: Socket) => {
 		true,
 	);
 
-	socket.conn.on("packet", ({ type, data }) => {
-		//if (data?.includes("ping1") || data?.includes("hdt") || data?.includes('2["0",')) return;
-		//console.log(type, data);
-	});
-
-	socket.on("cht", (msg, type) => {
-		if (msg.includes("!sync")) {
-			io.emit(
-				"rsd",
-				players.flatMap((player) => [
-					5,
-					player.index,
-					player.x,
-					player.y,
-					player.angle,
-				]),
-			);
-			socket.emit("cht", [-1, "synced"]);
-			return;
-		}
-		io.emit("cht", [player.index, msg]);
-	});
-	socket.on("ping1", () => {
-		socket.emit("pong1");
-	});
 	socket.on("gotit", (client, init, currentTime) => {
 		console.log("gotit", client, init, currentTime);
 		player.name = client.name ? client.name : player.name;
@@ -223,15 +197,6 @@ io.on("connection", (socket: Socket) => {
 			players.flatMap((pl) => [pl.index]),
 		);
 	});
-	// socket.on("ftc", (playerIdx) => {
-	// 	io.emit("rsd", [
-	// 		5,
-	// 		players[playerIdx].index,
-	// 		players[playerIdx].x,
-	// 		players[playerIdx].y,
-	// 		players[playerIdx].angle,
-	// 	]);
-	// });
 	socket.on("disconnect", () => {
 		io.emit("rem", player.index);
 		players.splice(players.indexOf(player), 1);
@@ -441,13 +406,33 @@ io.on("connection", (socket: Socket) => {
 		}
 		wallCol(player, { tiles }, { clutter });
 		player.x = Math.round(player.x);
-    player.y = Math.round(player.y);
-    // TODO: gamemode objectve
+		player.y = Math.round(player.y);
+		// TODO: gamemode objectve
 		//socket.emit("tprt", { indx: 0, newX: 0, newY: 0 })
 		io.emit(
 			"rsd",
 			players.flatMap((pl) => [6, pl.index, pl.x, pl.y, pl.angle, inputNumber]),
 		);
+	});
+	socket.on("cht", (msg, type) => {
+		if (msg.includes("!sync")) {
+			io.emit(
+				"rsd",
+				players.flatMap((player) => [
+					5,
+					player.index,
+					player.x,
+					player.y,
+					player.angle,
+				]),
+			);
+			socket.emit("cht", [-1, "synced"]);
+			return;
+		}
+		io.emit("cht", [player.index, msg]);
+	});
+	socket.on("ping1", () => {
+		socket.emit("pong1");
 	});
 	socket.on("create", (lobby) => {});
 });

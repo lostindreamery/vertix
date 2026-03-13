@@ -155,3 +155,17 @@ export type GameMode = {
 	desc2: string;
 	teams: boolean;
 };
+
+export type MapObjects = {
+	x: number;
+	y: number;
+	active: boolean;
+	//CLUTTER
+	i?: number;
+	w?: number;
+	h?: number;
+	hc?: boolean; //?
+	//PICKUPS
+	scale?: 64;
+	type?: string;
+};
