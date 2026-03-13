@@ -497,6 +497,17 @@
 								type="password"
 								style="margin-top:5px;margin-bottom:8px;width:95%;"
 							>
+							<b>Custom Map: (Optional)</b>
+							<button
+							    type="button"
+								id="customMapButton"
+								class="smallMenuButton"
+								accept="image/*"
+								onclick="document.getElementById('customMapFile').click();"
+							>
+                                Select Map
+                            </button>
+                            <input type="file" id="customMapFile" style="display:none;" accept="image/*" onchange="selectedCMap(this)">
 							<div id="serverCreateMessage" class="lobbyKey" style="margin-bottom:8px;">
 								Press start to start the Server.
 							</div>

@@ -6,6 +6,7 @@ import { characterClasses, setCharacterClasses, specialClasses, weaponNames } fr
 import type {
 	Account,
 	GameMode,
+	CustomMap,
 	InputSendData,
 	Player,
 	Sprite,
@@ -201,32 +202,31 @@ function startLogin() {
 		loginMessage.textContent = "Please Wait...";
 	}
 }
-var customMap = null;
+var customMap: CustomMap = null;
 function getFile() {
 	document.getElementById("upfile").click();
 }
-function selectedCMap(a) {
-	var b = a.value.split("\\");
-	document.getElementById("customMapButton").innerHTML = b[b.length - 1];
-	if (a.files?.[0]) {
-		b = new FileReader();
-		b.onload = () => {
-			var b = document.createElement("img");
-			b.onload = () => {
-				let tmpCanvas = document.createElement("canvas");
-				tmpCanvas.width = b.width;
-				tmpCanvas.height = b.height;
-				tmpCanvas.getContext("2d").drawImage(b, 0, 0, b.width, b.height);
-				customMap = {
-					width: b.width,
-					height: b.height,
-					data: tmpCanvas.getContext("2d").getImageData(0, 0, b.width, b.height).data,
-				};
-			};
-			b.src = a.target.result;
-		};
-		b.readAsDataURL(a.files[0]);
-	}
+window.selectedCMap = (input: HTMLInputElement) => {
+  if (!input?.files[0]) return;
+ 	var name = input.value.split("\\");
+	document.getElementById("customMapButton").innerHTML = name[name.length - 1];
+  let reader = new FileReader();
+  reader.onload = function (e) {
+    const img = document.createElement("img");
+    img.onload = function () {
+      let tmpCanvas = document.createElement("canvas");
+			tmpCanvas.width = img.width;
+			tmpCanvas.height = img.height;
+			tmpCanvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+      customMap = {
+          width: img.width,
+          height: img.height,
+          data: tmpCanvas.getContext("2d").getImageData(0, 0, img.width, img.height).data
+      };
+    };
+    img.src = e.target.result as string;
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 function clearCustomMap() {
 	customMap = null;

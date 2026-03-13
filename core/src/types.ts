@@ -169,3 +169,9 @@ export type MapObjects = {
 	scale?: 64;
 	type?: string;
 };
+
+export type CustomMap = {
+  width: number;
+  height: number;
+  data: ImageDataArray;
+}
