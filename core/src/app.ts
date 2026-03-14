@@ -209,26 +209,26 @@ function getFile() {
 (document.getElementById("customMapFile") as HTMLInputElement).addEventListener(
 	"change",
 	function () {
-	clearCustomMap();
+		clearCustomMap();
 		if (!this?.files[0]) return;
 		var name = this.value.split("\\");
-	document.getElementById("customMapButton").innerHTML = name[name.length - 1];
-	let reader = new FileReader();
+		document.getElementById("customMapButton").innerHTML = name[name.length - 1];
+		let reader = new FileReader();
 		reader.onload = (e) => {
-		const img = document.createElement("img");
+			const img = document.createElement("img");
 			img.onload = () => {
-			let tmpCanvas = document.createElement("canvas");
-			tmpCanvas.width = img.width;
-			tmpCanvas.height = img.height;
-			tmpCanvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
-			customMap = {
-				width: img.width,
-				height: img.height,
-				data: tmpCanvas.getContext("2d").getImageData(0, 0, img.width, img.height).data,
+				let tmpCanvas = document.createElement("canvas");
+				tmpCanvas.width = img.width;
+				tmpCanvas.height = img.height;
+				tmpCanvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+				customMap = {
+					width: img.width,
+					height: img.height,
+					data: tmpCanvas.getContext("2d").getImageData(0, 0, img.width, img.height).data,
+				};
 			};
+			img.src = e.target.result as string;
 		};
-		img.src = e.target.result as string;
-	};
 		reader.readAsDataURL(this.files[0]);
 	},
 );
@@ -2889,7 +2889,7 @@ function drawEdgeShader() {
 }
 
 function drawGameLights(delta: number) {
-	if (!lightSprite) return;
+	if (!appStore.get().sprites.light) return;
 	graph.globalCompositeOperation = "lighter";
 	graph.globalAlpha = 0.2;
 	for (let i = 0; i < bullets.length; i++) {
@@ -2904,7 +2904,7 @@ function drawGameLights(delta: number) {
 				graph.translate(lightX, lightY);
 				drawSprite(
 					graph,
-					lightSprite,
+					appStore.get().sprites.light as Sprite,
 					-(tmpBulletGlowWidth / 2),
 					-(tmpBulletGlowHeight / 2) + tmpObject.height / 2,
 					tmpBulletGlowWidth,
@@ -4064,7 +4064,6 @@ var cachedWalls: Record<string, SpriteCanvas> = {};
 var floorSprites: Sprite[] = [];
 var cachedFloors: Record<string, SpriteCanvas> = {};
 var sideWalkSprite: Sprite | null = null;
-var lightSprite: Sprite | null = null;
 var ambientSprites: Sprite[] = [];
 var wallSpritesSeg: Sprite[] = [];
 var particleSprites: Sprite[] = [];
@@ -4112,9 +4111,7 @@ function loadDefaultSprites(base: string) {
 	wallSprite = getSprite(`${base}wall1`);
 	ambientSprites.push(getSprite(`${base}ambient1`));
 	darkFillerSprite = getSprite(`${base}darkfiller`);
-	lightSprite = getSprite(`${base}lighting`);
-	//@ts-ignore temporary
-	window.lightSprite = lightSprite;
+	appStore.select("sprites", "light").set(getSprite(`${base}lighting`));
 	floorSprites.push(getSprite(`${base}ground1`));
 	floorSprites.push(getSprite(`${base}ground2`));
 	floorSprites.push(getSprite(`${base}ground3`));

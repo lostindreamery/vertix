@@ -1,4 +1,5 @@
 import { appStore } from "../state.ts";
+import type { Sprite } from "../types.ts";
 
 const startX = appStore.select("startX");
 const startY = appStore.select("startY");
@@ -28,8 +29,7 @@ export class FlashGlow {
 	draw() {
 		if (!this.active) return;
 		window.graph.drawImage(
-			//@ts-ignore temporary
-			window.lightSprite,
+			appStore.get().sprites.light as Sprite,
 			this.x - startX.get() - this.scale / 2,
 			this.y - startY.get() - this.scale / 2,
 			this.scale,
