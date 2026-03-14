@@ -2004,15 +2004,15 @@ function addRowToStatTable(data, b) {
 	}
 	document.getElementById("gameStatBoard").appendChild(trow);
 }
-function addUser(a) {
-	a = JSON.parse(a);
-	if (a.index !== player.get().index) {
-		a.type = "player";
-		const b = findUserByIndex(a.index);
+function addUser(userString: string) {
+	let parsed = JSON.parse(userString);
+	if (parsed.index !== player.get().index) {
+		parsed.type = "player";
+		const b = findUserByIndex(parsed.index);
 		if (b == null) {
-			gameObjects.push(a);
+			gameObjects.push(parsed);
 		} else {
-			gameObjects[gameObjects.indexOf(b)] = a;
+			gameObjects[gameObjects.indexOf(b)] = parsed;
 		}
 	}
 }
