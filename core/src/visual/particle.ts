@@ -1,5 +1,6 @@
+import type { Store } from "@simplestack/store";
 import { appStore } from "../state.ts";
-import type { Tile } from "../types.ts";
+import type { Sprite, Tile } from "../types.ts";
 import { canSee, getAngle, getDistance, isImageOk, randomFloat, randomInt } from "../utils.ts";
 import { createFlash } from "./flash.ts";
 import { screenShake } from "./shake.ts";
@@ -8,6 +9,7 @@ const startX = appStore.select("startX");
 const startY = appStore.select("startY");
 const player = appStore.select("player");
 const gameMap = appStore.select("gameMap");
+const particleSprites: Store<Sprite[]> = appStore.select("sprites", "particles");
 
 class Particle {
 	rotation = 0;
@@ -63,10 +65,8 @@ class Particle {
 	draw() {
 		if (
 			!this.active ||
-			//@ts-ignore todo
-			!window.particleSprites[this.spriteIndex] ||
-			//@ts-ignore todo
-			!isImageOk(window.particleSprites[this.spriteIndex])
+			!particleSprites.get()[this.spriteIndex] ||
+			!isImageOk(particleSprites.get()[this.spriteIndex])
 		)
 			return;
 
@@ -76,8 +76,7 @@ class Particle {
 			window.graph.translate(this.x - startX.get(), this.y - startY.get());
 			window.graph.rotate(this.rotation);
 			window.graph.drawImage(
-				//@ts-ignore todo
-				window.particleSprites[this.spriteIndex],
+				particleSprites.get()[this.spriteIndex],
 				-(this.scale / 2),
 				-(this.scale / 2),
 				this.scale,
@@ -86,8 +85,7 @@ class Particle {
 			window.graph.restore();
 		} else {
 			window.graph.drawImage(
-				//@ts-ignore todo
-				window.particleSprites[this.spriteIndex],
+				particleSprites.get()[this.spriteIndex],
 				this.x - startX.get() - this.scale / 2,
 				this.y - startY.get() - this.scale / 2,
 				this.scale,

@@ -4066,7 +4066,6 @@ var cachedFloors: Record<string, SpriteCanvas> = {};
 var sideWalkSprite: Sprite | null = null;
 var ambientSprites: Sprite[] = [];
 var wallSpritesSeg: Sprite[] = [];
-var particleSprites: Sprite[] = [];
 var weaponSpriteSheet: {
 	upSprite: Sprite;
 	downSprite: Sprite;
@@ -4092,9 +4091,6 @@ function loadDefaultSprites(base: string) {
 	floorSprites = [];
 	ambientSprites = [];
 	wallSpritesSeg = [];
-	particleSprites = [];
-	//@ts-ignore temporary
-	window.particleSprites = particleSprites;
 	bulletSprites = [];
 	cachedWeaponSprites = {};
 	flagSprites.push(getSprite(`${base}flags/flagb1`));
@@ -4119,13 +4115,17 @@ function loadDefaultSprites(base: string) {
 	wallSpritesSeg.push(getSprite(`${base}wallSegment1`));
 	wallSpritesSeg.push(getSprite(`${base}wallSegment2`));
 	wallSpritesSeg.push(getSprite(`${base}wallSegment3`));
-	particleSprites.push(getSprite(`${base}particles/blood/blood`));
-	particleSprites.push(getSprite(`${base}particles/oil/oil`));
-	particleSprites.push(getSprite(`${base}particles/wall`));
-	particleSprites.push(getSprite(`${base}particles/hole`));
-	particleSprites.push(getSprite(`${base}particles/blood/splatter1`));
-	particleSprites.push(getSprite(`${base}particles/blood/splatter2`));
-	particleSprites.push(getSprite(`${base}particles/explosion`));
+	appStore
+		.select("sprites", "particles")
+		.set([
+			getSprite(`${base}particles/blood/blood`),
+			getSprite(`${base}particles/oil/oil`),
+			getSprite(`${base}particles/wall`),
+			getSprite(`${base}particles/hole`),
+			getSprite(`${base}particles/blood/splatter1`),
+			getSprite(`${base}particles/blood/splatter2`),
+			getSprite(`${base}particles/explosion`),
+		]);
 	healthPackSprite = getSprite(`${base}healthpack`);
 	lootCrateSprite = getSprite(`${base}lootCrate1`);
 	weaponSpriteSheet = [];

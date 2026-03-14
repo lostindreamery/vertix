@@ -19,8 +19,9 @@ export const appStore = store({
 		scale: 0,
 		dir: 0,
 	},
-	// typescript breaks when any part of the store is typed as an html element
+	// typescript breaks when any part of the (main?) store is typed as an html element
 	sprites: {
-		light: null as object | null
+		light: null as object | null,
+		particles: []
 	}
 });
