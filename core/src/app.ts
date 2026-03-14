@@ -202,19 +202,21 @@ function startLogin() {
 		loginMessage.textContent = "Please Wait...";
 	}
 }
-var customMap: CustomMap = null;
+var customMap: CustomMap | null = null;
 function getFile() {
 	document.getElementById("upfile").click();
 }
-window.selectedCMap = (input: HTMLInputElement) => {
+(document.getElementById("customMapFile") as HTMLInputElement).addEventListener(
+	"change",
+	function () {
 	clearCustomMap();
-	if (!input?.files[0]) return;
-	var name = input.value.split("\\");
+		if (!this?.files[0]) return;
+		var name = this.value.split("\\");
 	document.getElementById("customMapButton").innerHTML = name[name.length - 1];
 	let reader = new FileReader();
-	reader.onload = function (e) {
+		reader.onload = (e) => {
 		const img = document.createElement("img");
-		img.onload = function () {
+			img.onload = () => {
 			let tmpCanvas = document.createElement("canvas");
 			tmpCanvas.width = img.width;
 			tmpCanvas.height = img.height;
@@ -227,8 +229,9 @@ window.selectedCMap = (input: HTMLInputElement) => {
 		};
 		img.src = e.target.result as string;
 	};
-	reader.readAsDataURL(input.files[0]);
-};
+		reader.readAsDataURL(this.files[0]);
+	},
+);
 function clearCustomMap() {
 	customMap = null;
 	document.getElementById("customMapButton").textContent = "Select Map";
