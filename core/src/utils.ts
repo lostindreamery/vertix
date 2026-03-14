@@ -1,3 +1,4 @@
+import type { Projectile } from "./logic/projectile.ts";
 import { appStore } from "./state.ts";
 import type { Player, Tile } from "./types.ts";
 
@@ -11,10 +12,10 @@ export function getNextBullet(bullets: any) {
 }
 export function shootNextBullet(
 	init: any,
-	source: any,
+	source: Player,
 	targetD: number,
 	currentTime: number,
-	bullet: any,
+	bullet: Projectile,
 ) {
 	let weapon = getCurrentWeapon(source);
 	if (bullet !== undefined) {
