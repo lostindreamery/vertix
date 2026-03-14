@@ -383,7 +383,7 @@ io.on("connection", (socket: Socket) => {
 						}
 					}, 1000);
 				}
-			};
+			}
 		}
 	});
 	socket.on("4", (data) => {

@@ -31,5 +31,5 @@ export const appStore = store({
 	gameOver: false,
 	mobile: false,
 	currentChatType: "ALL",
-	socket: null as object | null
+	socket: null as object | null,
 });
