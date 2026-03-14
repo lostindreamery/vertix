@@ -19,7 +19,7 @@ export const appStore = store({
 		scale: 0,
 		dir: 0,
 	},
-	// typescript breaks when any part of the (main?) store is typed as an html element
+	// typescript breaks when any part of the (main?) store is typed as an html element or socket
 	sprites: {
 		light: null as object | null,
 		particles: [],
@@ -29,4 +29,7 @@ export const appStore = store({
 	startingGame: false,
 	gameStart: false,
 	gameOver: false,
+	mobile: false,
+	currentChatType: "ALL",
+	socket: null as object | null
 });

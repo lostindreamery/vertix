@@ -35,6 +35,7 @@ import {
 import { updateFlashGlows } from "./visual/flash.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
 import { Projectile } from "./logic/projectile.ts";
+import { ChatManager } from "./visual/chat.ts";
 
 const {
 	shootNextBullet,
@@ -55,7 +56,7 @@ var playerType: string | undefined;
 var playerNameInput = document.getElementById("playerNameInput") as HTMLInputElement;
 var socket: Socket | undefined;
 var reason: string | undefined;
-var mobile = false;
+var mobile = appStore.select("mobile");
 var room: any;
 var currentFPS = 0;
 var fillCounter = 0;
@@ -81,7 +82,7 @@ window.changeMenuTab = changeMenuTab;
 
 // zip.workerScriptsPath = "../js/lib/";
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
-	mobile = true;
+	mobile.set(true);
 	hideMenuUI();
 	hideUI(true);
 	alert("tried to open google play");
@@ -97,7 +98,7 @@ var inMainMenu = true;
 var loggedIn = false;
 function startGame(plrType: string) {
 	if (!startingGame.get() && !changingLobby) {
-		startingGame.set(true)
+		startingGame.set(true);
 		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 		enterGame(plrType);
 		if (inMainMenu) {
@@ -239,7 +240,7 @@ function clearCustomMap() {
 }
 
 window.onload = () => {
-	if (mobile) {
+	if (mobile.get()) {
 		document.getElementById("loadText").textContent = "MOBILE VERSION COMING SOON";
 	} else {
 		document.documentElement.style.overflow = "hidden";
@@ -272,6 +273,7 @@ window.onload = () => {
 					transports: ["websocket"],
 					forceNew: false,
 				});
+				appStore.select("socket").set(socket);
 				setupSocket(socket);
 			}
 			socket.once("connect", () => {
@@ -412,6 +414,7 @@ window.onload = () => {
 											socket.close();
 											changingLobby = false;
 											socket = s;
+											appStore.select("socket").set(s);
 											setupSocket(socket);
 										});
 										socket.disconnect();
@@ -803,95 +806,6 @@ function keyUp(event: KeyboardEvent) {
 		hideStatTable();
 	}
 }
-var chatInput = document.getElementById("chatInput") as HTMLInputElement;
-
-var chatTypeIndex = 0;
-var chatTypes = ["ALL", "TEAM"];
-var currentChatType = chatTypes[0];
-document.getElementById("chatType").addEventListener("click", toggleTeamChat);
-function toggleTeamChat() {
-	chatTypeIndex++;
-	if (chatTypeIndex >= chatTypes.length) {
-		chatTypeIndex = 0;
-	}
-	currentChatType = chatTypes[chatTypeIndex];
-	document.getElementById("chatType").innerHTML = currentChatType;
-	mainCanvas.focus();
-}
-class ChatManager {
-	chatLineCounter = 0;
-	constructor() {
-		chatInput.addEventListener("keypress", this.sendChat.bind(this));
-		// chatInput.addEventListener("keyup", (b) => {
-		// 	let knum = b.which || b.keyCode;
-		// 	if (knum) {
-		// 		chatInput.value = "";
-		// 		mainCanvas.focus();
-		// 	}
-		// });
-	}
-	sendChat(event: KeyboardEvent) {
-		var chatInput = document.getElementById("chatInput") as HTMLInputElement;
-		if (event.key === "Enter") {
-			let msg = chatInput.value.replace(/(<([^>]+)>)/gi, "");
-			if (msg !== "") {
-				socket.emit("cht", msg.substring(0, 50), currentChatType);
-				this.addChatLine(
-					player.get().name,
-					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg,
-					true,
-					player.get().team,
-				);
-				chatInput.value = "";
-				mainCanvas.focus();
-			}
-		}
-	}
-	appendMessage(msgElem: HTMLElement) {
-		if (mobile) return;
-
-		const chatbox = document.getElementById("chatbox");
-		const chatList = document.getElementById("chatList");
-		for (; chatbox.clientHeight > 260; ) {
-			chatList.removeChild(chatList.childNodes[0]);
-		}
-		chatList.appendChild(msgElem);
-	}
-	addChatLine(authorName: string, text: string, fromSelf: boolean, type: string) {
-		if (mobile) return;
-
-		// b = checkProfanityString(b);
-		let listElem = document.createElement("li");
-		let source = "me";
-		if (fromSelf || type === "system" || type === "notif") {
-			if (type === "system") {
-				source = "system";
-			} else if (type === "notif") {
-				source = "notif";
-			}
-		} else {
-			source = player.get().team === type ? "blue" : "red";
-		}
-		this.chatLineCounter++;
-		listElem.className = source;
-		let tmp = false;
-		if (source === "system" || source === "notif") {
-			listElem.innerHTML = `<span>${text}</span>`;
-		} else {
-			tmp = true;
-			listElem.innerHTML =
-				"<span>" +
-				(fromSelf ? "YOU" : authorName) +
-				': </span><label id="chatLine' +
-				this.chatLineCounter +
-				'"></label>';
-		}
-		this.appendMessage(listElem);
-		if (tmp) {
-			document.getElementById(`chatLine${this.chatLineCounter}`).textContent = text;
-		}
-	}
-}
 var chat = new ChatManager();
 function messageFromServer(a: [userIdx: number, userMsg: string]) {
 	try {
@@ -1265,7 +1179,7 @@ function setupSocket(sock: Socket) {
 		gameOver.set(false);
 		gameOverFade = false;
 		targetChanged = true;
-		if (mobile) {
+		if (mobile.get()) {
 			hideMenuUI();
 			hideUI(true);
 			document.getElementById("startMenuWrapper").style.display = "none";
@@ -1682,7 +1596,7 @@ function updateVoteStats(a) {
 }
 function showESCMenu() {
 	deactiveAllAnimTexts();
-	gameStart.set(false)
+	gameStart.set(false);
 	hideUI(false);
 	document.getElementById("startMenuWrapper").style.display = "block";
 }
@@ -2730,7 +2644,7 @@ function updateGameLoop() {
 		} else if (gameStart.get()) {
 			doGame(delta);
 			drawOverlay(graph, false, true);
-			if (!mobile && targetChanged) {
+			if (!mobile.get() && targetChanged) {
 				targetChanged = false;
 				socket.emit("0", target.f);
 			}
@@ -3672,14 +3586,14 @@ async function loadModPack(url: string, isBaseAssets: boolean) {
 		if (loadingTexturePack) return;
 		let modPath = "";
 		if (isBaseAssets) {
-			appStore.select("doSounds").set(false)
+			appStore.select("doSounds").set(false);
 			modPath = "/res.zip";
 		} else {
 			if (url === "") {
 				setModInfoText("Please enter a mod Key/URL");
 				return false;
 			}
-			appStore.select("doSounds").set(true)
+			appStore.select("doSounds").set(true);
 			loadingTexturePack = true;
 			if (url.includes(".")) {
 				modPath = url;
