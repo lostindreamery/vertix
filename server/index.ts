@@ -295,7 +295,7 @@ io.on("connection", (socket: Socket) => {
 			};
 			updateBullet();
 
-			const updateHit = (source: Player, dest: Player, dmg: number) => {
+			function updateHit(source: Player, dest: Player, dmg: number) {
 				if (dest?.dead) return;
 				dest.health += dmg;
 				io.emit("1", {
