@@ -45,9 +45,10 @@ const io = new Server({
 	},
 });
 
-let bullets = [];
+let id = 0;
+let room = "DEV";
 let players: Player[] = [];
-let mapTileScale = genData.width * genData.height;
+let mapTileScale = 256;
 let tiles: Tile[] = [];
 let clutter: MapObjects[] = [];
 let pickups: MapObjects[] = [];
@@ -70,6 +71,7 @@ let mapData = {
 setupMap(mapData, mapTileScale);
 let scoreRed = 0;
 let scoreBlue = 0;
+let bullets = [];
 for (let i = 0; i < 100; i++) {
 	bullets.push(new ServerProjectile());
 }
@@ -79,8 +81,8 @@ io.on("connection", (socket: Socket) => {
 
 	const sid = getNewSid();
 	let player: Player = {
-		id: 0,
-		room: "DEV",
+		id: id,
+		room: room,
 		index: sid,
 		name: `Guest_${sid}`,
 		account: { clan: "" },
@@ -162,7 +164,7 @@ io.on("connection", (socket: Socket) => {
 		player.y = 0;
 		for (let i = 0; i < tiles.length; i++) {
 			let tl = tiles[i];
-			let mid = tl.scale / 2;
+			let mid = mapTileScale / 2;
 			if (tl.spriteIndex === 2) {
 				player.x = tl.x + mid;
 				player.y = tl.y + mid;
@@ -267,7 +269,7 @@ io.on("connection", (socket: Socket) => {
 					for (let i = 0; i < bullet.lastHit.length; i++) {
 						updateHit(player, players[bullet.lastHit[i]], -bullet.dmg);
 					}
-				} else if (bullet.explodeOnDeath) {
+				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					for (let p = 0; p < players.length; p++) {
 						const tmpPlayer = players[p];
