@@ -1,5 +1,4 @@
 import * as zip from "@zip.js/zip.js";
-import { Howl } from "howler";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
@@ -34,6 +33,7 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { updateFlashGlows } from "./visual/flash.ts";
+import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
 
 const {
 	shootNextBullet,
@@ -90,13 +90,13 @@ var previousClass = 0;
 var previousHat = 0;
 var previousShirt = 0;
 var previousSpray = 0;
-var startingGame = false;
+var startingGame = appStore.select("startingGame");
 var changingLobby = false;
 var inMainMenu = true;
 var loggedIn = false;
 function startGame(plrType: string) {
-	if (!startingGame && !changingLobby) {
-		startingGame = true;
+	if (!startingGame.get() && !changingLobby) {
+		startingGame.set(true)
 		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 		enterGame(plrType);
 		if (inMainMenu) {
@@ -524,11 +524,11 @@ var maxScreenHeight = appStore.select("maxScreenHeight");
 var viewMult = appStore.select("viewMult");
 var uiScale = 1;
 calculateUIScale();
-var gameStart = false;
-var gameOver = false;
+var gameStart = appStore.select("gameStart");
+var gameOver = appStore.select("gameOver");
 var gameOverFade = false;
 var disconnected = false;
-var kicked = false;
+var kicked = appStore.select("kicked");
 var killTxt = "";
 var continuity = false;
 var startPingTime = 0;
@@ -717,7 +717,7 @@ function keyDown(event: KeyboardEvent) {
 	} else if (mainCanvas === document.activeElement) {
 		event.preventDefault();
 		keyMap[event.key] = event.type === "keydown";
-		if (event.key === "Escape" && gameStart) {
+		if (event.key === "Escape" && gameStart.get()) {
 			showESCMenu();
 		}
 		if (keyMap[keysList.upKey] && !keys.u) {
@@ -751,10 +751,10 @@ function keyDown(event: KeyboardEvent) {
 		}
 		if (
 			!!keyMap[keysList.leaderboardKey] &&
-			!!gameStart &&
+			!!gameStart.get() &&
 			!showingScoreBoard &&
 			!player.get().dead &&
-			!gameOver
+			!gameOver.get()
 		) {
 			showingScoreBoard = true;
 			showStatTable(getUsersList(), null, null, true, true, true);
@@ -796,8 +796,8 @@ function keyUp(event: KeyboardEvent) {
 		event.key === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
 		!player.get().dead &&
-		!gameOver &&
-		!gameOver
+		!gameOver.get() &&
+		!gameOver.get()
 	) {
 		hideStatTable();
 	}
@@ -1041,7 +1041,7 @@ var showChat = (document.getElementById("showChat") as HTMLInputElement).checked
 document.getElementById("showChat").addEventListener("click", function (this: HTMLInputElement) {
 	showChat = this.checked;
 	if (showChat) {
-		if (gameStart) {
+		if (gameStart.get()) {
 			document.getElementById("chatbox").style.display = "block";
 		}
 	} else {
@@ -1084,7 +1084,7 @@ var showLeader = (document.getElementById("showLeader") as HTMLInputElement).che
 document.getElementById("showLeader").addEventListener("click", function (this: HTMLInputElement) {
 	showLeader = this.checked;
 	if (showLeader) {
-		if (gameStart) {
+		if (gameStart.get()) {
 			document.getElementById("status").style.display = "block";
 		}
 	} else {
@@ -1147,11 +1147,12 @@ function kickPlayer(secondReason: string) {
 		hideUI(true);
 		hideMenuUI();
 		document.getElementById("startMenuWrapper").style.display = "none";
-		gameOver = disconnected = true;
+		disconnected = true;
+		gameOver.set(true);
 		if (reason === undefined) {
 			reason = secondReason;
 		}
-		kicked = true;
+		kicked.set(true);
 		socket.close();
 		updateGameLoop();
 		stopAllSounds();
@@ -1253,14 +1254,15 @@ function setupSocket(sock: Socket) {
 		player.get().dead = true;
 		if (d) {
 			deactiveAllAnimTexts();
-			gameStart = false;
+			gameStart.set(false);
 			hideUI(false);
 			document.getElementById("startMenuWrapper").style.display = "block";
 		}
-		if (gameOver) {
+		if (gameOver.get()) {
 			document.getElementById("gameStatWrapper").style.display = "none";
 		}
-		gameOverFade = gameOver = false;
+		gameOver.set(false);
+		gameOverFade = false;
 		targetChanged = true;
 		if (mobile) {
 			hideMenuUI();
@@ -1435,7 +1437,7 @@ function setupSocket(sock: Socket) {
 			}
 		}
 		if (e) {
-			gameStart = true;
+			gameStart.set(true);
 			showUI();
 			document.getElementById("cvs").focus();
 		}
@@ -1456,7 +1458,7 @@ function setupSocket(sock: Socket) {
 			$("#loadingWrapper").fadeOut(0, () => {});
 			inMainMenu = false;
 		}
-		startingGame = false;
+		startingGame.set(false);
 		resize();
 	});
 	sock.on("lb", updateLeaderboard);
@@ -1589,11 +1591,11 @@ function setupSocket(sock: Socket) {
 		}
 		if (event.gID === player.get().index) {
 			hideStatTable();
-			gameStart = false;
+			gameStart.set(false);
 			hideUI(false);
 			player.get().dead = true;
 			window.setTimeout(() => {
-				if (!gameOver) {
+				if (!gameOver.get()) {
 					document.getElementById("startMenuWrapper").style.display = "block";
 					document.getElementById("linkBox").style.display = "block";
 				}
@@ -1659,7 +1661,7 @@ function setupSocket(sock: Socket) {
 	});
 	sock.on("7", (winner, userList, modeVoteData, isFading) => {
 		try {
-			gameOver = true;
+			gameOver.set(true);
 			document.getElementById("startMenuWrapper").style.display = "none";
 			showStatTable(userList, modeVoteData, winner, false, isFading, true);
 			startSoundTrack(1);
@@ -1679,7 +1681,7 @@ function updateVoteStats(a) {
 }
 function showESCMenu() {
 	deactiveAllAnimTexts();
-	gameStart = false;
+	gameStart.set(false)
 	hideUI(false);
 	document.getElementById("startMenuWrapper").style.display = "block";
 }
@@ -2085,7 +2087,7 @@ function updateUserValue(a) {
 			updateUiStats(tmpUser);
 		}
 		if (b) {
-			if (gameOver) {
+			if (gameOver.get()) {
 				if (a.l != undefined) {
 					a = document.createTextNode(tmpUser.likes.toString());
 					document.getElementById(`likeStat${tmpUser.index}`).textContent = "";
@@ -2106,7 +2108,7 @@ function receiveServerData(a: number[]) {
 	let tmpNowTime = Date.now();
 	timeSinceLastUpdate = tmpNowTime - timeOfLastUpdate;
 	timeOfLastUpdate = tmpNowTime;
-	if (!gameOver) {
+	if (!gameOver.get()) {
 		for (let i = 0; i < gameObjects.length; ++i) {
 			if (gameObjects[i].type === "player") {
 				gameObjects[i].onScreen = false;
@@ -2164,7 +2166,7 @@ function receiveServerData(a: number[]) {
 	}
 	for (let i = 0; i < gameObjects.length; i++) {
 		if (gameObjects[i].index === player.get().index) {
-			if (gameObjects[i].dead || gameOver || thisInput.length > 80) {
+			if (gameObjects[i].dead || gameOver.get() || thisInput.length > 80) {
 				thisInput = [];
 			}
 			let f = 0;
@@ -2616,7 +2618,7 @@ function updateGameLoop() {
 				if (gameObjects[e].index === player.get().index) {
 					gameObjects[e].oldX = gameObjects[e].x;
 					gameObjects[e].oldY = gameObjects[e].y;
-					if (!gameObjects[e].dead && !gameOver) {
+					if (!gameObjects[e].dead && !gameOver.get()) {
 						gameObjects[e].x += b * gameObjects[e].speed * delta;
 						gameObjects[e].y += d * gameObjects[e].speed * delta;
 					}
@@ -2637,7 +2639,7 @@ function updateGameLoop() {
 					if (gameObjects[e].jumpCountdown > 0) {
 						gameObjects[e].jumpCountdown -= delta;
 					}
-					if (keys.s && gameObjects[e].jumpCountdown <= 0 && !gameOver) {
+					if (keys.s && gameObjects[e].jumpCountdown <= 0 && !gameOver.get()) {
 						playerJump(gameObjects[e]);
 						doJump = 1;
 					}
@@ -2654,7 +2656,7 @@ function updateGameLoop() {
 					}
 					gameObjects[e].jumpY = Math.round(gameObjects[e].jumpY);
 				}
-				if (gameObjects[e].index == player.get().index && !gameOver) {
+				if (gameObjects[e].index == player.get().index && !gameOver.get()) {
 					let sendData = {
 						hdt: b,
 						vdt: d,
@@ -2666,14 +2668,14 @@ function updateGameLoop() {
 					inputNumber++;
 					thisInput.push(sendData);
 					socket.emit("4", sendData);
-					if (userScroll != 0 && !gameOver) {
+					if (userScroll != 0 && !gameOver.get()) {
 						playerSwapWeapon(gameObjects[e], userScroll);
 						userScroll = 0;
 					}
-					if (keys.rl && !gameOver) {
+					if (keys.rl && !gameOver.get()) {
 						playerReload(gameObjects[e], true);
 					}
-					if (keys.lm && !gameOver && player.get().weapons.length > 0) {
+					if (keys.lm && !gameOver.get() && player.get().weapons.length > 0) {
 						keyd = 0;
 						if (
 							currentTime - getCurrentWeapon(gameObjects[e]).lastShot >=
@@ -2683,7 +2685,7 @@ function updateGameLoop() {
 						}
 					}
 				}
-				if (gameOver) {
+				if (gameOver.get()) {
 					gameObjects[e].animIndex = 0;
 				} else {
 					let f = Math.abs(b) + Math.abs(d);
@@ -2715,8 +2717,8 @@ function updateGameLoop() {
 		}
 	}
 	gameObjects.sort(sortUsersByPosition);
-	if (!kicked) {
-		if (gameOver) {
+	if (!kicked.get()) {
+		if (gameOver.get()) {
 			doGame(delta);
 			if (gameOverFade && showUIFade) {
 				drawOverlay(graph, true, false);
@@ -2724,21 +2726,21 @@ function updateGameLoop() {
 		} else if (player.get().dead && !inMainMenu) {
 			doGame(delta);
 			drawOverlay(graph, true, false);
-		} else if (gameStart) {
+		} else if (gameStart.get()) {
 			doGame(delta);
 			drawOverlay(graph, false, true);
 			if (!mobile && targetChanged) {
 				targetChanged = false;
 				socket.emit("0", target.f);
 			}
-		} else if (!kicked) {
+		} else if (!kicked.get()) {
 			drawMenuBackground();
 			drawOverlay(graph, false, false);
 		}
 	}
-	if (disconnected || kicked) {
+	if (disconnected || kicked.get()) {
 		drawOverlay(graph, false, false);
-		const renderedReason = kicked
+		const renderedReason = kicked.get()
 			? reason !== ""
 				? renderShadedAnimText(reason, viewMult.get() * 48, "#ffffff", 6, "")
 				: renderShadedAnimText("You were kicked", viewMult.get() * 48, "#ffffff", 6, "")
@@ -2836,7 +2838,7 @@ function doGame(delta: number) {
 	updateNotifications(delta);
 	drawUI();
 	drawMiniMapCounter--;
-	if (drawMiniMapCounter <= 0 && gameStart) {
+	if (drawMiniMapCounter <= 0 && gameStart.get()) {
 		fillCounter = 0;
 		drawMiniMapCounter = drawMiniMapFPS;
 		drawMiniMap();
@@ -3113,198 +3115,6 @@ function drawSprays() {
 				);
 			}
 		}
-	}
-}
-var soundList: Record<
-	string,
-	{
-		loc: string;
-		id: string;
-		sound: Howl;
-		loop: boolean;
-		onload?: () => void;
-	}
-> = {};
-var soundMeta = [
-	{
-		loc: "weapons/smg",
-		id: "shot0",
-		loop: false,
-	},
-	{
-		loc: "weapons/revolver",
-		id: "shot1",
-		loop: false,
-	},
-	{
-		loc: "weapons/sniper",
-		id: "shot2",
-		loop: false,
-	},
-	{
-		loc: "weapons/toygun",
-		id: "shot3",
-		loop: false,
-	},
-	{
-		loc: "weapons/shotgun",
-		id: "shot4",
-		loop: false,
-	},
-	{
-		loc: "weapons/grenades",
-		id: "shot5",
-		loop: false,
-	},
-	{
-		loc: "weapons/rockets",
-		id: "shot6",
-		loop: false,
-	},
-	{
-		loc: "weapons/pistol",
-		id: "shot7",
-		loop: false,
-	},
-	{
-		loc: "weapons/minigun",
-		id: "shot8",
-		loop: false,
-	},
-	{
-		loc: "weapons/flamethrower",
-		id: "shot9",
-		loop: false,
-	},
-	{
-		loc: "characters/footstep1",
-		id: "step1",
-		loop: false,
-	},
-	{
-		loc: "characters/jump1",
-		id: "jump1",
-		loop: false,
-	},
-	{
-		loc: "characters/death1",
-		id: "death1",
-		loop: false,
-	},
-	{
-		loc: "characters/kill1",
-		id: "kill1",
-		loop: false,
-	},
-	{
-		loc: "special/explosion",
-		id: "explosion",
-		loop: false,
-	},
-	{
-		loc: "special/score",
-		id: "score",
-		loop: false,
-	},
-	{
-		loc: "tracks/track1",
-		id: "track1",
-		loop: true,
-		onload: () => {
-			if (player.get().dead && !startingGame) {
-				soundList.track1.sound.play();
-				currentTrack = 1;
-			}
-		},
-	},
-	{
-		loc: "tracks/track2",
-		id: "track2",
-		loop: true,
-		onload: () => {
-			if (!player.get().dead && gameStart && !gameOver) {
-				soundList.track2.sound.play();
-				currentTrack = 2;
-			}
-		},
-	},
-];
-var doSounds = false;
-function loadSounds(base: string) {
-	if (!doSounds) {
-		return false;
-	}
-	soundList = {};
-	for (let i = 0; i < soundMeta.length; ++i) {
-		let tmpSound = localStorage.getItem(`${base + soundMeta[i].loc}data`);
-		let tmpFormat = localStorage.getItem(`${base + soundMeta[i].loc}format`);
-		loadSound(tmpSound, soundMeta[i], tmpFormat);
-	}
-}
-function loadSound(src: string, sound: (typeof soundMeta)[number], format: string) {
-	soundList[sound.id]?.sound?.stop();
-
-	soundList[sound.id] = {
-		...sound,
-		sound: new Howl({
-			src,
-			format,
-			loop: sound.loop,
-			onload: sound.onload || (() => {}),
-		}),
-	};
-}
-var currentTrack = 0;
-function startSoundTrack(id: number) {
-	if (!doSounds || soundList.track1 == undefined || soundList.track2 == undefined) {
-		return false;
-	}
-	try {
-		if (id == 1) {
-			if (currentTrack != id) {
-				currentTrack = id;
-				soundList.track1.sound.play();
-				soundList.track1.sound.fade(0, 1, 1000);
-			}
-			soundList.track2.sound.stop();
-		} else {
-			if (currentTrack != id) {
-				currentTrack = id;
-				soundList.track2.sound.play();
-				soundList.track2.sound.fade(0, 1, 1000);
-			}
-			soundList.track1.sound.stop();
-		}
-	} catch (b) {
-		console.log(b);
-	}
-}
-var maxHearDist = 1500;
-//@ts-ignore todo
-window.playSound = playSound;
-function playSound(soundId: string, x: number, y: number) {
-	if (!kicked && doSounds) {
-		try {
-			let tmpDist = getDistance(player.get().x, player.get().y, x, y);
-			if (tmpDist <= maxHearDist) {
-				let tmpSoundEntry = soundList[soundId];
-				if (tmpSoundEntry !== undefined) {
-					let tmpSound = tmpSoundEntry.sound;
-					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
-					tmpSound.play();
-				}
-			}
-		} catch (e) {
-			console.log(e);
-		}
-	}
-}
-function stopAllSounds() {
-	if (!doSounds) {
-		return false;
-	}
-	for (let i = 0; i < soundMeta.length; ++i) {
-		soundList[soundMeta[i].id].sound.stop();
 	}
 }
 var spritesLoaded = false;
@@ -4165,14 +3975,15 @@ async function loadModPack(url: string, isBaseAssets: boolean) {
 		if (loadingTexturePack) return;
 		let modPath = "";
 		if (isBaseAssets) {
-			doSounds = false;
+			appStore.select("doSounds").set(false)
 			modPath = "/res.zip";
 		} else {
 			if (url === "") {
 				setModInfoText("Please enter a mod Key/URL");
 				return false;
 			}
-			loadingTexturePack = doSounds = true;
+			appStore.select("doSounds").set(true)
+			loadingTexturePack = true;
 			if (url.includes(".")) {
 				modPath = url;
 				if (!modPath.match(/^https?:\/\//i)) {

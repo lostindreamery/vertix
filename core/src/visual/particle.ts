@@ -4,6 +4,7 @@ import type { Sprite, Tile } from "../types.ts";
 import { canSee, getAngle, getDistance, isImageOk, randomFloat, randomInt } from "../utils.ts";
 import { createFlash } from "./flash.ts";
 import { screenShake } from "./shake.ts";
+import { playSound } from "../sound.ts";
 
 const startX = appStore.select("startX");
 const startY = appStore.select("startY");
@@ -214,8 +215,7 @@ export function createExplosion(x: number, y: number, scale: number) {
 		let tmpDir = getAngle(x, player.get().x, y, player.get().y);
 		screenShake(scale * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
 	}
-	//@ts-ignore todo
-	window.playSound("explosion", x, y);
+	playSound("explosion", x, y);
 	createSmokePuff(x, y, scale, true, 1);
 }
 export function createSmokePuff(x: number, y: number, scale: number, hole: boolean, speed: number) {
