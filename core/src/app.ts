@@ -35,7 +35,7 @@ import {
 import { updateFlashGlows } from "./visual/flash.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
 import { Projectile } from "./logic/projectile.ts";
-import { ChatManager } from "./visual/chat.ts";
+import { ChatManager } from "./visual/chat.tsx";
 
 const {
 	shootNextBullet,

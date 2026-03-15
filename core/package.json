@@ -13,6 +13,7 @@
 		"@zip.js/zip.js": "^2.8.23",
 		"howler": "^2.2.4",
 		"jquery": "^4.0.0",
+		"jsx-dom": "^8.1.6",
 		"socket.io-client": "^4.8.3",
 		"vite": "^8.0.0"
 	},

@@ -8,10 +8,10 @@
 		"resolveJsonModule": true,
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "jsx-dom",
 		"strict": true,
 		// todo:
-		"strictNullChecks": false,
-		"noImplicitAny": true,
-		"noImplicitThis": true
+		"strictNullChecks": false
 	}
 }

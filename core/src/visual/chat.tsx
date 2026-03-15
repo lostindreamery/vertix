@@ -69,15 +69,15 @@ export class ChatManager {
 		listElem.className = source;
 		let tmp = false;
 		if (source === "system" || source === "notif") {
-			listElem.innerHTML = `<span>${text}</span>`;
+			listElem.replaceChildren(<span>{text}</span>);
 		} else {
 			tmp = true;
-			listElem.innerHTML =
-				"<span>" +
-				(fromSelf ? "YOU" : authorName) +
-				': </span><label id="chatLine' +
-				this.chatLineCounter +
-				'"></label>';
+			listElem.replaceChildren(
+				<>
+					<span>{fromSelf ? "YOU" : authorName}: </span>
+					<div id={`chatLine${this.chatLineCounter}`} style="display: inline-block"></div>
+				</>,
+			);
 		}
 		this.appendMessage(listElem);
 		if (tmp) {
@@ -94,6 +94,6 @@ document.getElementById("chatType").addEventListener("click", () => {
 		chatTypeIndex = 0;
 	}
 	currentChatType = chatTypes[chatTypeIndex];
-	document.getElementById("chatType").innerHTML = currentChatType;
+	document.getElementById("chatType").textContent = currentChatType;
 	mainCanvas.focus();
 });
