@@ -1,7 +1,7 @@
 import { gameModes } from "core/src/gamemodes.ts";
 import { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
-import { defaultGenData } from "core/src/maps.ts";
+import { defaultGenData } from "./maps.ts";
 import type {
 	GameMode,
 	GenData,

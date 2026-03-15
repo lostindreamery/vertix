@@ -13,10 +13,6 @@ importers:
         version: 2.4.6
 
   core:
-    dependencies:
-      sharp:
-        specifier: ^0.34.5
-        version: 0.34.5
     devDependencies:
       '@simplestack/store':
         specifier: ^0.7.6
@@ -54,6 +50,9 @@ importers:
       hono:
         specifier: ^4.12.5
         version: 4.12.5
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       socket.io:
         specifier: ^4.8.3
         version: 4.8.3

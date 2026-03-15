@@ -1,0 +1,22 @@
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
+import type { GenData } from "core/src/types.ts";
+import sharp from "sharp";
+
+export const defaultGenData: GenData[] = [];
+
+const dir = join(import.meta.dirname, "./maps");
+const files = (await readdir(dir)).filter((f) => f.endsWith(".png")).toSorted();
+
+for (const file of files) {
+	const { data, info } = await sharp(join(dir, file))
+		.ensureAlpha()
+		.raw()
+		.toBuffer({ resolveWithObject: true });
+
+	defaultGenData.push({
+		width: info.width,
+		height: info.height,
+		data: new Uint8ClampedArray(data.buffer, data.byteOffset, data.byteLength),
+	});
+}
