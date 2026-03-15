@@ -130,7 +130,10 @@ export class Projectile {
 							}
 						}
 					}
-					if (this.active && (typeof window === "undefined" || this.owner.index == player.get().index)) {
+					if (
+						this.active &&
+						(typeof window === "undefined" || this.owner.index == player.get().index)
+					) {
 						for (let i = 0; i < players.length; i++) {
 							let tmpPlayer = players[i];
 							if (
