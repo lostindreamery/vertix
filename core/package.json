@@ -16,5 +16,8 @@
 		"socket.io-client": "^4.8.3",
 		"vite": "^8.0.0"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"sharp": "^0.34.5"
+	}
 }

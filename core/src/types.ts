@@ -175,7 +175,7 @@ export type MapObject = {
 export type GenData = {
 	width: number;
 	height: number;
-	data: ImageDataArray | number[];
+	data: Uint8ClampedArray;
 };
 
 export type MapData = {
