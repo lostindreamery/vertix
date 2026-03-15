@@ -29,7 +29,7 @@ export class Projectile {
 	trailWidth = 0;
 	trailMaxLength = 0;
 	trailAlpha = 0;
-	owner: any = null;
+	owner: Player = null;
 	dmg = 0;
 	lastHit: number[] = [];
 	serverIndex = 0;
@@ -130,7 +130,7 @@ export class Projectile {
 							}
 						}
 					}
-					if (this.active && this.owner.index == player.get().index) {
+					if (this.active && (typeof window === "undefined" || this.owner.index == player.get().index)) {
 						for (let i = 0; i < players.length; i++) {
 							let tmpPlayer = players[i];
 							if (
@@ -158,7 +158,7 @@ export class Projectile {
 									this.lastHit.push(tmpPlayer.index);
 								} else if (this.dmg > 0) {
 									this.lastHit.push(tmpPlayer.index);
-									if (this.spriteIndex !== 2) {
+									if (this.spriteIndex !== 2 && typeof window !== "undefined") {
 										particleCone(
 											12,
 											tmpPlayer.x,
@@ -186,7 +186,7 @@ export class Projectile {
 			}
 			if (this.spriteIndex === 1) {
 				this.dustTimer -= delta;
-				if (this.dustTimer <= 0) {
+				if (this.dustTimer <= 0 && typeof window !== "undefined") {
 					stillDustParticle(this.x, this.y, true);
 					this.dustTimer = 20;
 				}
@@ -203,7 +203,7 @@ export class Projectile {
 		this.skipMove = true;
 		this.lastHit = [];
 		this.active = true;
-		playSound(`shot${this.weaponIndex}`, this.x, this.y);
+		if (typeof window !== "undefined") playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	}
 	canSeeObject(a: any, b: number) {
 		let f = Math.abs(this.cEndX - a.x);
@@ -214,7 +214,7 @@ export class Projectile {
 		this.active = false;
 	}
 	hitSomething(a: boolean, b: number) {
-		if (this.spriteIndex !== 2) {
+		if (this.spriteIndex !== 2 && typeof window !== "undefined") {
 			particleCone(
 				10,
 				this.cEndX,

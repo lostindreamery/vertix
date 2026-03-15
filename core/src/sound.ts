@@ -1,5 +1,5 @@
 import { Howl } from "howler";
-import { appStore } from "./state";
+import { appStore } from "./state.ts";
 import { getDistance } from "./utils.ts";
 
 // todo logic cleanup
