@@ -153,9 +153,9 @@ export type GameMode = {
 	score: number;
 	desc1: string;
 	desc2: string;
-  teams: boolean;
-  maps: number[];
-  killScoreMult: number;
+	teams: boolean;
+	maps: number[];
+	killScoreMult: number;
 };
 
 export type MapObject = {
@@ -179,11 +179,11 @@ export type GenData = {
 };
 
 export type MapData = {
-  gameMode: GameMode;
-  genData: GenData;
-  tiles: Tile[];
-  clutter: MapObject[];
-  pickups: MapObject[];
-  width: number;
-  height: number;
-}
+	gameMode: GameMode;
+	genData: GenData;
+	tiles: Tile[];
+	clutter: MapObject[];
+	pickups: MapObject[];
+	width: number;
+	height: number;
+};

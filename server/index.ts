@@ -39,10 +39,10 @@ const io = new Server({
 let room = new Room();
 
 io.on("connection", (socket: Socket) => {
-  console.log("con", socket.id);
+	console.log("con", socket.id);
 
-  let player = room.newPlayer();
-  let players = room.players;
+	let player = room.newPlayer();
+	let players = room.players;
 
 	socket.emit(
 		"welcome",
@@ -57,7 +57,7 @@ io.on("connection", (socket: Socket) => {
 
 	socket.on("cSrv", (data) => {
 		if (data.srvMap) {
-		  room.mapData = room.newMap(data.srvMap)
+			room.mapData = room.newMap(data.srvMap);
 		}
 	});
 
@@ -207,7 +207,13 @@ io.on("connection", (socket: Socket) => {
 						}
 					}
 				} else {
-					bullet.update(player.delta, currentTime, room.clutter, room.tiles, players);
+					bullet.update(
+						player.delta,
+						currentTime,
+						room.clutter,
+						room.tiles,
+						players,
+					);
 					setTimeout(updateBullet, player.delta);
 					return;
 				}
@@ -251,14 +257,13 @@ io.on("connection", (socket: Socket) => {
 					"lb",
 					players.flatMap((pl) => [pl.index]),
 				);
-				let score = 100 / (room.gameMode.score / 100)
-				source.team === "red" ? (room.scoreRed += score ) : (room.scoreBlue += score);
+				let score = 100 / (room.gameMode.score / 100);
+				source.team === "red"
+					? (room.scoreRed += score)
+					: (room.scoreBlue += score);
 
 				io.emit("ts", room.scoreRed, room.scoreBlue);
-				if (
-					room.scoreRed >= 100 ||
-					room.scoreBlue >= 100
-				) {
+				if (room.scoreRed >= 100 || room.scoreBlue >= 100) {
 					io.emit(
 						"7",
 						room.scoreRed > room.scoreBlue ? "red" : "blue",
@@ -325,7 +330,7 @@ io.on("connection", (socket: Socket) => {
 			((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
 		if (space === 1) {
 			io.emit("jum", player.index);
-    }
+		}
 		wallCol(player, room, room);
 		player.x = Math.round(player.x);
 		player.y = Math.round(player.y);
