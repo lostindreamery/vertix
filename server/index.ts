@@ -5,16 +5,14 @@ import { Server, type Socket } from "socket.io";
 import {
 	shootNextBullet,
 	getNextBullet,
-	setupMap,
 	wallCol,
 	getCurrentWeapon,
 	roundNumber,
 	getDistance,
 } from "core/src/utils.ts";
-import { ServerProjectile } from "./utils.ts";
+import { Room } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
-import type { Player, Tile, MapObjects } from "core/src/types.ts";
-import { genData } from "./genData.ts";
+import type { Player } from "core/src/types.ts";
 
 const app = new Hono();
 app.use(
@@ -31,13 +29,6 @@ const server = serve({
 	port: 1118,
 });
 
-let nextAvailableSid = 0;
-function getNewSid() {
-	const toret = nextAvailableSid;
-	nextAvailableSid++;
-	return toret;
-}
-
 const io = new Server({
 	cors: {
 		origin: "http://localhost:1118",
@@ -45,80 +36,13 @@ const io = new Server({
 	},
 });
 
-let id = 0;
-let room = "DEV";
-let players: Player[] = [];
-let mapTileScale = 256;
-let tiles: Tile[] = [];
-let clutter: MapObjects[] = [];
-let pickups: MapObjects[] = [];
-let mapData = {
-	gameMode: {
-		code: "tdm",
-		name: "Team Deathmatch",
-		score: 100,
-		desc1: "Eliminate the enemy team",
-		desc2: "Eliminate the enemy team",
-		teams: true,
-	},
-	clutter: clutter,
-	genData: genData,
-	pickups: pickups,
-	tiles: tiles,
-	width: (genData.width - 4) * mapTileScale,
-	height: (genData.height - 4) * mapTileScale,
-};
-setupMap(mapData, mapTileScale);
-let scoreRed = 0;
-let scoreBlue = 0;
-let bullets = [];
-for (let i = 0; i < 100; i++) {
-	bullets.push(new ServerProjectile());
-}
+let room = new Room();
 
 io.on("connection", (socket: Socket) => {
-	console.log("con", socket.id);
+  console.log("con", socket.id);
 
-	const sid = getNewSid();
-	let player: Player = {
-		id: id,
-		room: room,
-		index: sid,
-		name: `Guest_${sid}`,
-		account: { clan: "" },
-		classIndex: 0,
-		currentWeapon: 0,
-		weapons: structuredClone([weapons[0], weapons[5]]),
-		health: 0,
-		maxHealth: 0,
-		height: 100,
-		width: 50,
-		speed: 0.5,
-		jumpY: 0,
-		jumpDelta: 0,
-		jumpStrength: 0.72,
-		gravityStrength: 0.0058,
-		jumpCountdown: 0,
-		frameCountdown: 0,
-		kills: 0,
-		deaths: 0,
-		score: 0,
-		angle: 0,
-		x: 0,
-		y: 0,
-		oldX: 0,
-		oldY: 0,
-		spawnProtection: 0,
-		nameYOffset: 0,
-		dead: true,
-		onScreen: false,
-		type: "player",
-		delta: 0,
-		targetF: 0,
-		animIndex: 0,
-		team: players.length % 2 === 0 ? "blue" : "red",
-	};
-	players.push(player);
+  let player = room.newPlayer();
+  let players = room.players;
 
 	socket.emit(
 		"welcome",
@@ -133,13 +57,7 @@ io.on("connection", (socket: Socket) => {
 
 	socket.on("cSrv", (data) => {
 		if (data.srvMap) {
-			mapData.tiles = tiles = [];
-			mapData.genData = data.srvMap;
-			mapTileScale = data.srvMap.width * data.srvMap.height;
-			mapData.width = (data.srvMap.width - 4) * mapTileScale;
-			mapData.height = (data.srvMap.height - 4) * mapTileScale;
-			setupMap(mapData, mapTileScale);
-			tiles = mapData.tiles;
+		  room.mapData = room.newMap(data.srvMap)
 		}
 	});
 
@@ -162,9 +80,9 @@ io.on("connection", (socket: Socket) => {
 		player.angle = 0;
 		player.x = 0;
 		player.y = 0;
-		for (let i = 0; i < tiles.length; i++) {
-			let tl = tiles[i];
-			let mid = mapTileScale / 2;
+		for (let i = 0; i < room.tiles.length; i++) {
+			let tl = room.tiles[i];
+			let mid = room.tileScale / 2;
 			if (tl.spriteIndex === 2) {
 				player.x = tl.x + mid;
 				player.y = tl.y + mid;
@@ -172,12 +90,12 @@ io.on("connection", (socket: Socket) => {
 		}
 
 		const gameSetup = {
-			mapData: mapData,
+			mapData: room.mapData,
 
 			maxScreenWidth: 1920,
 			maxScreenHeight: 1080,
 			viewMult: 1,
-			tileScale: mapTileScale,
+			tileScale: room.tileScale,
 
 			usersInRoom: players,
 			you: player,
@@ -250,7 +168,7 @@ io.on("connection", (socket: Socket) => {
 			si: -1,
 		});
 		for (let b = 0; b < currentWeapon.bulletsPerShot; b++) {
-			const bullet = getNextBullet(bullets);
+			const bullet = getNextBullet(room.bullets);
 			shootNextBullet(
 				{
 					i: player.index,
@@ -289,7 +207,7 @@ io.on("connection", (socket: Socket) => {
 						}
 					}
 				} else {
-					bullet.update(player.delta, currentTime, clutter, tiles, players);
+					bullet.update(player.delta, currentTime, room.clutter, room.tiles, players);
 					setTimeout(updateBullet, player.delta);
 					return;
 				}
@@ -333,17 +251,17 @@ io.on("connection", (socket: Socket) => {
 					"lb",
 					players.flatMap((pl) => [pl.index]),
 				);
+				let score = 100 / (room.gameMode.score / 100)
+				source.team === "red" ? (room.scoreRed += score ) : (room.scoreBlue += score);
 
-				source.team === "red" ? (scoreRed += 20) : (scoreBlue += 20);
-
-				io.emit("ts", scoreRed, scoreBlue);
+				io.emit("ts", room.scoreRed, room.scoreBlue);
 				if (
-					scoreRed >= mapData.gameMode.score ||
-					scoreBlue >= mapData.gameMode.score
+					room.scoreRed >= 100 ||
+					room.scoreBlue >= 100
 				) {
 					io.emit(
 						"7",
-						scoreRed > scoreBlue ? "red" : "blue",
+						room.scoreRed > room.scoreBlue ? "red" : "blue",
 						players,
 						{},
 						false,
@@ -353,8 +271,8 @@ io.on("connection", (socket: Socket) => {
 						if (timeLeft >= 0) {
 							io.emit("8", timeLeft--);
 						} else {
-							scoreRed = 0;
-							scoreBlue = 0;
+							room.scoreRed = 0;
+							room.scoreBlue = 0;
 							for (let i = 0; i < players.length; i++) {
 								players[i].score = 0;
 								players[i].kills = 0;
@@ -376,8 +294,8 @@ io.on("connection", (socket: Socket) => {
 							);
 							io.emit(
 								"ts",
-								dest.team === "red" ? scoreRed : scoreBlue,
-								source.team === "red" ? scoreRed : scoreBlue,
+								dest.team === "red" ? room.scoreRed : room.scoreBlue,
+								source.team === "red" ? room.scoreRed : room.scoreBlue,
 							);
 							clearInterval(timer);
 						}
@@ -407,8 +325,8 @@ io.on("connection", (socket: Socket) => {
 			((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
 		if (space === 1) {
 			io.emit("jum", player.index);
-		}
-		wallCol(player, { tiles }, { clutter });
+    }
+		wallCol(player, room, room);
 		player.x = Math.round(player.x);
 		player.y = Math.round(player.y);
 		// TODO: gamemode objectve

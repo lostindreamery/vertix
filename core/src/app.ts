@@ -5,7 +5,7 @@ import { characterClasses, setCharacterClasses, specialClasses, weaponNames } fr
 import type {
 	Account,
 	GameMode,
-	CustomMap,
+	GenData,
 	InputSendData,
 	Player,
 	Sprite,
@@ -204,7 +204,7 @@ function startLogin() {
 		loginMessage.textContent = "Please Wait...";
 	}
 }
-var customMap: CustomMap | null = null;
+var customMap: GenData | null = null;
 function getFile() {
 	document.getElementById("upfile").click();
 }

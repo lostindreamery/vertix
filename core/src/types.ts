@@ -153,10 +153,12 @@ export type GameMode = {
 	score: number;
 	desc1: string;
 	desc2: string;
-	teams: boolean;
+  teams: boolean;
+  maps: number[];
+  killScoreMult: number;
 };
 
-export type MapObjects = {
+export type MapObject = {
 	x: number;
 	y: number;
 	active: boolean;
@@ -170,8 +172,18 @@ export type MapObjects = {
 	type?: string;
 };
 
-export type CustomMap = {
+export type GenData = {
 	width: number;
 	height: number;
-	data: ImageDataArray;
+	data: ImageDataArray | number[];
 };
+
+export type MapData = {
+  gameMode: GameMode;
+  genData: GenData;
+  tiles: Tile[];
+  clutter: MapObject[];
+  pickups: MapObject[];
+  width: number;
+  height: number;
+}
