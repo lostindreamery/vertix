@@ -3,7 +3,7 @@ import { appStore } from "../state.ts";
 
 const player = appStore.select("player");
 const mobile = appStore.select("mobile");
-const currentChatType = appStore.select("currentChatType");
+let currentChatType = "ALL";
 const chatInput = document.getElementById("chatInput") as HTMLInputElement;
 const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
 
@@ -27,11 +27,11 @@ export class ChatManager {
 				(appStore.select("socket").get() as Socket).emit(
 					"cht",
 					msg.substring(0, 50),
-					currentChatType.get(),
+					currentChatType,
 				);
 				this.addChatLine(
 					player.get().name,
-					(currentChatType.get() === "TEAM" ? "(TEAM) " : "") + msg,
+					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg,
 					true,
 					player.get().team,
 				);
@@ -93,7 +93,7 @@ document.getElementById("chatType").addEventListener("click", () => {
 	if (chatTypeIndex >= chatTypes.length) {
 		chatTypeIndex = 0;
 	}
-	currentChatType.set(chatTypes[chatTypeIndex]);
-	document.getElementById("chatType").innerHTML = currentChatType.get();
+	currentChatType = chatTypes[chatTypeIndex];
+	document.getElementById("chatType").innerHTML = currentChatType;
 	mainCanvas.focus();
 });
