@@ -43,7 +43,7 @@ export class Room {
 			room: this.room,
 			index: sid,
 			name: `Guest_${sid}`,
-			account: { clan: "" },
+			account: { clan: "DEV" },
 			classIndex: 0,
 			currentWeapon: 0,
 			weapons: structuredClone([weapons[0], weapons[5]]),
