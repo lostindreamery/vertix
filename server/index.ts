@@ -116,7 +116,7 @@ io.on("connection", (socket: Socket) => {
 		);
 		io.emit(
 			"lb",
-			players.flatMap((pl) => [pl.index]),
+			players.toSorted((a, b) => (b.score - a.score)).flatMap((pl) => [pl.index]),
 		);
 	});
 	socket.on("disconnect", () => {
@@ -255,7 +255,7 @@ io.on("connection", (socket: Socket) => {
 				});
 				io.emit(
 					"lb",
-					players.flatMap((pl) => [pl.index]),
+					players.toSorted((a, b) => (b.score - a.score)).flatMap((pl) => [pl.index]),
 				);
 				let score = 100 / (room.gameMode.score / 100);
 				source.team === "red"
@@ -295,7 +295,7 @@ io.on("connection", (socket: Socket) => {
 							}
 							io.emit(
 								"lb",
-								players.flatMap((pl) => [pl.index]),
+								players.toSorted((a, b) => (b.score - a.score)).flatMap((pl) => [pl.index]),
 							);
 							io.emit(
 								"ts",
