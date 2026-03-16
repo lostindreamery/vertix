@@ -214,7 +214,7 @@ function getFile() {
 		clearCustomMap();
 		if (!this?.files[0]) return;
 		var name = this.value.split("\\");
-		document.getElementById("customMapButton").innerHTML = name[name.length - 1];
+		document.getElementById("customMapButton").textContent = name[name.length - 1];
 		let reader = new FileReader();
 		reader.onload = (e) => {
 			const img = document.createElement("img");
@@ -460,13 +460,43 @@ var saveAccountData = document.getElementById("saveAccountData");
 var editProfileMessage = document.getElementById("editProfileMessage");
 function updateAccountPage(a: Account) {
 	player.get().account = a;
-	accStatRank.innerHTML = `<b>Rank:  </b>${a.rank}`;
+	accStatRank.replaceChildren(
+		<>
+			<b>Rank: </b>
+			{a.rank}
+		</>,
+	);
 	accStatRankProg.style.width = `${a.rankPercent}%`;
-	accStatKills.innerHTML = `<b>Kills:  </b>${a.kills}`;
-	accStatDeaths.innerHTML = `<b>Deaths:  </b>${a.deaths}`;
-	accStatKD.innerHTML = `<b>KD:  </b>${a.kd}`;
-	accStatWorldRank.innerHTML = `<b>World Rank:  </b>${a.worldRank}`;
-	accStatLikes.innerHTML = `<b>Likes:  </b>${a.likes}`;
+	accStatKills.replaceChildren(
+		<>
+			<b>Kills: </b>
+			{a.kills}
+		</>,
+	);
+	accStatDeaths.replaceChildren(
+		<>
+			<b>Deaths: </b>
+			{a.deaths}
+		</>,
+	);
+	accStatKD.replaceChildren(
+		<>
+			<b>KD: </b>
+			{a.kd}
+		</>,
+	);
+	accStatWorldRank.replaceChildren(
+		<>
+			<b>World Rank: </b>
+			{a.worldRank}
+		</>,
+	);
+	accStatLikes.replaceChildren(
+		<>
+			<b>Likes: </b>
+			{a.likes}
+		</>,
+	);
 	profileButton.onclick = () => {
 		showUserStatPage(player.get().account.user_name);
 	};
@@ -502,16 +532,40 @@ var clanStatFounder = document.getElementById("clanStatFounder");
 var clanStatMembers = document.getElementById("clanStatMembers");
 var clanStatKD = document.getElementById("clanStatKD");
 function updateClanPage(clanData: any) {
-	clanStatRank.innerHTML = `<b>Rank:  </b>${clanData.level}`;
-	clanStatKD.innerHTML = `<b>Avg KD:  </b>${clanData.kd}`;
-	clanStatFounder.innerHTML = `<b>Founder:  </b>${clanData.founder}`;
-	clanStatMembers.innerHTML = `<b>Roster:</b>${clanData.members}`;
+	clanStatRank.replaceChildren(
+		<>
+			<b>Rank: </b>
+			{clanData.level}
+		</>,
+	);
+	clanStatKD.replaceChildren(
+		<>
+			<b>Avg KD: </b>
+			{clanData.kd}
+		</>,
+	);
+	clanStatFounder.replaceChildren(
+		<>
+			<b>Founder: </b>
+			{clanData.founder}
+		</>,
+	);
+	clanStatMembers.replaceChildren(
+		<>
+			<b>Roster:</b>
+			{clanData.members}
+		</>,
+	);
 	let chatURL = clanData.chatURL;
 	if (chatURL !== "") {
 		if (!chatURL.match(/^https?:\/\//i)) {
 			chatURL = `http://${clanData}`;
 		}
-		clanChatLink.innerHTML = `<a target='_blank' href='${chatURL}'>Clan Chat</a>`;
+		clanChatLink.replaceChildren(
+			<a target="_blank" href={chatURL}>
+				Clan Chat
+			</a>,
+		);
 	}
 }
 function showUserStatPage(userName: string) {
@@ -1121,7 +1175,7 @@ var fpsText = document.getElementById("fpsText");
 var pingStart = 0;
 function receivePing() {
 	var a = Date.now() - pingStart;
-	pingText.innerHTML = `PING ${a}`;
+	pingText.replaceChildren(<>PING {a}</>);
 }
 var pingInterval: number | null = null;
 function setupSocket(sock: Socket) {
@@ -1144,7 +1198,7 @@ function setupSocket(sock: Socket) {
 	}, 2000);
 	sock.on("yourRoom", (a, d) => {
 		room = a;
-		serverKeyTxt.innerHTML = d;
+		serverKeyTxt.textContent = d;
 	});
 	sock.on("connect_failed", () => {
 		kickPlayer("Connection failed. Please check your internet connection.");
@@ -1188,22 +1242,22 @@ function setupSocket(sock: Socket) {
 	});
 	sock.on("cSrvRes", (a, d) => {
 		if (d) {
-			serverKeyTxt.innerHTML = a;
-			serverCreateMessage.innerHTML = `Success. Created server with IP: ${a}`;
+			serverKeyTxt.textContent = a;
+			serverCreateMessage.textContent = `Success. Created server with IP: ${a}`;
 		} else {
-			serverCreateMessage.innerHTML = a;
+			serverCreateMessage.textContent = a;
 		}
 	});
 	sock.on("regRes", (a, d) => {
 		if (!d) {
 			loginMessage.style.display = "block";
 		}
-		loginMessage.innerHTML = a;
+		loginMessage.textContent = a;
 	});
 	sock.on("logRes", (a, d) => {
 		if (d) {
 			loginMessage.style.display = "none";
-			loginMessage.innerHTML = "";
+			loginMessage.textContent = "";
 			loginWrapper.style.display = "none";
 			loggedInWrapper.style.display = "block";
 			(document.getElementById("playerNameInput") as HTMLInputElement).value = a.text;
@@ -1219,27 +1273,27 @@ function setupSocket(sock: Socket) {
 			}
 		} else {
 			loginMessage.style.display = "block";
-			loginMessage.innerHTML = a;
+			loginMessage.textContent = a;
 		}
 		loadSavedClass();
 	});
 	sock.on("recovRes", (b, d) => {
 		loginMessage.style.display = "block";
-		loginMessage.innerHTML = b;
+		loginMessage.textContent = b;
 		if (d) {
 			document.getElementById("recoverForm").style.display = "block";
 			const chngPassKey = document.getElementById("chngPassKey") as HTMLInputElement;
 			const chngPassPass = document.getElementById("chngPassPass") as HTMLInputElement;
 			document.getElementById("chngPassButton").onclick = () => {
 				loginMessage.style.display = "block";
-				loginMessage.innerHTML = "Please Wait...";
+				loginMessage.textContent = "Please Wait...";
 				sock.emit("dbCngPass", {
 					passKey: chngPassKey.value,
 					newPass: chngPassPass.value,
 				});
 				sock.on("cngPassRes", (a, b) => {
 					loginMessage.style.display = "block";
-					loginMessage.innerHTML = a;
+					loginMessage.textContent = a;
 					if (b) {
 						document.getElementById("recoverForm").style.display = "none";
 					}
@@ -1257,52 +1311,56 @@ function setupSocket(sock: Socket) {
 			leaveClanButton.textContent = "DELETE CLAN";
 		} else {
 			clanDBMessage.style.display = "block";
-			clanDBMessage.innerHTML = a;
+			clanDBMessage.textContent = a;
 		}
 	});
 	sock.on("dbClanJoinR", (a, d) => {
 		if (d) {
 			clanSignUp.style.display = "none";
 			clanStats.style.display = "block";
-			clanHeader.innerHTML = `[${a}] Clan:`;
+			clanHeader.textContent = `[${a}] Clan:`;
 			player.get().account.clan = a;
 			const user = findUserByIndex(player.get().index);
 			if (user) {
 				user.account.clan = a;
 			}
 			leaveClanButton.style.display = "inline-block";
-			leaveClanButton.innerHTML = "Leave Clan";
+			leaveClanButton.textContent = "Leave Clan";
 		} else {
 			clanDBMessage.style.display = "block";
-			clanDBMessage.innerHTML = a;
+			clanDBMessage.textContent = a;
 		}
 	});
 	sock.on("dbClanInvR", (a, _) => {
 		clanInvMessage.style.display = "block";
-		clanInvMessage.innerHTML = a;
+		clanInvMessage.textContent = a;
 	});
 	sock.on("dbKickInvR", (a, _) => {
 		clanInvMessage.style.display = "block";
-		clanInvMessage.innerHTML = a;
+		clanInvMessage.textContent = a;
 	});
 	sock.on("dbClanLevR", (a, d) => {
 		if (d) {
 			clanSignUp.style.display = "block";
 			clanStats.style.display = "none";
-			clanHeader.innerHTML = "Clans";
+			clanHeader.textContent = "Clans";
 			clanDBMessage.style.display = "block";
-			clanDBMessage.innerHTML = a;
+			clanDBMessage.textContent = a;
 			leaveClanButton.style.display = "none";
 		}
 	});
 	sock.on("dbChatR", (a, d) => {
 		clanChtMessage.style.display = "inline-block";
-		clanChtMessage.innerHTML = a.text;
+		clanChtMessage.textContent = a.text;
 		if (d) {
 			if (!a.newURL.match(/^https?:\/\//i)) {
 				a.newURL = `http://${a.newURL}`;
 			}
-			clanChatLink.innerHTML = `<a target='_blank' href='${a.newURL}'>Clan Chat</a>`;
+			clanChatLink.replaceChildren(
+				<a target="_blank" href={a.newURL}>
+					Clan Chat
+				</a>,
+			);
 		}
 	});
 	sock.on("dbChangeUserR", (a, d) => {
@@ -1311,7 +1369,7 @@ function setupSocket(sock: Socket) {
 			player.get().account.user_name = a;
 			editProfileMessage.textContent = "Success. Account Updated.";
 		} else {
-			editProfileMessage.innerHTML = a;
+			editProfileMessage.textContent = a;
 		}
 	});
 	sock.on("dbClanStats", (a) => {
@@ -2164,8 +2222,11 @@ function updateHatList(a, b) {
 }
 function resetHatList() {
 	hatHeader.textContent = "SELECT HAT";
-	hatList.innerHTML =
-		"<div class='hatSelectItem' id='hatItem-1' onclick='changeHat(-1);'>Default</div>";
+	hatList.replaceChildren(
+		<div class="hatSelectItem" id="hatItem-1" onClick={() => changeHat(-1)}>
+			Default
+		</div>,
+	);
 	changeHat(-1);
 }
 window.showHatselector = showHatselector;
@@ -2231,8 +2292,11 @@ function updateShirtList(a, b) {
 }
 function resetShirtList() {
 	shirtHeader.textContent = "SELECT SHIRT";
-	shirtList.innerHTML =
-		"<div class='hatSelectItem' id='shirtItem-1' onclick='changeShirt(-1);'>Default</div>";
+	shirtList.replaceChildren(
+		<div class="hatSelectItem" id="shirtItem-1" onClick={() => changeShirt(-1)}>
+			Default
+		</div>,
+	);
 	changeShirt(-1);
 }
 window.showShirtselector = showShirtselector;
@@ -2314,9 +2378,7 @@ function changeSpray(sprayId, b) {
 	currentSpray.innerHTML = document.getElementById(`sprayItem${sprayId}`).innerHTML;
 	currentSpray.style.color = document.getElementById(`sprayItem${sprayId}`).style.color;
 	let hoverElem = document.getElementById(`sprayHoverImage${sprayId}`);
-	if (hoverElem) {
-		hoverElem.innerHTML = `<image class='sprayDisplayImage' src='.././images/sprays/${b}.png'></image>`;
-	}
+	hoverElem?.replaceChildren(<img class="sprayDisplayImage" src={`.././images/sprays/${b}.png`} />);
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	classSelector.style.display = "none";
@@ -3099,7 +3161,7 @@ function updateWeaponUI(tmpPlayer: Player, force: boolean) {
 		return false;
 	}
 	if (force) {
-		actionBar.innerHTML = "";
+		actionBar.textContent = "";
 	}
 	if (actionBar.innerHTML === "") {
 		for (let i = 0; i < tmpPlayer.weapons.length; ++i) {
@@ -3290,18 +3352,15 @@ var classList = document.getElementById("classList");
 var characterWepnDisplay = document.getElementById("charWpn");
 var characterWepnDisplay2 = document.getElementById("charWpn2");
 function createClassList() {
-	let res = "";
+	let res: Node[] = [];
 	for (let i = 0; i < characterClasses.length; ++i) {
-		res +=
-			"<div class='hatSelectItem' id='classItem" +
-			i +
-			"' onclick='pickedCharacter(" +
-			i +
-			");'>" +
-			characterClasses[i].classN +
-			"</div>";
+		res.push(
+			<div class="hatSelectItem" id={`classItem${i}`} onClick={() => pickedCharacter(i)}>
+				{characterClasses[i].classN}
+			</div>,
+		);
 	}
-	classList.innerHTML = res;
+	classList.replaceChildren(...res);
 }
 createClassList();
 function showClassselector() {
@@ -3322,14 +3381,22 @@ function pickedCharacter(classId: number) {
 	currentClassID = classId;
 	currentClass.innerHTML = document.getElementById(`classItem${classId}`).innerHTML;
 	currentClass.style.color = document.getElementById(`classItem${classId}`).style.color;
-	characterWepnDisplay.innerHTML =
-		"<b>Primary:</b><div class='hatSelectItem' style='display:inline-block'>" +
-		characterClasses[classId].pWeapon +
-		"</div>";
-	characterWepnDisplay2.innerHTML =
-		"<b>Secondary:</b><div class='hatSelectItem' style='display:inline-block'>" +
-		characterClasses[classId].sWeapon +
-		"</div>";
+	characterWepnDisplay.replaceChildren(
+		<>
+			<b>Primary:</b>
+			<div class="hatSelectItem" style="display:inline-block">
+				{characterClasses[classId].pWeapon}
+			</div>
+		</>,
+	);
+	characterWepnDisplay2.replaceChildren(
+		<>
+			<b>Secondary:</b>
+			<div class="hatSelectItem" style="display:inline-block">
+				{characterClasses[classId].sWeapon}
+			</div>
+		</>,
+	);
 	localStorage.setItem("previousClass", classId.toString());
 	if (loggedIn) {
 		for (let i = 0; i < characterClasses[classId].weaponIndexes.length; ++i) {
@@ -3384,10 +3451,10 @@ function showWeaponSelector(wepType: 0 | 1) {
 				(parseInt(camo.count) + 1) +
 				"</div>";
 		}
-		document.getElementById("camoHeaderAmount").innerHTML =
+		document.getElementById("camoHeaderAmount").textContent =
 			`SELECT CAMO (${camoDataList[classWeapon].length + 1}/${maxCamos + 1})`;
 	} else {
-		document.getElementById("camoHeaderAmount").innerHTML = "SELECT CAMO";
+		document.getElementById("camoHeaderAmount").textContent = "SELECT CAMO";
 	}
 	camoList.innerHTML = b;
 }
@@ -3567,6 +3634,7 @@ function loadDefaultSprites(base: string) {
 
 var mainTitleText = document.getElementById("mainTitleText");
 function updateMenuInfo(info: string) {
+	// active security risk
 	mainTitleText.innerHTML = info;
 }
 
@@ -3575,9 +3643,10 @@ loadModPack(linkedMod, linkedMod == "");
 var loadingTexturePack = false;
 
 var modInfo = document.getElementById("modInfo");
-function setModInfoText(a) {
-	if (modInfo != undefined) {
-		modInfo.innerHTML = a;
+function setModInfoText(info: string) {
+	if (modInfo) {
+		// active security risk
+		modInfo.innerHTML = info;
 	}
 }
 window.loadModPack = loadModPack;

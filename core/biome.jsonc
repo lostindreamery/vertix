@@ -16,9 +16,7 @@
 				"noUnusedVariables": "info",
 				"useParseIntRadix": "off"
 			},
-			"a11y": {
-				"noAutofocus": "off"
-			}
+			"a11y": "off"
 		}
 	},
 	"formatter": {
