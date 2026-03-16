@@ -407,7 +407,7 @@ window.onload = () => {
 									userName: d,
 								});
 								s.once("lobbyRes", (a, d) => {
-									lobbyMessage.innerHTML = a.resp || a;
+									lobbyMessage.textContent = a.resp || a;
 									if (d) {
 										socket.removeListener("disconnect");
 										socket.once("disconnect", () => {
@@ -720,9 +720,9 @@ var previousKeyElementContent: string | null = null;
 window.inputChange = inputChange;
 function inputChange(elem: HTMLElement, ktc: keyof typeof keysList) {
 	if (keyToChange != null && keyChangeElement != null) {
-		keyChangeElement.innerHTML = previousKeyElementContent;
+		keyChangeElement.textContent = previousKeyElementContent;
 	}
-	previousKeyElementContent = elem.innerHTML;
+	previousKeyElementContent = elem.textContent;
 	elem.textContent = "Press any Key";
 	keyChangeElement = elem;
 	keyToChange = ktc;
@@ -765,10 +765,10 @@ function keyDown(event: KeyboardEvent) {
 	if (keyToChange != null) {
 		event.preventDefault();
 		if (event.key) {
-			keyChangeElement.innerHTML = event.key;
+			keyChangeElement.textContent = event.key;
 			keysList[keyToChange] = event.key;
 		} else {
-			keyChangeElement.innerHTML = previousKeyElementContent;
+			keyChangeElement.textContent = previousKeyElementContent;
 		}
 		keyChangeElement = keyToChange = null;
 		saveKeysToCookie();
@@ -1177,7 +1177,7 @@ function receivePing() {
 	var a = Date.now() - pingStart;
 	pingText.replaceChildren(<>PING {a}</>);
 }
-var pingInterval: number | null = null;
+var pingInterval: ReturnType<typeof setInterval> | null = null;
 function setupSocket(sock: Socket) {
 	// logging, ignoring packets that are spammy
 	sock.onAny((event, ...args) => {
@@ -2185,40 +2185,47 @@ function updatePlayerInfo(a: Partial<Player>) {
 var currentHat = document.getElementById("currentHat");
 var hatList = document.getElementById("hatList");
 var hatHeader = document.getElementById("hatHeader");
-function updateHatList(a, b) {
-	hatHeader.textContent = `SELECT HAT: (${b.length}/${a})`;
-	var content = "<div class='hatSelectItem' id='hatItem-1' onclick='changeHat(-1);'>Default</div>";
-	for (let i = 0; i < b.length; ++i) {
-		content +=
-			"<div class='hatSelectItem' id='hatItem" +
-			b[i].id +
-			"' style='color:" +
-			getItemRarityColor(b[i].chance) +
-			";' onclick='changeHat(" +
-			b[i].id +
-			");'>" +
-			b[i].name +
-			" x" +
-			(parseInt(b[i].count) + 1) +
-			"<div class='hoverTooltip'><image class='itemDisplayImage' src='.././images/hats/" +
-			b[i].id +
-			"/d.png'></image><div style='color:" +
-			getItemRarityColor(b[i].chance) +
-			"; font-size:16px; margin-top:5px;'>" +
-			b[i].name +
-			"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-			b[i].chance +
-			"%</div><div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>wearable</i></div><div style='font-size:12px; margin-top:5px;'>" +
-			b[i].desc +
-			"</div>" +
-			(b[i].creator == "EatMyApples"
-				? ""
-				: "<div style='font-size:8px; color:#d8d8d8; margin-top:5px;'><i>Artist: " +
-					b[i].creator +
-					"</i></div>") +
-			"</div></div>";
+function updateHatList(totalCount: number, hats: any[]) {
+	hatHeader.textContent = `SELECT HAT: (${hats.length}/${totalCount})`;
+	let content: Node[] = [];
+	content.push(
+		<div class="hatSelectItem" id="hatItem-1" onClick={() => changeHat(-1)}>
+			Default
+		</div>,
+	);
+	for (const hat of hats) {
+		content.push(
+			<div
+				className="hatSelectItem"
+				id={`hatItem${hat.id}`}
+				style={{ color: getItemRarityColor(hat.chance) }}
+				onClick={() => changeHat(hat.id)}
+			>
+				{hat.name} x{parseInt(hat.count) + 1}
+				<div className="hoverTooltip">
+					<img className="itemDisplayImage" src={`.././images/hats/${hat.id}/d.png`} />
+					<div
+						style={{ color: getItemRarityColor(hat.chance), fontSize: "16px", marginTop: "5px" }}
+					>
+						{hat.name}
+					</div>
+					<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
+						droprate {hat.chance}%
+					</div>
+					<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
+						<i>wearable</i>
+					</div>
+					<div style={{ fontSize: "12px", marginTop: "5px" }}>{hat.desc}</div>
+					{hat.creator !== "EatMyApples" && (
+						<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "5px" }}>
+							<i>Artist: {hat.creator}</i>
+						</div>
+					)}
+				</div>
+			</div>,
+		);
 	}
-	hatList.innerHTML = content;
+	hatList.replaceChildren(...content);
 }
 function resetHatList() {
 	hatHeader.textContent = "SELECT HAT";
@@ -2242,10 +2249,10 @@ function showHatselector() {
 	hatSelector.style.display = "block";
 }
 window.changeHat = changeHat;
-function changeHat(a) {
+function changeHat(a: number) {
 	if (!socket) return;
 	socket.emit("cHat", a);
-	localStorage.setItem("previousHat", a);
+	localStorage.setItem("previousHat", a.toString());
 	currentHat.innerHTML = document.getElementById(`hatItem${a}`).innerHTML;
 	currentHat.style.color = document.getElementById(`hatItem${a}`).style.color;
 	charSelectorCont.style.display = "block";
@@ -2260,35 +2267,43 @@ function changeHat(a) {
 var currentShirt = document.getElementById("currentShirt");
 var shirtList = document.getElementById("shirtList");
 var shirtHeader = document.getElementById("shirtHeader");
-function updateShirtList(a, b) {
-	shirtHeader.textContent = `SELECT SHIRT: (${b.length}/${a})`;
-	let listContent =
-		"<div class='hatSelectItem' id='shirtItem-1' onclick='changeShirt(-1);'>Default</div>";
-	for (let i = 0; i < b.length; ++i) {
-		listContent +=
-			"<div class='hatSelectItem' id='shirtItem" +
-			b[i].id +
-			"' style='color:" +
-			getItemRarityColor(b[i].chance) +
-			";' onclick='changeShirt(" +
-			b[i].id +
-			");'>" +
-			b[i].name +
-			" x" +
-			(parseInt(b[i].count) + 1) +
-			"<div class='hoverTooltip'><image class='shirtDisplayImage' src='.././images/shirts/" +
-			b[i].id +
-			"/d.png'></image><div style='color:" +
-			getItemRarityColor(b[i].chance) +
-			"; font-size:16px; margin-top:5px;'>" +
-			b[i].name +
-			"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-			b[i].chance +
-			"%</div><div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>shirt</i></div><div style='font-size:12px; margin-top:5px;'>" +
-			b[i].desc +
-			"</div></div></div>";
+function updateShirtList(totalCount: number, shirts: any[]) {
+	shirtHeader.textContent = `SELECT SHIRT: (${shirts.length}/${totalCount})`;
+
+	let test: Node[] = [];
+	test.push(
+		<div class="hatSelectItem" id="shirtItem-1" onClick={() => changeShirt(-1)}>
+			Default
+		</div>,
+	);
+	for (const shirt of shirts) {
+		test.push(
+			<div
+				className="hatSelectItem"
+				id={`shirtItem${shirt.id}`}
+				style={{ color: getItemRarityColor(shirt.chance) }}
+				onClick={() => changeShirt(shirt.id)}
+			>
+				{shirt.name} x{parseInt(shirt.count) + 1}
+				<div className="hoverTooltip">
+					<img className="shirtDisplayImage" src={`.././images/shirts/${shirt.id}/d.png`} />
+					<div
+						style={{ color: getItemRarityColor(shirt.chance), fontSize: "16px", marginTop: "5px" }}
+					>
+						{shirt.name}
+					</div>
+					<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
+						droprate {shirt.chance}%
+					</div>
+					<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
+						<i>shirt</i>
+					</div>
+					<div style={{ fontSize: "12px", marginTop: "5px" }}>{shirt.desc}</div>
+				</div>
+			</div>,
+		);
 	}
-	shirtList.innerHTML = listContent;
+	shirtList.replaceChildren(...test);
 }
 function resetShirtList() {
 	shirtHeader.textContent = "SELECT SHIRT";
@@ -2330,32 +2345,34 @@ function changeShirt(shirtId: number) {
 }
 var currentSpray = document.getElementById("currentSpray");
 var sprayList = document.getElementById("sprayList");
-function updateSpraysList(a) {
-	let listContent = "";
-	for (let i = 0; i < a.length; ++i) {
-		listContent +=
-			"<div class='hatSelectItem' id='sprayItem" +
-			(i + 1) +
-			"' onclick='changeSpray(" +
-			(i + 1) +
-			"," +
-			a[i].id +
-			");'>" +
-			a[i].name +
-			"<div id='sprayHoverImage" +
-			(i + 1) +
-			"' class='hoverTooltip' style='width:90px;height:90px;'></div></div>";
+function updateSpraysList(sprays: any[]) {
+	let listContent: Node[] = [];
+	for (let i = 0; i < sprays.length; ++i) {
+		listContent.push(
+			<div
+				class="hatSelectItem"
+				id={`sprayItem${i + 1}`}
+				onClick={() => changeSpray(i + 1, sprays[i].id)}
+			>
+				{sprays[i].name}
+				<div
+					id={`sprayHoverImage${i + 1}`}
+					class="hoverTooltip"
+					style={{ width: "90px", height: "90px" }}
+				></div>
+			</div>,
+		);
 	}
-	sprayList.innerHTML = listContent;
+	sprayList.replaceChildren(...listContent);
 	if (localStorage.getItem("previousSpray")) {
 		previousSpray = Number.parseInt(localStorage.getItem("previousSpray"));
 		try {
-			changeSpray(previousSpray, a[previousSpray - 1].id);
+			changeSpray(previousSpray, sprays[previousSpray - 1].id);
 		} catch (_) {
-			changeSpray(1, a[1].id);
+			changeSpray(1, sprays[1].id);
 		}
 	} else {
-		changeSpray(1, a[1].id);
+		changeSpray(1, sprays[1].id);
 	}
 }
 window.updateSpraysList = updateSpraysList;
@@ -2371,14 +2388,14 @@ function showSprayselector() {
 	spraySelector.style.display = "block";
 }
 window.showSprayselector = showSprayselector;
-function changeSpray(sprayId, b) {
+function changeSpray(dir: number, sprayId: number) {
 	if (!socket) return;
-	socket.emit("cSpray", sprayId);
-	localStorage.setItem("previousSpray", sprayId);
-	currentSpray.innerHTML = document.getElementById(`sprayItem${sprayId}`).innerHTML;
-	currentSpray.style.color = document.getElementById(`sprayItem${sprayId}`).style.color;
-	let hoverElem = document.getElementById(`sprayHoverImage${sprayId}`);
-	hoverElem?.replaceChildren(<img class="sprayDisplayImage" src={`.././images/sprays/${b}.png`} />);
+	socket.emit("cSpray", dir);
+	localStorage.setItem("previousSpray", dir.toString());
+	currentSpray.innerHTML = document.getElementById(`sprayItem${dir}`).innerHTML;
+	currentSpray.style.color = document.getElementById(`sprayItem${dir}`).style.color;
+	let hoverElem = document.getElementById(`sprayHoverImage${dir}`);
+	hoverElem?.replaceChildren(<img class="sprayDisplayImage" src={`.././images/sprays/${sprayId}.png`} />);
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	classSelector.style.display = "none";
@@ -2436,32 +2453,32 @@ function sortUsersByPosition(a, b) {
 }
 function updateLeaderboard(data: number[]) {
 	try {
-		let lbContent = '<span class="title">LEADERBOARD</span>';
+		let test: Node[] = [];
+		test.push(<span class="title">LEADERBOARD</span>);
+
 		for (let i = 0; i < data.length; i++) {
 			let tmpPlayer = findUserByIndex(data[0 + i]);
 			if (tmpPlayer == null) continue;
-			lbContent += "<br />";
+			test.push(<br />);
 			if (tmpPlayer.index === player.get().index) {
-				lbContent +=
-					'<span class="me">' +
-					(i + 1) +
-					". " +
-					player.get().name +
-					(player.get().account.clan ? ` [${player.get().account.clan}]` : "") +
-					"</span>";
+				test.push(
+					<span class="me">
+						{i + 1}. {player.get().name}
+						{player.get().account.clan && ` [${player.get().account.clan}]`}
+					</span>,
+				);
 			} else if (tmpPlayer.name) {
-				lbContent +=
-					'<span class="' +
-					(tmpPlayer.team !== player.get().team ? "red" : "blue") +
-					'">' +
-					(i + 1) +
-					". " +
-					tmpPlayer.name +
-					"</span>" +
-					(tmpPlayer.account.clan ? `<span class='me'> [${tmpPlayer.account.clan}]</span>` : "");
+				test.push(
+					<>
+						<span class={tmpPlayer.team !== player.get().team ? "red" : "blue"}>
+							{i + 1}. {tmpPlayer.name}
+						</span>
+						{tmpPlayer.account.clan && <span class="me"> [{tmpPlayer.account.clan}]</span>}
+					</>,
+				);
 			}
 		}
-		document.getElementById("status").innerHTML = lbContent;
+		document.getElementById("status").replaceChildren(...test);
 	} catch (err) {
 		// "throw it all in a try-catch, that'll fix it"
 		// - Sidney, probably
