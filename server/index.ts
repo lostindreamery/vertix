@@ -77,9 +77,9 @@ io.on("connection", (socket: Socket) => {
 
 		player.onScreen = true;
 		player.angle = 0;
-    const spawn = room.getSpawn();
-    player.x = spawn.x;
-    player.y = spawn.y;
+		const spawn = room.getSpawn();
+		player.x = spawn.x;
+		player.y = spawn.y;
 		player.dead = false;
 
 		const gameSetup = {
@@ -178,21 +178,21 @@ io.on("connection", (socket: Socket) => {
 			const updateBullet = () => {
 				if (bullet.lastHit.length > 0) {
 					for (const i of bullet.lastHit) {
-            updateHit(player, players[i], -bullet.dmg);
+						updateHit(player, players[i], -bullet.dmg);
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					for (const pl of players) {
-					  const left   = pl.x - pl.width / 2;
-					  const right  = pl.x + pl.width / 2;
-					  const top    = pl.y - pl.height;
-					  const bottom = pl.y;
-            const dist = getDistance(
-              bullet.x,
-              bullet.y,
-              Math.max(left, Math.min(right, bullet.x)),
-              Math.max(top, Math.min(bottom, bullet.y))
-            );
+						const left = pl.x - pl.width / 2;
+						const right = pl.x + pl.width / 2;
+						const top = pl.y - pl.height;
+						const bottom = pl.y;
+						const dist = getDistance(
+							bullet.x,
+							bullet.y,
+							Math.max(left, Math.min(right, bullet.x)),
+							Math.max(top, Math.min(bottom, bullet.y)),
+						);
 						if (bullet.blastRadius > dist) {
 							const dmg =
 								-bullet.blastRadius + Math.round(dist) < -bullet.dmg

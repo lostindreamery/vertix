@@ -95,25 +95,30 @@ export class Room {
 		};
 		setupMap(tmpMap, this.tileScale);
 		return tmpMap;
-  }
+	}
 
-  getSpawn() {
-    let mid = this.tileScale / 2;
-    let spawn = { x: 0, y: 0 };
-    for (const tl of this.tiles) {
-      if (tl.spriteIndex === 2) {
-        let valid = this.players.every((pl: Player) => {
-          const dist = getDistance(pl.x, pl.y + pl.width / 2, tl.x + mid, tl.y + mid);
-          return dist > this.tileScale * 4 || pl.dead;
-        })
-        if (valid) {
-          spawn = {
-            x: tl.x + mid,
-            y: tl.y + mid
-          }
-        }
-      }
-    }
-    return spawn;
-  }
+	getSpawn() {
+		let mid = this.tileScale / 2;
+		let spawn = { x: 0, y: 0 };
+		for (const tl of this.tiles) {
+			if (tl.spriteIndex === 2) {
+				let valid = this.players.every((pl: Player) => {
+					const dist = getDistance(
+						pl.x,
+						pl.y + pl.width / 2,
+						tl.x + mid,
+						tl.y + mid,
+					);
+					return dist > this.tileScale * 4 || pl.dead;
+				});
+				if (valid) {
+					spawn = {
+						x: tl.x + mid,
+						y: tl.y + mid,
+					};
+				}
+			}
+		}
+		return spawn;
+	}
 }
