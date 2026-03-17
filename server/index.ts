@@ -160,7 +160,7 @@ io.on("connection", (socket: Socket) => {
 			d: d,
 			si: -1,
 		});
-		for (let b = 0; b < currentWeapon.bulletsPerShot; b++) {
+		for (let i = 0; i < currentWeapon.bulletsPerShot; i++) {
 			const bullet = getNextBullet(room.bullets);
 			shootNextBullet(
 				{
@@ -177,26 +177,28 @@ io.on("connection", (socket: Socket) => {
 			);
 			const updateBullet = () => {
 				if (bullet.lastHit.length > 0) {
-					for (let i = 0; i < bullet.lastHit.length; i++) {
-						updateHit(player, players[bullet.lastHit[i]], -bullet.dmg);
+					for (const i of bullet.lastHit) {
+            updateHit(player, players[i], -bullet.dmg);
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
-					for (let p = 0; p < players.length; p++) {
-						const tmpPlayer = players[p];
-						//TODO
-						const dist = getDistance(
-							bullet.x,
-							bullet.y,
-							tmpPlayer.x,
-							tmpPlayer.y - tmpPlayer.height / 2,
-						);
+					for (const pl of players) {
+					  const left   = pl.x - pl.width / 2;
+					  const right  = pl.x + pl.width / 2;
+					  const top    = pl.y - pl.height;
+					  const bottom = pl.y;
+            const dist = getDistance(
+              bullet.x,
+              bullet.y,
+              Math.max(left, Math.min(right, bullet.x)),
+              Math.max(top, Math.min(bottom, bullet.y))
+            );
 						if (bullet.blastRadius > dist) {
 							const dmg =
 								-bullet.blastRadius + Math.round(dist) < -bullet.dmg
 									? -bullet.dmg
 									: -bullet.blastRadius + Math.round(dist);
-							updateHit(player, tmpPlayer, dmg);
+							updateHit(player, pl, dmg);
 						}
 					}
 				} else {
@@ -273,17 +275,17 @@ io.on("connection", (socket: Socket) => {
 						} else {
 							room.scoreRed = 0;
 							room.scoreBlue = 0;
-							for (let i = 0; i < players.length; i++) {
-								players[i].score = 0;
-								players[i].kills = 0;
-								players[i].deaths = 0;
+							for (const pl of players) {
+								pl.score = 0;
+								pl.kills = 0;
+								pl.deaths = 0;
 								io.emit(
 									"welcome",
 									{
-										id: players[i].id,
-										room: players[i].room,
-										name: players[i].name,
-										classIndex: players[i].classIndex,
+										id: pl.id,
+										room: pl.room,
+										name: pl.name,
+										classIndex: pl.classIndex,
 									},
 									true,
 								);
