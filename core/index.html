@@ -319,33 +319,33 @@
 						<h3 class="menuHeaderTabbed2">LOADOUT</h3>
 						<div id="charClass">
 							<b>Class:</b>
-							<div class="hatSelectItem" id="currentClass" style="display:inline-block" onclick="showClassselector();">
+							<div class="hatSelectItem" id="currentClass" style="display:inline-block">
 								Triggerman
 							</div>
 						</div>
-						<div id="charWpn" style="margin-top:-5px;" onclick="showWeaponSelector(0);">
+						<div id="charWpn" style="margin-top:-5px;">
 							<b>Primary: </b>
 							<div class="hatSelectItem" style="display:inline-block">Loading...</div>
 						</div>
-						<div id="charWpn2" style="margin-top:-5px;" onclick="showWeaponSelector(1);">
+						<div id="charWpn2" style="margin-top:-5px;">
 							<b>Secondary: </b>
 							<div class="hatSelectItem" style="display:inline-block">Loading...</div>
 						</div>
 						<div id="charHat" style="margin-top:-5px;">
 							<b>Hat:</b>
-							<div class="hatSelectItem" id="currentHat" style="display:inline-block" onclick="showHatselector();">
+							<div class="hatSelectItem" id="currentHat" style="display:inline-block">
 								Default
 							</div>
 						</div>
 						<div id="charShirt" style="margin-top:-5px;">
 							<b>Shirt:</b>
-							<div class="hatSelectItem" id="currentShirt" style="display:inline-block" onclick="showShirtselector();">
+							<div class="hatSelectItem" id="currentShirt" style="display:inline-block">
 								Default
 							</div>
 						</div>
 						<div id="charSpray" style="margin-top:-5px;">
 							<b>Spray:</b>
-							<div class="hatSelectItem" id="currentSpray" style="display:inline-block" onclick="showSprayselector();">
+							<div class="hatSelectItem" id="currentSpray" style="display:inline-block">
 								Strike
 							</div>
 						</div>
@@ -557,7 +557,6 @@
 							placeholder="Username"
 							id="usernameInput"
 							maxlength="15"
-							onkeyup="if(event.keyCode == 13){startLogin();return false;}"
 						>
 						<input
 							type="text"
@@ -573,7 +572,6 @@
 							placeholder="Password"
 							id="passwordInput"
 							maxlength="15"
-							onkeyup="if(event.keyCode == 13){startLogin();return false;}"
 						>
 						<div id="loginMessage" style="display:none;"></div>
 						<button type="button" id="registerButton" class="smallMenuButton">REGISTER</button>
@@ -757,7 +755,7 @@
 		</div>
 		<div id="linkBox" class="linkBox">
 			<center>
-				<div onclick="clickDropUpLink(1)" class="dropUpLink">
+				<div data-drop-idx="1" class="dropUpLink">
 					MODS
 					<ul id="di1" class="dropdown">
 						<li>
@@ -779,7 +777,7 @@
 					</ul>
 				</div>
 				|
-				<div onclick="clickDropUpLink(2)" class="dropUpLink">
+				<div data-drop-idx="2" class="dropUpLink">
 					COMMUNITY
 					<ul id="di2" class="dropdown">
 						<li><a target="_blank" href="">FORUM</a></li>
@@ -789,7 +787,7 @@
 					</ul>
 				</div>
 				|
-				<div onclick="clickDropUpLink(3)" class="dropUpLink">
+				<div data-drop-idx="3" class="dropUpLink">
 					OTHER
 					<ul id="di3" class="dropdown">
 						<li>
@@ -811,7 +809,7 @@
 		<div id="namesBox" class="namesBox">
 			<center>
 				THANKS FOR PLAYING! |<!-- Donations -->
-				<div onclick="clickDropUpLink(4)" class="dropUpLink">
+				<div data-drop-idx="4" class="dropUpLink">
 					DONATE
 					<ul id="di4" class="dropdown" style="width:200px;">
 						<label id="grayText">
@@ -824,7 +822,7 @@
 					</ul>
 				</div>
 				|
-				<div onclick="clickDropUpLink(5)" class="dropUpLink">
+				<div data-drop-idx="5" class="dropUpLink">
 					SHARE
 					<ul id="di5" class="dropdown">
 						<li>

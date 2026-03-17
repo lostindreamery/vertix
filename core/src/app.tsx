@@ -174,7 +174,13 @@ var serverKeyTxt = document.getElementById("serverKeyTxt");
 
 let dropUpLinksCount = 5;
 let activeIndex = -1;
-window.clickDropUpLink = (index: number) => {
+Array.from(document.getElementsByClassName("dropUpLink") as HTMLCollectionOf<HTMLElement>).map(
+	(elem) =>
+		elem.addEventListener("click", () => {
+			clickDropUpLink(Number.parseInt(elem.attributes.getNamedItem("data-drop-idx").value));
+		}),
+);
+function clickDropUpLink(index: number) {
 	for (let i = 0; i < dropUpLinksCount; ++i) {
 		const tmpIndex = i + 1;
 		try {
@@ -189,7 +195,7 @@ window.clickDropUpLink = (index: number) => {
 			}
 		} catch (_) {}
 	}
-};
+}
 
 var loginTimeOut = null;
 function startLogin() {
@@ -2236,7 +2242,7 @@ function resetHatList() {
 	);
 	changeHat(-1);
 }
-window.showHatselector = showHatselector;
+document.getElementById("currentHat").addEventListener("click", showHatselector);
 function showHatselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2314,7 +2320,7 @@ function resetShirtList() {
 	);
 	changeShirt(-1);
 }
-window.showShirtselector = showShirtselector;
+document.getElementById("currentShirt").addEventListener("click", showShirtselector);
 function showShirtselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2375,7 +2381,7 @@ function updateSpraysList(sprays: any[]) {
 		changeSpray(1, sprays[1].id);
 	}
 }
-window.updateSpraysList = updateSpraysList;
+document.getElementById("currentSpray").addEventListener("click", showSprayselector);
 function showSprayselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2387,7 +2393,6 @@ function showSprayselector() {
 	hatSelector.style.display = "none";
 	spraySelector.style.display = "block";
 }
-window.showSprayselector = showSprayselector;
 function changeSpray(dir: number, sprayId: number) {
 	if (!socket) return;
 	socket.emit("cSpray", dir);
@@ -2395,7 +2400,9 @@ function changeSpray(dir: number, sprayId: number) {
 	currentSpray.innerHTML = document.getElementById(`sprayItem${dir}`).innerHTML;
 	currentSpray.style.color = document.getElementById(`sprayItem${dir}`).style.color;
 	let hoverElem = document.getElementById(`sprayHoverImage${dir}`);
-	hoverElem?.replaceChildren(<img class="sprayDisplayImage" src={`.././images/sprays/${sprayId}.png`} />);
+	hoverElem?.replaceChildren(
+		<img class="sprayDisplayImage" src={`.././images/sprays/${sprayId}.png`} />,
+	);
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	classSelector.style.display = "none";
@@ -3363,12 +3370,12 @@ function createClassList() {
 	classList.replaceChildren(...res);
 }
 createClassList();
+document.getElementById("currentClass").addEventListener("click", showClassselector);
 function showClassselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
 	classSelector.style.display = "block";
 }
-window.showClassselector = showClassselector;
 function loadSavedClass() {
 	if (localStorage.getItem("previousClass")) {
 		previousClass = Number.parseInt(localStorage.getItem("previousClass"));
@@ -3425,51 +3432,54 @@ function pickedCharacter(classId: number) {
 	shirtSelector.style.display = "none";
 }
 window.pickedCharacter = pickedCharacter;
-var camoDataList = null;
+var camoDataList: any[] | null = null;
 var maxCamos = 0;
 var camoList = document.getElementById("camoList");
+characterWepnDisplay.addEventListener("click", () => showWeaponSelector(0));
+characterWepnDisplay2.addEventListener("click", () => showWeaponSelector(1));
 function showWeaponSelector(wepType: 0 | 1) {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
 	classSelector.style.display = "none";
 	camoSelector.style.display = "block";
 	let classWeapon = characterClasses[currentClassID].weaponIndexes[wepType];
-	var b = `<div class='hatSelectItem' onclick='changeCamo(${classWeapon},0,true);'>Default</div>`;
+	let list: Node[] = [];
+	list.push(
+		<div class="hatSelectItem" onClick={() => changeCamo(classWeapon, 0, true)}>
+			Default
+		</div>,
+	);
 	if (loggedIn && camoDataList?.[classWeapon]) {
 		for (let i = 0; i < camoDataList[classWeapon].length; ++i) {
 			let camo = camoDataList[classWeapon][i];
-			b +=
-				"<div class='hatSelectItem' style='color:" +
-				getItemRarityColor(camo.chance) +
-				"' onclick='changeCamo(" +
-				classWeapon +
-				"," +
-				camo.id +
-				",true);'>" +
-				camo.name +
-				" x" +
-				(parseInt(camo.count) + 1) +
-				"</div>";
+			list.push(
+				<div
+					class="hatSelectItem"
+					style={{ color: getItemRarityColor(camo.chance) }}
+					onClick={() => changeCamo(classWeapon, camo.id, true)}
+				>
+					camo.name x{parseInt(camo.count) + 1}
+				</div>,
+			);
 		}
 		document.getElementById("camoHeaderAmount").textContent =
 			`SELECT CAMO (${camoDataList[classWeapon].length + 1}/${maxCamos + 1})`;
 	} else {
 		document.getElementById("camoHeaderAmount").textContent = "SELECT CAMO";
 	}
-	camoList.innerHTML = b;
+	camoList.replaceChildren(...list);
 }
-window.showWeaponSelector = showWeaponSelector;
 function getCamoURL(a) {
 	return `.././images/camos/${a + 1}.png`;
 }
-function changeCamo(a, b, d) {
+function changeCamo(weaponId: number, camoId: number, save: boolean) {
 	if (socket) {
 		socket.emit("cCamo", {
-			weaponID: a,
-			camoID: b,
+			weaponID: weaponId,
+			camoID: camoId,
 		});
-		if (d) {
-			localStorage.setItem(`wpnSkn${a}`, b);
+		if (save) {
+			localStorage.setItem(`wpnSkn${weaponId}`, camoId.toString());
 			charSelectorCont.style.display = "block";
 			lobbySelectorCont.style.display = "block";
 			camoSelector.style.display = "none";
@@ -3481,12 +3491,10 @@ function changeCamo(a, b, d) {
 		}
 	}
 }
-window.changeCamo = changeCamo;
-function updateCamosList(a, b) {
-	camoDataList = b;
-	maxCamos = a;
+function updateCamosList(max: number, data: any[]) {
+	camoDataList = data;
+	maxCamos = max;
 }
-window.updateCamosList = updateCamosList;
 var animLength = 3;
 var classSpriteSheets: {
 	upSprites: Sprite[];
