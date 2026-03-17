@@ -75,19 +75,12 @@ io.on("connection", (socket: Socket) => {
 		player.speed = currentClass.speed;
 		if (init) return;
 
-		player.dead = false;
 		player.onScreen = true;
 		player.angle = 0;
-		player.x = 0;
-		player.y = 0;
-		for (let i = 0; i < room.tiles.length; i++) {
-			let tl = room.tiles[i];
-			let mid = room.tileScale / 2;
-			if (tl.spriteIndex === 2) {
-				player.x = tl.x + mid;
-				player.y = tl.y + mid;
-			}
-		}
+    const spawn = room.getSpawn();
+    player.x = spawn.x;
+    player.y = spawn.y;
+		player.dead = false;
 
 		const gameSetup = {
 			mapData: room.mapData,
