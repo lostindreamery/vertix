@@ -2,18 +2,21 @@ import * as zip from "@zip.js/zip.js";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
+import { Projectile } from "./logic/projectile.ts";
+import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
+import { appStore } from "./state.ts";
 import type {
 	Account,
 	GameMode,
 	GenData,
 	InputSendData,
 	Player,
+	ShootEvent,
 	Sprite,
 	SpriteCanvas,
 	Tile,
 } from "./types.ts";
 import * as utils from "./utils.ts";
-import { appStore } from "./state.ts";
 import {
 	deactiveAllAnimTexts,
 	renderShadedAnimText,
@@ -23,7 +26,8 @@ import {
 	updateAnimTexts,
 	updateNotifications,
 } from "./visual/animtext.ts";
-import { screenShake, updateScreenShake } from "./visual/shake.ts";
+import { ChatManager } from "./visual/chat.tsx";
+import { updateFlashGlows } from "./visual/flash.ts";
 import {
 	createExplosion,
 	createLiquid,
@@ -32,23 +36,10 @@ import {
 	stillDustParticle,
 	updateParticles,
 } from "./visual/particle.ts";
-import { updateFlashGlows } from "./visual/flash.ts";
-import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
-import { Projectile } from "./logic/projectile.ts";
-import { ChatManager } from "./visual/chat.tsx";
+import { screenShake, updateScreenShake } from "./visual/shake.ts";
 
-const {
-	shootNextBullet,
-	getNextBullet,
-	setupMap,
-	wallCol,
-	getCurrentWeapon,
-	getDistance,
-	getAngle,
-	randomFloat,
-	randomInt,
-	canSee,
-} = utils;
+const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
+	utils;
 
 let playerName: string | undefined;
 var playerClassIndex: number | undefined;
@@ -197,16 +188,15 @@ function clickDropUpLink(index: number) {
 
 var loginTimeOut = null;
 function startLogin() {
-	if (socket) {
-		socket.emit("dbLogin", {
-			userName: userNameInput.value,
-			userPass: userPassInput.value,
-		});
-		loginUserNm = userNameInput.value;
-		loginUserPs = userPassInput.value;
-		loginMessage.style.display = "block";
-		loginMessage.textContent = "Please Wait...";
-	}
+	if (!socket) return;
+	socket.emit("dbLogin", {
+		userName: userNameInput.value,
+		userPass: userPassInput.value,
+	});
+	loginUserNm = userNameInput.value;
+	loginUserPs = userPassInput.value;
+	loginMessage.style.display = "block";
+	loginMessage.textContent = "Please Wait...";
 }
 var customMap: GenData | null = null;
 function getFile() {
@@ -721,6 +711,7 @@ function inputReset(save: boolean) {
 }
 inputReset(false);
 var previousKeyElementContent: string | null = null;
+//@ts-ignore
 window.inputChange = inputChange;
 function inputChange(elem: HTMLElement, ktc: keyof typeof keysList) {
 	if (keyToChange != null && keyChangeElement != null) {
@@ -1121,21 +1112,20 @@ function changeMenuTab(event: MouseEvent, tabId: string) {
 	(event.currentTarget as HTMLElement).className += " active";
 }
 function kickPlayer(secondReason: string) {
-	if (!disconnected) {
-		hideStatTable();
-		hideUI(true);
-		hideMenuUI();
-		document.getElementById("startMenuWrapper").style.display = "none";
-		disconnected = true;
-		gameOver.set(true);
-		if (reason === undefined) {
-			reason = secondReason;
-		}
-		kicked.set(true);
-		socket.close();
-		updateGameLoop();
-		stopAllSounds();
+	if (disconnected) return;
+	hideStatTable();
+	hideUI(true);
+	hideMenuUI();
+	document.getElementById("startMenuWrapper").style.display = "none";
+	disconnected = true;
+	gameOver.set(true);
+	if (reason === undefined) {
+		reason = secondReason;
 	}
+	kicked.set(true);
+	socket.close();
+	updateGameLoop();
+	stopAllSounds();
 }
 var classSelector = document.getElementById("classSelector");
 var spraySelector = document.getElementById("spraySelector");
@@ -1155,12 +1145,14 @@ function showLobbySelector() {
 	shirtSelector.style.display = "none";
 	lobbySelector.style.display = "block";
 }
+//@ts-ignore
 window.showLobbySelector = showLobbySelector;
 function hideLobbySelector() {
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	lobbySelector.style.display = "none";
 }
+//@ts-ignore
 window.hideLobbySelector = hideLobbySelector;
 function showLobbyCSelector() {
 	charSelectorCont.style.display = "none";
@@ -1171,12 +1163,14 @@ function showLobbyCSelector() {
 	shirtSelector.style.display = "none";
 	lobbyCSelector.style.display = "block";
 }
+//@ts-ignore
 window.showLobbyCSelector = showLobbyCSelector;
 function hideLobbyCSelector() {
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	lobbyCSelector.style.display = "none";
 }
+//@ts-ignore
 window.hideLobbyCSelector = hideLobbyCSelector;
 var timeOutCheck = null;
 var tmpPingTimer = null;
@@ -1670,9 +1664,9 @@ function showESCMenu() {
 }
 var buttonCount = 0;
 function showStatTable(
-	userList: any[],
+	userList: Player[],
 	modeVoteData: any,
-	winner: string | number,
+	winner: string | number | null,
 	reset: boolean,
 	isFading: boolean,
 	isEnd: boolean,
@@ -1779,9 +1773,9 @@ function showStatTable(
 						className: "contL",
 						canClick: userList[g].loggedIn,
 						color:
-							userList[g].index == player.get().index
+							userList[g].index === player.get().index
 								? "#fff"
-								: userList[g].team != player.get().team
+								: userList[g].team !== player.get().team
 									? "#d95151"
 									: "#5151d9",
 						id: null,
@@ -1861,7 +1855,7 @@ function showStatTable(
 				}, 4500);
 			}
 		}
-	} catch (l) {}
+	} catch (_) {}
 }
 function hideStatTable() {
 	showUI();
@@ -1873,7 +1867,7 @@ function hideStatTable() {
 	document.getElementById("linkBox").style.display = "none";
 }
 type StatTableRow = {
-	text: string;
+	text: string | number;
 	className: string;
 	canClick?: boolean;
 	color: string;
@@ -1885,73 +1879,89 @@ type StatTableRow = {
 };
 function addRowToStatTable(data: StatTableRow[], b: boolean) {
 	let trow = document.createElement("tr");
-	for (let f = 0; f < data.length; ++f) {
+	for (let i = 0; i < data.length; ++i) {
 		let tcell = document.createElement("td");
-		if (b || f !== data.length - 1) {
-			tcell.appendChild(document.createTextNode(data[f].text));
-			tcell.className = data[f].className;
-			tcell.style.color = data[f].color;
-			if (data[f].hoverInfo) {
-				let tooltip = document.createElement("div");
-				tooltip.className = "hoverTooltip";
-				tooltip.innerHTML =
-					data[f].hoverInfo.type === "hat"
-						? "<image class='itemDisplayImage' src='.././images/hats/" +
-							data[f].hoverInfo.id +
-							"/d.png'></image><div style='color:" +
-							data[f].color +
-							"; font-size:16px; margin-top:5px;'>" +
-							data[f].hoverInfo.name +
-							"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-							data[f].hoverInfo.chance +
-							"%</div>" +
-							(data[f].hoverInfo.duplicate
-								? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
-								: "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>wearable</i></div>") +
-							"<div style='font-size:12px; margin-top:5px;'>" +
-							data[f].hoverInfo.desc +
-							"</div>" +
-							(data[f].hoverInfo.creator === "EatMyApples"
-								? ""
-								: "<div style='font-size:8px; color:#d8d8d8; margin-top:5px;'><i>Artist: " +
-									data[f].hoverInfo.creator +
-									"</i></div>")
-						: data[f].hoverInfo.type === "shirt"
-							? "<image class='shirtDisplayImage' src='.././images/shirts/" +
-								data[f].hoverInfo.id +
-								"/d.png'></image><div style='color:" +
-								data[f].color +
-								"; font-size:16px; margin-top:5px;'>" +
-								data[f].hoverInfo.name +
-								"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-								data[f].hoverInfo.chance +
-								"%</div>" +
-								(data[f].hoverInfo.duplicate
-									? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
-									: "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>shirt</i></div>") +
-								"<div style='font-size:12px; margin-top:5px;'>" +
-								data[f].hoverInfo.desc +
-								"</div>"
-							: "<image class='camoDisplayImage' src='.././images/camos/" +
-								(data[f].hoverInfo.id + 1) +
-								".png'></image><div style='color:" +
-								data[f].color +
-								"; font-size:16px; margin-top:5px;'>" +
-								data[f].hoverInfo.name +
-								"</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-								data[f].hoverInfo.chance +
-								"%</div>" +
-								(data[f].hoverInfo.duplicate
-									? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
-									: "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>weapon camo</i></div>") +
-								"<div style='font-size:12px; margin-top:5px;'>" +
-								data[f].hoverInfo.weaponName +
-								"</div>";
+		if (b || i !== data.length - 1) {
+			tcell.appendChild(document.createTextNode(data[i].text.toString()));
+			tcell.className = data[i].className;
+			tcell.style.color = data[i].color;
+			if (data[i].hoverInfo) {
+				const info = data[i].hoverInfo;
+				const tooltip = (
+					<div className="hoverTooltip">
+						{info.type === "hat" ? (
+							<>
+								<img className="itemDisplayImage" src={`.././images/hats/${info.id}/d.png`} />
+								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
+									{info.name}
+								</div>
+								<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
+									droprate {info.chance}%
+								</div>
+								{info.duplicate ? (
+									<div style={{ fontSize: "8px", color: "#e04141", marginTop: "1px" }}>
+										<i>Duplicate</i>
+									</div>
+								) : (
+									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
+										<i>wearable</i>
+									</div>
+								)}
+								<div style={{ fontSize: "12px", marginTop: "5px" }}>{info.desc}</div>
+								{info.creator !== "EatMyApples" && (
+									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "5px" }}>
+										<i>Artist: {info.creator}</i>
+									</div>
+								)}
+							</>
+						) : info.type === "shirt" ? (
+							<>
+								<img className="shirtDisplayImage" src={`.././images/shirts/${info.id}/d.png`} />
+								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
+									{info.name}
+								</div>
+								<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
+									droprate {info.chance}%
+								</div>
+								{info.duplicate ? (
+									<div style={{ fontSize: "8px", color: "#e04141", marginTop: "1px" }}>
+										<i>Duplicate</i>
+									</div>
+								) : (
+									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
+										<i>shirt</i>
+									</div>
+								)}
+								<div style={{ fontSize: "12px", marginTop: "5px" }}>{info.desc}</div>
+							</>
+						) : (
+							<>
+								<img className="camoDisplayImage" src={`.././images/camos/${info.id + 1}.png`} />
+								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
+									{info.name}
+								</div>
+								<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
+									droprate {info.chance}%
+								</div>
+								{info.duplicate ? (
+									<div style={{ fontSize: "8px", color: "#e04141", marginTop: "1px" }}>
+										<i>Duplicate</i>
+									</div>
+								) : (
+									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
+										<i>weapon camo</i>
+									</div>
+								)}
+								<div style={{ fontSize: "12px", marginTop: "5px" }}>{info.weaponName}</div>
+							</>
+						)}
+					</div>
+				);
 				tcell.appendChild(tooltip);
 			}
-			if (tcell.className === "contL" && data[f].canClick) {
+			if (tcell.className === "contL" && data[i].canClick) {
 				tcell.addEventListener("click", () => {
-					showUserStatPage(data[f].text);
+					showUserStatPage(data[i].text.toString());
 				});
 			}
 		} else {
@@ -1959,7 +1969,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 			let btnText = document.createTextNode(" NICE");
 			btn.appendChild(btnText);
 			btn.setAttribute("type", "button");
-			let m = data[f];
+			let m = data[i];
 			btn.onclick = () => {
 				mainCanvas.focus();
 				likePlayerStat(m.pos);
@@ -1985,13 +1995,13 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 			btn.style.display = m.pos === player.get().index ? "none" : "block";
 			trow.appendChild(btn);
 			let tmpDiv = document.createElement("div");
-			tmpDiv.innerHTML = data[f].text;
-			if (data[f].id != null) {
-				tmpDiv.setAttribute("id", data[f].id);
+			tmpDiv.textContent = data[i].text.toString();
+			if (data[i].id != null) {
+				tmpDiv.setAttribute("id", data[i].id);
 			}
 			tcell.appendChild(btn);
-			tcell.className = data[f].className;
-			tcell.style.color = data[f].color;
+			tcell.className = data[i].className;
+			tcell.style.color = data[i].color;
 		}
 		trow.appendChild(tcell);
 	}
@@ -2269,6 +2279,7 @@ function showHatselector() {
 	spraySelector.style.display = "none";
 	hatSelector.style.display = "block";
 }
+//@ts-ignore
 window.changeHat = changeHat;
 function changeHat(a: number) {
 	if (!socket) return;
@@ -2347,22 +2358,22 @@ function showShirtselector() {
 	hatSelector.style.display = "none";
 	shirtSelector.style.display = "block";
 }
+//@ts-ignore
 window.changeShirt = changeShirt;
 function changeShirt(shirtId: number) {
-	if (socket) {
-		socket.emit("cShirt", shirtId);
-		localStorage.setItem("previousShirt", shirtId.toString());
-		currentShirt.innerHTML = document.getElementById(`shirtItem${shirtId}`).innerHTML;
-		currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`).style.color;
-		charSelectorCont.style.display = "block";
-		lobbySelectorCont.style.display = "block";
-		classSelector.style.display = "none";
-		camoSelector.style.display = "none";
-		shirtSelector.style.display = "none";
-		hatSelector.style.display = "none";
-		lobbySelector.style.display = "none";
-		lobbyCSelector.style.display = "none";
-	}
+	if (!socket) return;
+	socket.emit("cShirt", shirtId);
+	localStorage.setItem("previousShirt", shirtId.toString());
+	currentShirt.innerHTML = document.getElementById(`shirtItem${shirtId}`).innerHTML;
+	currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`).style.color;
+	charSelectorCont.style.display = "block";
+	lobbySelectorCont.style.display = "block";
+	classSelector.style.display = "none";
+	camoSelector.style.display = "none";
+	shirtSelector.style.display = "none";
+	hatSelector.style.display = "none";
+	lobbySelector.style.display = "none";
+	lobbyCSelector.style.display = "none";
 }
 var currentSpray = document.getElementById("currentSpray");
 var sprayList = document.getElementById("sprayList");
@@ -2428,6 +2439,7 @@ function changeSpray(dir: number, sprayId: number) {
 	lobbySelector.style.display = "none";
 	lobbyCSelector.style.display = "none";
 }
+//@ts-ignore
 window.changeSpray = changeSpray;
 function findUserByIndex(index: number): Player {
 	for (let i = 0; i < gameObjects.length; ++i) {
@@ -2777,7 +2789,7 @@ function updateGameLoop() {
 }
 function otherJump(userIdx: number) {
 	var tmpPlayer = findUserByIndex(userIdx);
-	if (tmpPlayer != undefined && tmpPlayer != null && player.get().index != userIdx) {
+	if (tmpPlayer && player.get().index !== userIdx) {
 		playerJump(tmpPlayer);
 	}
 }
@@ -3021,27 +3033,26 @@ function drawMiniMap() {
 			mapContext.fill();
 		}
 	}
-	if (gameMap.get()) {
-		mapContext.globalAlpha = 1;
-		for (let i = 0; i < gameMap.get().pickups.length; ++i) {
-			if (gameMap.get().pickups[i].active) {
-				if (gameMap.get().pickups[i].type === "lootcrate") {
-					mapContext.fillStyle = "#ffd100";
-				} else if (gameMap.get().pickups[i].type === "healthpack") {
-					mapContext.fillStyle = "#5ed951";
-				}
-				mapContext.beginPath();
-				mapContext.arc(
-					(gameMap.get().pickups[i].x / gameWidth) * mapScale,
-					(gameMap.get().pickups[i].y / gameHeight) * mapScale,
-					pingScale,
-					0,
-					Math.PI * 2,
-					true,
-				);
-				mapContext.closePath();
-				mapContext.fill();
+	if (!gameMap.get()) return;
+	mapContext.globalAlpha = 1;
+	for (let i = 0; i < gameMap.get().pickups.length; ++i) {
+		if (gameMap.get().pickups[i].active) {
+			if (gameMap.get().pickups[i].type === "lootcrate") {
+				mapContext.fillStyle = "#ffd100";
+			} else if (gameMap.get().pickups[i].type === "healthpack") {
+				mapContext.fillStyle = "#5ed951";
 			}
+			mapContext.beginPath();
+			mapContext.arc(
+				(gameMap.get().pickups[i].x / gameWidth) * mapScale,
+				(gameMap.get().pickups[i].y / gameHeight) * mapScale,
+				pingScale,
+				0,
+				Math.PI * 2,
+				true,
+			);
+			mapContext.closePath();
+			mapContext.fill();
 		}
 	}
 }
@@ -3091,36 +3102,30 @@ function deactivateSprays() {
 function cacheSpray(img: Sprite) {
 	const tmpIndex = img.src;
 	let tmpSpray = cachedSprays[tmpIndex];
-	if (tmpSpray === undefined && img.width !== 0) {
-		let initialCanvas = document.createElement("canvas");
-		let initialCtx = initialCanvas.getContext("2d");
-		initialCanvas.width = img.resolution;
-		initialCanvas.height = img.resolution;
-		initialCtx.drawImage(img, 0, 0, img.resolution, img.resolution);
-		let finalCanvas = document.createElement("canvas");
-		let finalCtx = finalCanvas.getContext("2d");
-		finalCanvas.width = img.scale;
-		finalCanvas.height = img.scale;
-		finalCtx.imageSmoothingEnabled = false;
-		finalCtx.globalAlpha = img.alpha;
-		finalCtx.drawImage(initialCanvas, 0, 0, img.scale, img.scale);
-		tmpSpray = finalCanvas;
-		cachedSprays[tmpIndex] = tmpSpray;
-	}
+	if (tmpSpray || img.width === 0) return;
+
+	let initialCanvas = document.createElement("canvas");
+	let initialCtx = initialCanvas.getContext("2d");
+	initialCanvas.width = img.resolution;
+	initialCanvas.height = img.resolution;
+	initialCtx.drawImage(img, 0, 0, img.resolution, img.resolution);
+	let finalCanvas = document.createElement("canvas");
+	let finalCtx = finalCanvas.getContext("2d");
+	finalCanvas.width = img.scale;
+	finalCanvas.height = img.scale;
+	finalCtx.imageSmoothingEnabled = false;
+	finalCtx.globalAlpha = img.alpha;
+	finalCtx.drawImage(initialCanvas, 0, 0, img.scale, img.scale);
+	tmpSpray = finalCanvas;
+	cachedSprays[tmpIndex] = tmpSpray;
 }
 function drawSprays() {
 	if (!showSprays) return;
-	for (let i = 0; i < userSprays.length; ++i) {
-		if (userSprays[i].active) {
-			let tmpSpray = cachedSprays[`${userSprays[i].src}`];
-			if (tmpSpray != undefined) {
-				graph.drawImage(
-					tmpSpray,
-					userSprays[i].xPos - startX.get(),
-					userSprays[i].yPos - startY.get(),
-				);
-			}
-		}
+	for (const sp of userSprays) {
+		if (!sp.active) continue;
+		let tmpSpray = cachedSprays[`${sp.src}`];
+		if (!tmpSpray) continue;
+		graph.drawImage(tmpSpray, sp.xPos - startX.get(), sp.yPos - startY.get());
 	}
 }
 var spritesLoaded = false;
@@ -3149,7 +3154,7 @@ function getSprite(fileName: string) {
 	return b;
 }
 function flipSprite(sprite: Sprite, horizontal: boolean): Sprite {
-	let canvasElem = document.createElement("canvas") as any;
+	let canvasElem = document.createElement("canvas") as any; // todo cursed
 	let ctx = canvasElem.getContext("2d");
 	canvasElem.width = sprite.width;
 	canvasElem.height = sprite.height;
@@ -3161,7 +3166,6 @@ function flipSprite(sprite: Sprite, horizontal: boolean): Sprite {
 		ctx.scale(1, -1);
 		ctx.drawImage(sprite, 0, -canvasElem.height, canvasElem.width, canvasElem.height);
 	}
-	// TODO
 	canvasElem.index = sprite.index;
 	canvasElem.flipped = true;
 	canvasElem.isLoaded = true;
@@ -3294,8 +3298,7 @@ function playerReload(player: Player, shouldEmit: boolean) {
 function findServerBullet(bulletIndex: number) {
 	return bullets.find((b) => b.serverIndex === bulletIndex);
 }
-function someoneShot(evt: any) {
-	// todo
+function someoneShot(evt: ShootEvent) {
 	if (evt.i !== player.get().index) {
 		let tmpPlayer = findUserByIndex(evt.i);
 		if (tmpPlayer != null) {
@@ -3401,7 +3404,7 @@ function loadSavedClass() {
 }
 function pickedCharacter(classId: number) {
 	currentClassID = classId;
-	currentClass.innerHTML = document.getElementById(`classItem${classId}`).innerHTML;
+	currentClass.textContent = document.getElementById(`classItem${classId}`).textContent;
 	currentClass.style.color = document.getElementById(`classItem${classId}`).style.color;
 	characterWepnDisplay.replaceChildren(
 		<>
@@ -3423,7 +3426,7 @@ function pickedCharacter(classId: number) {
 	if (loggedIn) {
 		for (let i = 0; i < characterClasses[classId].weaponIndexes.length; ++i) {
 			let skinPref = localStorage.getItem(`wpnSkn${characterClasses[classId].weaponIndexes[i]}`);
-			if (skinPref != "") {
+			if (skinPref) {
 				changeCamo(characterClasses[classId].weaponIndexes[i], parseInt(skinPref), false);
 			}
 		}
@@ -3487,23 +3490,21 @@ function getCamoURL(id: number) {
 	return `.././images/camos/${id + 1}.png`;
 }
 function changeCamo(weaponId: number, camoId: number, save: boolean) {
-	if (socket) {
-		socket.emit("cCamo", {
-			weaponID: weaponId,
-			camoID: camoId,
-		});
-		if (save) {
-			localStorage.setItem(`wpnSkn${weaponId}`, camoId.toString());
-			charSelectorCont.style.display = "block";
-			lobbySelectorCont.style.display = "block";
-			camoSelector.style.display = "none";
-			shirtSelector.style.display = "none";
-			classSelector.style.display = "none";
-			hatSelector.style.display = "none";
-			lobbySelector.style.display = "none";
-			lobbyCSelector.style.display = "none";
-		}
-	}
+	if (!socket) return;
+	socket.emit("cCamo", {
+		weaponID: weaponId,
+		camoID: camoId,
+	});
+	if (!save) return;
+	localStorage.setItem(`wpnSkn${weaponId}`, camoId.toString());
+	charSelectorCont.style.display = "block";
+	lobbySelectorCont.style.display = "block";
+	camoSelector.style.display = "none";
+	shirtSelector.style.display = "none";
+	classSelector.style.display = "none";
+	hatSelector.style.display = "none";
+	lobbySelector.style.display = "none";
+	lobbyCSelector.style.display = "none";
 }
 function updateCamosList(max: number, data: any[]) {
 	camoDataList = data;
@@ -3671,6 +3672,7 @@ function setModInfoText(info: string) {
 		modInfo.innerHTML = info;
 	}
 }
+//@ts-ignore
 window.loadModPack = loadModPack;
 async function loadModPack(url: string, isBaseAssets: boolean) {
 	try {
@@ -4304,7 +4306,7 @@ function drawPlayerNames() {
 					);
 				}
 			}
-			if (tmpObject.account?.clan != "") {
+			if (tmpObject.account?.clan) {
 				let renderedClan = renderShadedAnimText(
 					` [${tmpObject.account?.clan}]`,
 					d * textSizeMult,

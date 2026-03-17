@@ -330,7 +330,7 @@ io.on("connection", (socket: Socket) => {
 		if (space === 1) {
 			io.emit("jum", player.index);
 		}
-		wallCol(player, room, room);
+		wallCol(player, room, room.clutter);
 		player.x = Math.round(player.x);
 		player.y = Math.round(player.y);
 		// TODO: gamemode objectve

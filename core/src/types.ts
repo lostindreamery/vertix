@@ -44,6 +44,10 @@ export type Player = {
 	isn?: number;
 	firstReceive?: boolean; // unused?
 	spray?: any; // todo
+
+	// properties for removed gamemodes?
+	totalGoals?: number;
+	lastItem?: any;
 };
 
 export type Weapon = {
@@ -186,4 +190,13 @@ export type MapData = {
 	pickups: MapObject[];
 	width: number;
 	height: number;
+};
+
+// todo gather types for socket events/packets together
+export type ShootEvent = {
+	i: number;
+	x: number;
+	y: number;
+	d: number;
+	si: number;
 };

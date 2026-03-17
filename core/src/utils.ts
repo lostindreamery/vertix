@@ -3,7 +3,7 @@ import { appStore } from "./state.ts";
 import type { Player, Tile } from "./types.ts";
 
 var bulletIndex = 0;
-export function getNextBullet(bullets: any) {
+export function getNextBullet(bullets: Projectile[]) {
 	bulletIndex++;
 	if (bulletIndex >= bullets.length) {
 		bulletIndex = 0;
@@ -270,60 +270,56 @@ function canPlaceFlag(tile: Tile, ignoreWalls: boolean) {
 export function wallCol(player: Player, gameMap: any, gameObjects: any) {
 	if (player.dead) return;
 	player.nameYOffset = 0;
-	for (let i = 0; i < gameMap.tiles.length; ++i) {
-		if (gameMap.tiles[i].wall && gameMap.tiles[i].hasCollision) {
-			const tmpTile = gameMap.tiles[i];
-			if (
-				player.x + player.width / 2 >= tmpTile.x &&
-				player.x - player.width / 2 <= tmpTile.x + tmpTile.scale &&
-				player.y >= tmpTile.y &&
-				player.y <= tmpTile.y + tmpTile.scale
-			) {
-				if (player.oldX <= tmpTile.x) {
-					player.x = tmpTile.x - player.width / 2 - 2;
-				} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
-					player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
-				}
-				if (player.oldY <= tmpTile.y) {
-					player.y = tmpTile.y - 2;
-				} else if (player.oldY >= tmpTile.y + tmpTile.scale) {
-					player.y = tmpTile.y + tmpTile.scale + 2;
-				}
+	for (const tmpTile of gameMap.tiles) {
+		if (!tmpTile.wall || !tmpTile.hasCollision) continue;
+		if (
+			player.x + player.width / 2 >= tmpTile.x &&
+			player.x - player.width / 2 <= tmpTile.x + tmpTile.scale &&
+			player.y >= tmpTile.y &&
+			player.y <= tmpTile.y + tmpTile.scale
+		) {
+			if (player.oldX <= tmpTile.x) {
+				player.x = tmpTile.x - player.width / 2 - 2;
+			} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
+				player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
 			}
-			if (
-				!tmpTile.hardPoint &&
-				player.x > tmpTile.x &&
-				player.x < tmpTile.x + tmpTile.scale &&
-				player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
-				player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
-			) {
-				player.nameYOffset = Math.round(
-					player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
-				);
+			if (player.oldY <= tmpTile.y) {
+				player.y = tmpTile.y - 2;
+			} else if (player.oldY >= tmpTile.y + tmpTile.scale) {
+				player.y = tmpTile.y + tmpTile.scale + 2;
 			}
 		}
+		if (
+			!tmpTile.hardPoint &&
+			player.x > tmpTile.x &&
+			player.x < tmpTile.x + tmpTile.scale &&
+			player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
+			player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
+		) {
+			player.nameYOffset = Math.round(
+				player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
+			);
+		}
 	}
-	for (let i = 0; i < gameObjects.length; ++i) {
-		if (gameObjects[i].type === "clutter" && gameObjects[i].active) {
-			const tmpObj = gameObjects[i];
-			if (
-				tmpObj.hc &&
-				//canSee(b.x - startX, b.y - startY, b.w, b.h) &&
-				player.x + player.width / 2 >= tmpObj.x &&
-				player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
-				player.y >= tmpObj.y - tmpObj.h * tmpObj.tp &&
-				player.y <= tmpObj.y
-			) {
-				if (player.oldX + player.width / 2 <= tmpObj.x) {
-					player.x = tmpObj.x - player.width / 2 - 1;
-				} else if (player.oldX - player.width / 2 >= tmpObj.x + tmpObj.w) {
-					player.x = tmpObj.x + tmpObj.w + player.width / 2 + 1;
-				}
-				if (player.oldY >= tmpObj.y) {
-					player.y = tmpObj.y + 1;
-				} else if (player.oldY <= tmpObj.y - tmpObj.h * tmpObj.tp) {
-					player.y = tmpObj.y - tmpObj.h * tmpObj.tp - 1;
-				}
+	for (const tmpObj of gameObjects) {
+		if (tmpObj.type !== "clutter" || !tmpObj.active) continue;
+		if (
+			tmpObj.hc &&
+			//canSee(b.x - startX, b.y - startY, b.w, b.h) &&
+			player.x + player.width / 2 >= tmpObj.x &&
+			player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
+			player.y >= tmpObj.y - tmpObj.h * tmpObj.tp &&
+			player.y <= tmpObj.y
+		) {
+			if (player.oldX + player.width / 2 <= tmpObj.x) {
+				player.x = tmpObj.x - player.width / 2 - 1;
+			} else if (player.oldX - player.width / 2 >= tmpObj.x + tmpObj.w) {
+				player.x = tmpObj.x + tmpObj.w + player.width / 2 + 1;
+			}
+			if (player.oldY >= tmpObj.y) {
+				player.y = tmpObj.y + 1;
+			} else if (player.oldY <= tmpObj.y - tmpObj.h * tmpObj.tp) {
+				player.y = tmpObj.y - tmpObj.h * tmpObj.tp - 1;
 			}
 		}
 	}
