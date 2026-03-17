@@ -1,7 +1,7 @@
-import type { UserConfig } from 'vite'
+import type { UserConfig } from "vite";
 
-export default { 
+export default {
 	build: {
-		target: "esnext"
-	}
+		target: "esnext",
+	},
 } satisfies UserConfig;
