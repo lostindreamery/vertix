@@ -60,7 +60,7 @@ var mobile = appStore.select("mobile");
 var room: any;
 var currentFPS = 0;
 var fillCounter = 0;
-var currentLikeButton = "";
+var currentLikeButton: number = null;
 var delta = 0;
 var horizontalDT = 0;
 var verticalDT = 0;
@@ -77,8 +77,6 @@ var keyd = 1;
 var tabbed = 0;
 var timeSinceLastUpdate = 0;
 var timeOfLastUpdate = 0;
-
-window.changeMenuTab = changeMenuTab;
 
 // zip.workerScriptsPath = "../js/lib/";
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
@@ -613,7 +611,7 @@ var target = {
 	d: 0,
 	dOffset: 0,
 };
-var gameObjects: any = []; // todo
+var gameObjects: any[] = []; // todo
 //@ts-ignore
 window.gameObjects = gameObjects;
 var bullets: Projectile[] = [];
@@ -1101,6 +1099,12 @@ document.getElementById("fpsSelect").addEventListener("change", function (this: 
 	localStorage.setItem("targetFPS", targetFPS.toString());
 });
 
+Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
+	(elem) =>
+		elem.addEventListener("click", (event) => {
+			changeMenuTab(event, elem.attributes.getNamedItem("data-menu-tab").value);
+		}),
+);
 function changeMenuTab(event: MouseEvent, tabId: string) {
 	const tabContents = document.getElementsByClassName("tabcontent");
 	for (let i = 0; i < tabContents.length; i++) {
@@ -1402,7 +1406,7 @@ function setupSocket(sock: Socket) {
 			} else {
 				document.getElementById("gameModeText").textContent = gameMode.desc1;
 			}
-			currentLikeButton = "";
+			currentLikeButton = null;
 			for (let d = 0; d < gameMap.get().clutter.length; ++d) {
 				const b = gameMap.get().clutter[d];
 				b.type = "clutter";
@@ -1652,10 +1656,10 @@ function setupSocket(sock: Socket) {
 		document.getElementById("nextGameTimer").textContent = `${a}: UNTIL NEXT ROUND`;
 	});
 }
-function likePlayerStat(a) {
+function likePlayerStat(a: any) {
 	socket.emit("like", a);
 }
-function updateVoteStats(a) {
+function updateVoteStats(a: any) {
 	document.getElementById(`votesText${a.i}`).textContent = `${a.n}: ${a.v}`;
 }
 function showESCMenu() {
@@ -1671,10 +1675,10 @@ function showStatTable(
 	winner: string | number,
 	reset: boolean,
 	isFading: boolean,
-	h,
+	isEnd: boolean,
 ) {
 	buttonCount = 0;
-	if (h) {
+	if (isEnd) {
 		hideUI(false);
 		if (reset) {
 			document.getElementById("nextGameTimer").textContent = "GAME STATS";
@@ -1838,7 +1842,7 @@ function showStatTable(
 				false,
 			);
 		}
-		if (h) {
+		if (isEnd) {
 			if (isFading) {
 				overlayAlpha = overlayMaxAlpha;
 				animateOverlay = false;
@@ -1868,7 +1872,18 @@ function hideStatTable() {
 	document.getElementById("gameStatWrapper").style.display = "none";
 	document.getElementById("linkBox").style.display = "none";
 }
-function addRowToStatTable(data, b) {
+type StatTableRow = {
+	text: string;
+	className: string;
+	canClick?: boolean;
+	color: string;
+	id?: string;
+	uID?: number;
+	hoverInfo?: any;
+	pos?: number;
+	userInfo?: Player;
+};
+function addRowToStatTable(data: StatTableRow[], b: boolean) {
 	let trow = document.createElement("tr");
 	for (let f = 0; f < data.length; ++f) {
 		let tcell = document.createElement("td");
@@ -1957,7 +1972,7 @@ function addRowToStatTable(data, b) {
 					currentLikeButton = m.uID;
 					btn.setAttribute("class", "gameStatLikeButtonA");
 				} else {
-					currentLikeButton = "";
+					currentLikeButton = null;
 				}
 			};
 			btn.setAttribute("id", `gameStatLikeButton${buttonCount}`);
@@ -1974,7 +1989,7 @@ function addRowToStatTable(data, b) {
 			if (data[f].id != null) {
 				tmpDiv.setAttribute("id", data[f].id);
 			}
-			tcell.appendChild(btnText);
+			tcell.appendChild(btn);
 			tcell.className = data[f].className;
 			tcell.style.color = data[f].color;
 		}
@@ -2027,38 +2042,38 @@ function getItemRarityColor(chance: number) {
 		return "#9d9d9d";
 	}
 }
-function updateUserValue(a) {
+function updateUserValue(data: any) {
 	var b = false;
-	const tmpUser = findUserByIndex(a.i);
+	const tmpUser = findUserByIndex(data.i);
 	if (tmpUser != null) {
-		if (a.s != undefined) {
-			tmpUser.score = a.s;
+		if (data.s != undefined) {
+			tmpUser.score = data.s;
 			b = true;
 		}
-		if (a.sp != undefined) {
-			tmpUser.spawnProtection = a.sp;
+		if (data.sp != undefined) {
+			tmpUser.spawnProtection = data.sp;
 		}
-		if (a.wi != undefined && a.i != player.get().index) {
-			playerEquipWeapon(tmpUser, a.wi);
+		if (data.wi != undefined && data.i != player.get().index) {
+			playerEquipWeapon(tmpUser, data.wi);
 		}
-		if (a.l != undefined) {
-			tmpUser.likes = a.l;
+		if (data.l != undefined) {
+			tmpUser.likes = data.l;
 			b = true;
 		}
-		if (a.dea != undefined) {
-			tmpUser.deaths = a.dea;
+		if (data.dea != undefined) {
+			tmpUser.deaths = data.dea;
 			b = true;
 		}
-		if (a.kil != undefined) {
-			tmpUser.kills = a.kil;
+		if (data.kil != undefined) {
+			tmpUser.kills = data.kil;
 			b = true;
 		}
-		if (a.dmg != undefined) {
-			tmpUser.totalDamage = a.dmg;
+		if (data.dmg != undefined) {
+			tmpUser.totalDamage = data.dmg;
 			b = true;
 		}
-		if (a.hea != undefined) {
-			tmpUser.totalHealing = a.hea;
+		if (data.hea != undefined) {
+			tmpUser.totalHealing = data.hea;
 			b = true;
 		}
 		if (tmpUser.index == player.get().index) {
@@ -2067,17 +2082,17 @@ function updateUserValue(a) {
 		}
 		if (b) {
 			if (gameOver.get()) {
-				if (a.l != undefined) {
-					a = document.createTextNode(tmpUser.likes.toString());
+				if (data.l != undefined) {
+					data = document.createTextNode(tmpUser.likes.toString());
 					document.getElementById(`likeStat${tmpUser.index}`).textContent = "";
-					document.getElementById(`likeStat${tmpUser.index}`).appendChild(a);
+					document.getElementById(`likeStat${tmpUser.index}`).appendChild(data);
 				}
 			} else {
 				showStatTable(getUsersList(), null, null, true, true, false);
 			}
 		}
 	} else {
-		fetchUserWithIndex(a.i);
+		fetchUserWithIndex(data.i);
 	}
 }
 function fetchUserWithIndex(a: number) {
@@ -2422,7 +2437,7 @@ function findUserByIndex(index: number): Player {
 	}
 	return null;
 }
-function getUsersList() {
+function getUsersList(): Player[] {
 	let tmpUsers = [];
 	for (let i = 0; i < gameObjects.length; ++i) {
 		if (gameObjects[i].type === "player") {
@@ -2449,7 +2464,7 @@ function sortUsersByScore(a: Player, b: Player) {
 		return 0;
 	}
 }
-function sortUsersByPosition(a, b) {
+function sortUsersByPosition(a: (typeof gameObjects)[number], b: (typeof gameObjects)[number]) {
 	if (a.y < b.y) {
 		return -1;
 	} else if (a.y > b.y) {
@@ -3133,13 +3148,13 @@ function getSprite(fileName: string) {
 	spriteIndex++;
 	return b;
 }
-function flipSprite(sprite: Sprite, b): Sprite {
+function flipSprite(sprite: Sprite, horizontal: boolean): Sprite {
 	let canvasElem = document.createElement("canvas") as any;
 	let ctx = canvasElem.getContext("2d");
 	canvasElem.width = sprite.width;
 	canvasElem.height = sprite.height;
 	ctx.imageSmoothingEnabled = false;
-	if (b) {
+	if (horizontal) {
 		ctx.scale(-1, 1);
 		ctx.drawImage(sprite, -canvasElem.width, 0, canvasElem.width, canvasElem.height);
 	} else {
@@ -3431,7 +3446,6 @@ function pickedCharacter(classId: number) {
 	camoSelector.style.display = "none";
 	shirtSelector.style.display = "none";
 }
-window.pickedCharacter = pickedCharacter;
 var camoDataList: any[] | null = null;
 var maxCamos = 0;
 var camoList = document.getElementById("camoList");
@@ -3469,8 +3483,8 @@ function showWeaponSelector(wepType: 0 | 1) {
 	}
 	camoList.replaceChildren(...list);
 }
-function getCamoURL(a) {
-	return `.././images/camos/${a + 1}.png`;
+function getCamoURL(id: number) {
+	return `.././images/camos/${id + 1}.png`;
 }
 function changeCamo(weaponId: number, camoId: number, save: boolean) {
 	if (socket) {
@@ -4602,8 +4616,8 @@ function drawSprite(
 	dh: number,
 	angle: number,
 	hasShadows: boolean,
-	m,
-	k,
+	shadowShift: number,
+	shadowScaleY: number,
 	hOff: number,
 ) {
 	if (!sprite || sprite.width <= 0) return;
@@ -4611,22 +4625,27 @@ function drawSprite(
 	dy = Math.floor(dy);
 	dw = Math.floor(dw);
 	dh = Math.floor(dh);
-	m = Math.floor(m);
+	shadowShift = Math.floor(shadowShift);
 	ctx.rotate(angle);
 	ctx.drawImage(sprite, dx, dy, dw, dh);
 	if (hasShadows && showShadows) {
 		ctx.globalAlpha = 1;
-		ctx.translate(0, m);
-		let tmpShadow = getCachedShadow(sprite, dw, dh + hOff, k);
+		ctx.translate(0, shadowShift);
+		let tmpShadow = getCachedShadow(sprite, dw, dh + hOff, shadowScaleY);
 		if (tmpShadow) {
 			ctx.drawImage(tmpShadow, dx, dy + dh);
 		}
 		ctx.rotate(-angle);
-		ctx.translate(0, -m);
+		ctx.translate(0, -shadowShift);
 	}
 }
 var shadowIntensity = 0.16;
-function getCachedShadow(sprite: Sprite | SpriteCanvas, width: number, height: number, e) {
+function getCachedShadow(
+	sprite: Sprite | SpriteCanvas,
+	width: number,
+	height: number,
+	scaleY: number,
+) {
 	if (
 		cachedShadows[sprite.index] === undefined &&
 		width !== 0 &&
@@ -4639,8 +4658,8 @@ function getCachedShadow(sprite: Sprite | SpriteCanvas, width: number, height: n
 
 		tmpCanvas.width = width;
 		tmpCanvas.height = height;
-		ctx.globalAlpha = e === 0.5 ? shadowIntensity : shadowIntensity * 0.75;
-		ctx.scale(1, -e);
+		ctx.globalAlpha = scaleY === 0.5 ? shadowIntensity : shadowIntensity * 0.75;
+		ctx.scale(1, -scaleY);
 		ctx.transform(1, 0, 0, 1, 0, 0);
 		ctx.drawImage(sprite, 0, -height, width, height);
 		let imgData = ctx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
