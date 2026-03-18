@@ -16,14 +16,9 @@
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
-		"domains": {
-			"types": "all",
-			"project": "recommended"
-		},
 		"rules": {
 			"suspicious": {
-				"noDebugger": "off",
-				"noImportCycles": "on"
+				"noDebugger": "off"
 			},
 			"correctness": {
 				"useImportExtensions": "on"
