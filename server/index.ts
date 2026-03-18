@@ -134,9 +134,11 @@ io.on("connection", (socket: Socket) => {
 		io.emit("upd", { i: player.index, wi: player.currentWeapon });
 	});
 	socket.on("r", () => {
+		const currentWeapon = getCurrentWeapon(player);
+		const swappedWeapon = player.currentWeapon
 		setTimeout(() => {
-			socket.emit("r", player.currentWeapon);
-		}, weapons[player.currentWeapon].reloadSpeed ?? 0);
+			socket.emit("r", swappedWeapon);
+		}, currentWeapon.reloadSpeed ?? 0);
 	});
 	socket.on("0", (targetF) => {
 		player.targetF = targetF;
@@ -330,7 +332,7 @@ io.on("connection", (socket: Socket) => {
 		if (space === 1) {
 			io.emit("jum", player.index);
 		}
-		wallCol(player, room, room.clutter);
+		wallCol(player, room.tiles, room.clutter);
 		player.x = Math.round(player.x);
 		player.y = Math.round(player.y);
 		// TODO: gamemode objectve

@@ -2192,7 +2192,7 @@ function receiveServerData(a: number[]) {
 						gameObjects[i].oldY = gameObjects[i].y;
 						gameObjects[i].x += hdt * gameObjects[i].speed * thisInput[f].delta;
 						gameObjects[i].y += vdt * gameObjects[i].speed * thisInput[f].delta;
-						wallCol(gameObjects[i], gameMap.get(), gameObjects);
+						wallCol(gameObjects[i], gameMap.get().tiles, gameObjects);
 						f++;
 					}
 				}
@@ -2650,7 +2650,7 @@ function updateGameLoop() {
 						gameObjects[e].x += b * gameObjects[e].speed * delta;
 						gameObjects[e].y += d * gameObjects[e].speed * delta;
 					}
-					wallCol(gameObjects[e], gameMap.get(), gameObjects);
+					wallCol(gameObjects[e], gameMap.get().tiles, gameObjects);
 					gameObjects[e].x = Math.round(gameObjects[e].x);
 					gameObjects[e].y = Math.round(gameObjects[e].y);
 					gameObjects[e].angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;

@@ -267,10 +267,10 @@ function canPlaceFlag(tile: Tile, ignoreWalls: boolean) {
 		return tile !== undefined && !tile.hardPoint;
 	}
 }
-export function wallCol(player: Player, gameMap: any, gameObjects: any) {
+export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 	if (player.dead) return;
 	player.nameYOffset = 0;
-	for (const tmpTile of gameMap.tiles) {
+	for (const tmpTile of tiles) {
 		if (!tmpTile.wall || !tmpTile.hasCollision) continue;
 		if (
 			player.x + player.width / 2 >= tmpTile.x &&
