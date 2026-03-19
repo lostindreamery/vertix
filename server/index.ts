@@ -13,7 +13,7 @@ import {
 import { Room } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 import type { Player } from "core/src/types.ts";
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const app = new Hono();
@@ -58,11 +58,12 @@ io.on("connection", (socket: Socket) => {
 		},
 		true,
 	);
+
+	// todo cleanup, see if it's possible to find their original names?
+
 	const camoFiles = readdirSync(
 		join(import.meta.dirname, "../core/public/images/camos"),
 	);
-
-	// todo cleanup, see if it's possible to find their original names?
 	socket.emit(
 		"updCmo",
 		camoFiles.length,
@@ -77,9 +78,28 @@ io.on("connection", (socket: Socket) => {
 				.toSorted((a, b) => a.id - b.id),
 		),
 	);
-
 	socket.on("cCamo", (data) => {
 		playerWeps[data.weaponID].camo = data.camoID;
+	});
+
+	const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
+	const hatIds = readdirSync(hatPathBase)
+		.filter((h) => h !== "display.png")
+		.toSorted((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10));
+	const hatData = hatIds.map((id) => ({
+		id,
+		name: id,
+		desc: "Unknown",
+		chance: 50,
+		count: 0,
+		creator: "Unknown",
+		left: existsSync(join(hatPathBase, id, "l.png")),
+		up: existsSync(join(hatPathBase, id, "u.png")),
+	}));
+	socket.emit("updHt", hatIds.length, hatData);
+
+	socket.on("cHat", (id) => {
+		player.account.hat = hatData[Number.parseInt(id, 10) - 1];
 	});
 
 	socket.on("cSrv", (data) => {
@@ -160,7 +180,7 @@ io.on("connection", (socket: Socket) => {
 	});
 	socket.on("r", () => {
 		const currentWeapon = getCurrentWeapon(player);
-		const swappedWeapon = player.currentWeapon
+		const swappedWeapon = player.currentWeapon;
 		setTimeout(() => {
 			socket.emit("r", swappedWeapon);
 		}, currentWeapon.reloadSpeed ?? 0);

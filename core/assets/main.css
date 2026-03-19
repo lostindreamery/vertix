@@ -195,9 +195,6 @@ div {
 	font-size: 15px;
 }
 
-.rewardText:hover > .hoverTooltip {
-	display: block;
-}
 
 .itemDisplayImage {
 	float: left;
@@ -242,7 +239,7 @@ div {
 	display: none;
 	position: absolute;
 	padding: 15px;
-	margin-left: 20px;
+	margin-left: 20px; /* todo: why is it not over everything else despite the z-index? */
 	font-size: 12px;
 	text-align: left;
 	top: 0px;
@@ -690,6 +687,10 @@ div {
 }
 
 .hatSelectItem:hover > .hoverTooltip {
+	display: block;
+}
+
+.rewardText:hover > .hoverTooltip {
 	display: block;
 }
 

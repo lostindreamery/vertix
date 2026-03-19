@@ -2285,7 +2285,7 @@ function changeHat(a: number) {
 	if (!socket) return;
 	socket.emit("cHat", a);
 	localStorage.setItem("previousHat", a.toString());
-	currentHat.innerHTML = document.getElementById(`hatItem${a}`).innerHTML;
+	currentHat.innerHTML = document.getElementById(`hatItem${a}`).innerHTML.replace(/ x\d/, "");
 	currentHat.style.color = document.getElementById(`hatItem${a}`).style.color;
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
@@ -2364,7 +2364,7 @@ function changeShirt(shirtId: number) {
 	if (!socket) return;
 	socket.emit("cShirt", shirtId);
 	localStorage.setItem("previousShirt", shirtId.toString());
-	currentShirt.innerHTML = document.getElementById(`shirtItem${shirtId}`).innerHTML;
+	currentShirt.innerHTML = document.getElementById(`shirtItem${shirtId}`).innerHTML.replace(/ x\d/, "");
 	currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`).style.color;
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
@@ -2423,7 +2423,7 @@ function changeSpray(dir: number, sprayId: number) {
 	if (!socket) return;
 	socket.emit("cSpray", dir);
 	localStorage.setItem("previousSpray", dir.toString());
-	currentSpray.innerHTML = document.getElementById(`sprayItem${dir}`).innerHTML;
+	currentSpray.innerHTML = document.getElementById(`sprayItem${dir}`).innerHTML.replace(/ x\d/, "");
 	currentSpray.style.color = document.getElementById(`sprayItem${dir}`).style.color;
 	let hoverElem = document.getElementById(`sprayHoverImage${dir}`);
 	hoverElem?.replaceChildren(

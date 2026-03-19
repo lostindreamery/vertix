@@ -2,6 +2,7 @@ import { gameModes } from "core/src/gamemodes.ts";
 import type { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
 import type {
+	Account,
 	GameMode,
 	GenData,
 	MapData,
@@ -43,7 +44,7 @@ export class Room {
 			room: this.room,
 			index: sid,
 			name: `Guest_${sid}`,
-			account: { clan: "DEV" },
+			account: { clan: "DEV" } as Account,
 			classIndex: 0,
 			currentWeapon: 0,
 			weapons: [playerWeps[0], playerWeps[5]],
