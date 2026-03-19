@@ -43,10 +43,10 @@ let room = new Room();
 io.on("connection", (socket: Socket) => {
 	console.log("con", socket.id);
 
-	let player = room.newPlayer();
-	let players = room.players;
-
 	const playerWeps = structuredClone(weapons);
+
+	let player = room.newPlayer(playerWeps);
+	let players = room.players;
 
 	socket.emit(
 		"welcome",

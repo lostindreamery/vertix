@@ -1,7 +1,6 @@
 import { gameModes } from "core/src/gamemodes.ts";
-import { weapons } from "core/src/loadouts.ts";
+import type { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
-import { defaultGenData } from "./maps.ts";
 import type {
 	GameMode,
 	GenData,
@@ -11,6 +10,7 @@ import type {
 	Tile,
 } from "core/src/types.ts";
 import { getDistance, setupMap } from "core/src/utils.ts";
+import { defaultGenData } from "./maps.ts";
 
 export class Room {
 	id = 0;
@@ -35,7 +35,7 @@ export class Room {
 		}
 	}
 
-	newPlayer() {
+	newPlayer(playerWeps: typeof weapons) {
 		let sid = this.nextAvailableSid;
 		this.nextAvailableSid++;
 		let tmpPlayer = {
@@ -46,7 +46,7 @@ export class Room {
 			account: { clan: "DEV" },
 			classIndex: 0,
 			currentWeapon: 0,
-			weapons: structuredClone([weapons[0], weapons[5]]),
+			weapons: [playerWeps[0], playerWeps[5]],
 			health: 0,
 			maxHealth: 0,
 			height: 100,
