@@ -1891,7 +1891,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 					<div className="hoverTooltip">
 						{info.type === "hat" ? (
 							<>
-								<img className="itemDisplayImage" src={`.././images/hats/${info.id}/d.png`} />
+								<img className="itemDisplayImage" src={`/images/hats/${info.id}/d.png`} />
 								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
 									{info.name}
 								</div>
@@ -1916,7 +1916,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 							</>
 						) : info.type === "shirt" ? (
 							<>
-								<img className="shirtDisplayImage" src={`.././images/shirts/${info.id}/d.png`} />
+								<img className="shirtDisplayImage" src={`/images/shirts/${info.id}/d.png`} />
 								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
 									{info.name}
 								</div>
@@ -1936,7 +1936,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 							</>
 						) : (
 							<>
-								<img className="camoDisplayImage" src={`.././images/camos/${info.id + 1}.png`} />
+								<img className="camoDisplayImage" src={`/images/camos/${info.id + 1}.png`} />
 								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
 									{info.name}
 								</div>
@@ -2234,7 +2234,7 @@ function updateHatList(totalCount: number, hats: any[]) {
 			>
 				{hat.name} x{parseInt(hat.count) + 1}
 				<div className="hoverTooltip">
-					<img className="itemDisplayImage" src={`.././images/hats/${hat.id}/d.png`} />
+					<img className="itemDisplayImage" src={`/images/hats/${hat.id}/d.png`} />
 					<div
 						style={{ color: getItemRarityColor(hat.chance), fontSize: "16px", marginTop: "5px" }}
 					>
@@ -2318,7 +2318,7 @@ function updateShirtList(totalCount: number, shirts: any[]) {
 			>
 				{shirt.name} x{parseInt(shirt.count) + 1}
 				<div className="hoverTooltip">
-					<img className="shirtDisplayImage" src={`.././images/shirts/${shirt.id}/d.png`} />
+					<img className="shirtDisplayImage" src={`/images/shirts/${shirt.id}/d.png`} />
 					<div
 						style={{ color: getItemRarityColor(shirt.chance), fontSize: "16px", marginTop: "5px" }}
 					>
@@ -2427,7 +2427,7 @@ function changeSpray(dir: number, sprayId: number) {
 	currentSpray.style.color = document.getElementById(`sprayItem${dir}`).style.color;
 	let hoverElem = document.getElementById(`sprayHoverImage${dir}`);
 	hoverElem?.replaceChildren(
-		<img class="sprayDisplayImage" src={`.././images/sprays/${sprayId}.png`} />,
+		<img class="sprayDisplayImage" src={`/images/sprays/${sprayId}.png`} />,
 	);
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
@@ -3466,7 +3466,7 @@ function showWeaponSelector(wepType: 0 | 1) {
 			Default
 		</div>,
 	);
-	if (loggedIn && camoDataList?.[classWeapon]) {
+	if (/*loggedIn && */camoDataList?.[classWeapon]) {
 		for (let i = 0; i < camoDataList[classWeapon].length; ++i) {
 			let camo = camoDataList[classWeapon][i];
 			list.push(
@@ -3475,7 +3475,7 @@ function showWeaponSelector(wepType: 0 | 1) {
 					style={{ color: getItemRarityColor(camo.chance) }}
 					onClick={() => changeCamo(classWeapon, camo.id, true)}
 				>
-					camo.name x{parseInt(camo.count) + 1}
+					{camo.name} x{parseInt(camo.count) + 1}
 				</div>,
 			);
 		}
@@ -3487,7 +3487,7 @@ function showWeaponSelector(wepType: 0 | 1) {
 	camoList.replaceChildren(...list);
 }
 function getCamoURL(id: number) {
-	return `.././images/camos/${id + 1}.png`;
+	return `/images/camos/${id + 1}.png`;
 }
 function changeCamo(weaponId: number, camoId: number, save: boolean) {
 	if (!socket) return;
@@ -3796,7 +3796,7 @@ function getHatSprite(playerObj: Player, dir: number) {
 				hat.imgToLoad++;
 				hat.lS.index = spriteIndex;
 				spriteIndex++;
-				hat.lS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
+				hat.lS.src = `/images/hats/${tmpAcc.hat.id}/l.png`;
 				hat.lS.onload = () => {
 					hat.imgToLoad--;
 					hat.lS.isLoaded = true;
@@ -3805,7 +3805,7 @@ function getHatSprite(playerObj: Player, dir: number) {
 				hat.imgToLoad++;
 				hat.rS.index = spriteIndex;
 				spriteIndex++;
-				hat.rS.src = `.././images/hats/${tmpAcc.hat.id}/l.png`;
+				hat.rS.src = `/images/hats/${tmpAcc.hat.id}/l.png`;
 				hat.rS.onload = () => {
 					hat.rS = flipSprite(hat.rS, true);
 					hat.imgToLoad--;
@@ -3817,7 +3817,7 @@ function getHatSprite(playerObj: Player, dir: number) {
 				hat.imgToLoad++;
 				hat.uS.index = spriteIndex;
 				spriteIndex++;
-				hat.uS.src = `.././images/hats/${tmpAcc.hat.id}/u.png`;
+				hat.uS.src = `/images/hats/${tmpAcc.hat.id}/u.png`;
 				hat.uS.onload = () => {
 					hat.imgToLoad--;
 					hat.uS.isLoaded = true;
@@ -3827,7 +3827,7 @@ function getHatSprite(playerObj: Player, dir: number) {
 			hat.imgToLoad++;
 			hat.dS.index = spriteIndex;
 			spriteIndex++;
-			hat.dS.src = `.././images/hats/${tmpAcc.hat.id}/d.png`;
+			hat.dS.src = `/images/hats/${tmpAcc.hat.id}/d.png`;
 			hat.dS.onload = () => {
 				hat.imgToLoad--;
 				hat.dS.isLoaded = true;
@@ -3884,7 +3884,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 			d.lS = new Image() as Sprite;
 			d.lS.index = spriteIndex;
 			spriteIndex++;
-			d.lS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
+			d.lS.src = `/images/shirts/${tmpAcc.shirt.id}/l.png`;
 			d.lS.onload = () => {
 				d.imgToLoad--;
 				d.lS.isLoaded = true;
@@ -3894,7 +3894,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 			d.rS = new Image() as Sprite;
 			d.rS.index = spriteIndex;
 			spriteIndex++;
-			d.rS.src = `.././images/shirts/${tmpAcc.shirt.id}/l.png`;
+			d.rS.src = `/images/shirts/${tmpAcc.shirt.id}/l.png`;
 			d.rS.onload = () => {
 				d.rS = flipSprite(d.rS, true);
 				d.imgToLoad--;
@@ -3907,7 +3907,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 			d.uS = new Image() as Sprite;
 			d.uS.index = spriteIndex;
 			spriteIndex++;
-			d.uS.src = `.././images/shirts/${tmpAcc.shirt.id}/u.png`;
+			d.uS.src = `/images/shirts/${tmpAcc.shirt.id}/u.png`;
 			d.uS.onload = () => {
 				d.imgToLoad--;
 				d.uS.isLoaded = true;
@@ -3918,7 +3918,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 		d.dS = new Image() as Sprite;
 		d.dS.index = spriteIndex;
 		spriteIndex++;
-		d.dS.src = `.././images/shirts/${tmpAcc.shirt.id}/d.png`;
+		d.dS.src = `/images/shirts/${tmpAcc.shirt.id}/d.png`;
 		d.dS.onload = () => {
 			d.imgToLoad--;
 			d.dS.isLoaded = true;

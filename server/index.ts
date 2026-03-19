@@ -13,6 +13,8 @@ import {
 import { Room } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 import type { Player } from "core/src/types.ts";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 
 const app = new Hono();
 app.use(
@@ -44,6 +46,8 @@ io.on("connection", (socket: Socket) => {
 	let player = room.newPlayer();
 	let players = room.players;
 
+	const playerWeps = structuredClone(weapons);
+
 	socket.emit(
 		"welcome",
 		{
@@ -54,6 +58,29 @@ io.on("connection", (socket: Socket) => {
 		},
 		true,
 	);
+	const camoFiles = readdirSync(
+		join(import.meta.dirname, "../core/public/images/camos"),
+	);
+
+	// todo cleanup, see if it's possible to find their original names?
+	socket.emit(
+		"updCmo",
+		camoFiles.length,
+		weapons.map(() =>
+			camoFiles
+				.map((p) => ({
+					id: Number.parseInt(p.replace(".png", ""), 10),
+					name: p,
+					chance: 50,
+					count: 0,
+				}))
+				.toSorted((a, b) => a.id - b.id),
+		),
+	);
+
+	socket.on("cCamo", (data) => {
+		playerWeps[data.weaponID].camo = data.camoID;
+	});
 
 	socket.on("cSrv", (data) => {
 		if (data.srvMap) {
@@ -66,9 +93,7 @@ io.on("connection", (socket: Socket) => {
 		player.name = client.name ? client.name : player.name;
 		player.classIndex = client.classIndex ? client.classIndex : 0;
 		const currentClass = characterClasses[player.classIndex];
-		player.weapons = currentClass.weaponIndexes.map((i) =>
-			structuredClone(weapons[i]),
-		);
+		player.weapons = currentClass.weaponIndexes.map((i) => playerWeps[i]);
 		player.health = player.maxHealth = currentClass.maxHealth;
 		player.height = currentClass.height;
 		player.width = currentClass.width;
