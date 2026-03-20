@@ -53,23 +53,15 @@ var currentFPS = 0;
 var fillCounter = 0;
 var currentLikeButton: number = null;
 var delta = 0;
-var horizontalDT = 0;
-var verticalDT = 0;
-var roomNum = 0;
 var currentTime = Date.now();
 var oldTime = Date.now();
-var FRAME_STEP = 1000 / 60;
 var count = -1;
 var clientPrediction = true;
 var inputNumber = 0;
 var clientSpeed = 12;
 var thisInput: InputSendData[] = [];
-var keyd = 1;
-var tabbed = 0;
-var timeSinceLastUpdate = 0;
 var timeOfLastUpdate = 0;
 
-// zip.workerScriptsPath = "../js/lib/";
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 	mobile.set(true);
 	hideMenuUI();
@@ -115,49 +107,29 @@ function enterGame(plrType: string) {
 function validNick() {
 	return /^\w*$/.exec(playerNameInput.value) !== null;
 }
-var createClanButton = document.getElementById("createClanButton");
-var joinClanButton = document.getElementById("joinClanButton");
-var clanNameInput = document.getElementById("clanNameInput") as HTMLInputElement;
-var clanKeyInput = document.getElementById("clanKeyInput") as HTMLInputElement;
 var clanDBMessage = document.getElementById("clanDBMessage");
 var clanStats = document.getElementById("clanStats");
 var clanSignUp = document.getElementById("clanSignUp");
 var clanHeader = document.getElementById("clanHeader");
 var clanAdminPanel = document.getElementById("clanAdminPanel");
 var clanInviteInput = document.getElementById("clanInviteInput") as HTMLInputElement;
-var inviteClanButton = document.getElementById("inviteClanButton");
-var kickClanButton = document.getElementById("kickClanButton");
 var leaveClanButton = document.getElementById("leaveClanButton");
-var clanChatInput = document.getElementById("clanChatInput") as HTMLInputElement;
-var setChatClanButton = document.getElementById("setChatClanButton");
 var clanInvMessage = document.getElementById("clanInvMessage");
 var clanChtMessage = document.getElementById("clanChtMessage");
 var clanChatLink = document.getElementById("clanChatLink");
 var loginWrapper = document.getElementById("loginWrapper");
 var loggedInWrapper = document.getElementById("loggedInWrapper");
-var loginButton = document.getElementById("loginButton");
-var registerButton = document.getElementById("registerButton");
-var logoutButton = document.getElementById("logoutButton");
 var loginMessage = document.getElementById("loginMessage");
-var recoverButton = document.getElementById("recoverButton");
 var userNameInput = document.getElementById("usernameInput") as HTMLInputElement;
 var userEmailInput = document.getElementById("emailInput") as HTMLInputElement;
 var userPassInput = document.getElementById("passwordInput") as HTMLInputElement;
 var loginUserNm = "";
 var loginUserPs = "";
-var settingsMenu = document.getElementById("settingsButton");
 var settings = document.getElementById("settings");
-var howToMenu = document.getElementById("instructionButton");
 var howTo = document.getElementById("instructions");
-var leaderboardButton = document.getElementById("leaderButton");
-var btn = document.getElementById("startButton");
-var btnMod = document.getElementById("texturePackButton");
-var modURL = document.getElementById("textureModInput") as HTMLInputElement;
 var lobbyInput = document.getElementById("lobbyKey") as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass") as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage");
-var lobbyButton = document.getElementById("joinLobbyButton");
-var createServerButton = document.getElementById("createServerButton");
 var serverCreateMessage = document.getElementById("serverCreateMessage");
 var serverKeyTxt = document.getElementById("serverKeyTxt");
 
@@ -186,7 +158,6 @@ function clickDropUpLink(index: number) {
 	}
 }
 
-var loginTimeOut = null;
 function startLogin() {
 	if (!socket) return;
 	socket.emit("dbLogin", {
@@ -199,9 +170,7 @@ function startLogin() {
 	loginMessage.textContent = "Please Wait...";
 }
 var customMap: GenData | null = null;
-function getFile() {
-	document.getElementById("upfile").click();
-}
+
 (document.getElementById("customMapFile") as HTMLInputElement).addEventListener(
 	"change",
 	function () {
@@ -240,7 +209,7 @@ window.onload = () => {
 		document.documentElement.style.overflow = "hidden";
 		document.getElementById("gameAreaWrapper").style.opacity = "1";
 		drawMenuBackground();
-		settingsMenu.onclick = () => {
+		document.getElementById("settingsButton").onclick = () => {
 			if (settings.style.maxHeight === "200px") {
 				settings.style.maxHeight = "0px";
 			} else {
@@ -248,7 +217,7 @@ window.onload = () => {
 				howTo.style.maxHeight = "0px";
 			}
 		};
-		howToMenu.onclick = () => {
+		document.getElementById("instructionButton").onclick = () => {
 			if (howTo.style.maxHeight === "200px") {
 				howTo.style.maxHeight = "0px";
 			} else {
@@ -256,7 +225,7 @@ window.onload = () => {
 				settings.style.maxHeight = "0px";
 			}
 		};
-		leaderboardButton.onclick = () => {
+		document.getElementById("leaderButton").onclick = () => {
 			window.open("/leaderboards.html", "_blank");
 		};
 		$.get("http://localhost:1118/getIP", (a) => {
@@ -284,7 +253,7 @@ window.onload = () => {
 				} else {
 					loadSavedClass();
 				}
-				btn.onclick = () => {
+				document.getElementById("startButton").onclick = () => {
 					startGame("player");
 				};
 				playerNameInput.addEventListener("keypress", (event) => {
@@ -292,10 +261,10 @@ window.onload = () => {
 						startGame("player");
 					}
 				});
-				btnMod.onclick = () => {
-					loadModPack(modURL.value, false);
+				document.getElementById("texturePackButton").onclick = () => {
+					loadModPack((document.getElementById("textureModInput") as HTMLInputElement).value, false);
 				};
-				registerButton.onclick = () => {
+				document.getElementById("registerButton").onclick = () => {
 					socket.emit("dbReg", {
 						userName: userNameInput.value,
 						userEmail: userEmailInput.value,
@@ -306,10 +275,10 @@ window.onload = () => {
 					loginMessage.style.display = "block";
 					loginMessage.textContent = "Registering...";
 				};
-				loginButton.onclick = () => {
+				document.getElementById("loginButton").onclick = () => {
 					startLogin();
 				};
-				logoutButton.onclick = () => {
+				document.getElementById("logoutButton").onclick = () => {
 					loggedInWrapper.style.display = "none";
 					loginWrapper.style.display = "block";
 					loginMessage.textContent = "";
@@ -321,35 +290,35 @@ window.onload = () => {
 					localStorage.setItem("userName", "");
 					socket.emit("dbLogout");
 				};
-				recoverButton.onclick = () => {
+				document.getElementById("recoverButton").onclick = () => {
 					socket.emit("dbRecov", {
 						userMail: userEmailInput.value,
 					});
 					loginMessage.style.display = "block";
 					loginMessage.textContent = "Please Wait...";
 				};
-				createClanButton.onclick = () => {
+				document.getElementById("createClanButton").onclick = () => {
 					socket.emit("dbClanCreate", {
-						clanName: clanNameInput.value,
+						clanName: (document.getElementById("clanNameInput") as HTMLInputElement).value,
 					});
 					clanDBMessage.style.display = "block";
 					clanDBMessage.textContent = "Please Wait...";
 				};
-				joinClanButton.onclick = () => {
+				document.getElementById("joinClanButton").onclick = () => {
 					socket.emit("dbClanJoin", {
-						clanKey: clanKeyInput.value,
+						clanKey: (document.getElementById("clanKeyInput") as HTMLInputElement).value,
 					});
 					clanDBMessage.style.display = "block";
 					clanDBMessage.textContent = "Please Wait...";
 				};
-				inviteClanButton.onclick = () => {
+				document.getElementById("inviteClanButton").onclick = () => {
 					socket.emit("dbClanInvite", {
 						userName: clanInviteInput.value,
 					});
 					clanInvMessage.style.display = "block";
 					clanInvMessage.textContent = "Please Wait...";
 				};
-				kickClanButton.onclick = () => {
+				document.getElementById("kickClanButton").onclick = () => {
 					socket.emit("dbClanKick", {
 						userName: clanInviteInput.value,
 					});
@@ -359,14 +328,14 @@ window.onload = () => {
 				leaveClanButton.onclick = () => {
 					socket.emit("dbClanLeave");
 				};
-				setChatClanButton.onclick = () => {
+				document.getElementById("setChatClanButton").onclick = () => {
 					socket.emit("dbClanChatURL", {
-						chUrl: clanChatInput.value,
+						chUrl: (document.getElementById("clanChatInput") as HTMLInputElement).value,
 					});
 					clanChtMessage.style.display = "inline-block";
 					clanChtMessage.textContent = "Please Wait...";
 				};
-				createServerButton.onclick = () => {
+				document.getElementById("createServerButton").onclick = () => {
 					var modes = [];
 					for (let i = 0; i < 9; ++i) {
 						if ((document.getElementById(`serverMode${i}`) as HTMLInputElement).checked) {
@@ -383,7 +352,7 @@ window.onload = () => {
 						srvModes: modes,
 					});
 				};
-				lobbyButton.onclick = () => {
+				document.getElementById("joinLobbyButton").onclick = () => {
 					if (!changingLobby) {
 						if (lobbyInput.value.split("/")[0].trim()) {
 							lobbyMessage.style.display = "block";
@@ -439,64 +408,54 @@ window.onload = () => {
 	}
 };
 
-var accStatKills = document.getElementById("accStatKills");
-var accStatDeaths = document.getElementById("accStatDeaths");
-var accStatLikes = document.getElementById("accStatLikes");
-var accStatKD = document.getElementById("accStatKD");
-var accStatRank = document.getElementById("accStatRank");
-var accStatView = document.getElementById("accStatView");
-var accStatRankProg = document.getElementById("rankProgress");
-var accStatWorldRank = document.getElementById("accStatWorldRank");
-var profileButton = document.getElementById("profileButton");
 var newUsernameInput = document.getElementById("newUsernameInput") as HTMLInputElement;
 var youtubeChannelInput = document.getElementById("youtubeChannelInput") as HTMLInputElement;
-var saveAccountData = document.getElementById("saveAccountData");
 var editProfileMessage = document.getElementById("editProfileMessage");
 function updateAccountPage(a: Account) {
 	player.get().account = a;
-	accStatRank.replaceChildren(
+	document.getElementById("accStatRank").replaceChildren(
 		<>
 			<b>Rank: </b>
 			{a.rank}
 		</>,
 	);
-	accStatRankProg.style.width = `${a.rankPercent}%`;
-	accStatKills.replaceChildren(
+	document.getElementById("rankProgress").style.width = `${a.rankPercent}%`;
+	document.getElementById("accStatKills").replaceChildren(
 		<>
 			<b>Kills: </b>
 			{a.kills}
 		</>,
 	);
-	accStatDeaths.replaceChildren(
+	document.getElementById("accStatDeaths").replaceChildren(
 		<>
 			<b>Deaths: </b>
 			{a.deaths}
 		</>,
 	);
-	accStatKD.replaceChildren(
+	document.getElementById("accStatKD").replaceChildren(
 		<>
 			<b>KD: </b>
 			{a.kd}
 		</>,
 	);
-	accStatWorldRank.replaceChildren(
+	document.getElementById("accStatWorldRank").replaceChildren(
 		<>
 			<b>World Rank: </b>
 			{a.worldRank}
 		</>,
 	);
-	accStatLikes.replaceChildren(
+	document.getElementById("accStatLikes").replaceChildren(
 		<>
 			<b>Likes: </b>
 			{a.likes}
 		</>,
 	);
-	profileButton.onclick = () => {
+	document.getElementById("profileButton").onclick = () => {
 		showUserStatPage(player.get().account.user_name);
 	};
 	newUsernameInput.value = player.get().account.user_name;
 	youtubeChannelInput.value = player.get().account.channel;
-	saveAccountData.onclick = () => {
+	document.getElementById("saveAccountData").onclick = () => {
 		socket.emit("dbEditUser", {
 			userName: newUsernameInput.value,
 			userChannel: youtubeChannelInput.value,
@@ -521,30 +480,26 @@ function updateAccountPage(a: Account) {
 		clanHeader.textContent = "Clans";
 	}
 }
-var clanStatRank = document.getElementById("clanStatRank");
-var clanStatFounder = document.getElementById("clanStatFounder");
-var clanStatMembers = document.getElementById("clanStatMembers");
-var clanStatKD = document.getElementById("clanStatKD");
 function updateClanPage(clanData: any) {
-	clanStatRank.replaceChildren(
+	document.getElementById("clanStatRank").replaceChildren(
 		<>
 			<b>Rank: </b>
 			{clanData.level}
 		</>,
 	);
-	clanStatKD.replaceChildren(
+	document.getElementById("clanStatKD").replaceChildren(
 		<>
 			<b>Avg KD: </b>
 			{clanData.kd}
 		</>,
 	);
-	clanStatFounder.replaceChildren(
+	document.getElementById("clanStatFounder").replaceChildren(
 		<>
 			<b>Founder: </b>
 			{clanData.founder}
 		</>,
 	);
-	clanStatMembers.replaceChildren(
+	document.getElementById("clanStatMembers").replaceChildren(
 		<>
 			<b>Roster:</b>
 			{clanData.members}
@@ -569,8 +524,6 @@ var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
 var gameWidth = 0;
 var gameHeight = 0;
-var mouseX = 0;
-var mouseY = 0;
 var maxScreenWidth = appStore.select("maxScreenWidth");
 var maxScreenHeight = appStore.select("maxScreenHeight");
 var viewMult = appStore.select("viewMult");
@@ -581,20 +534,11 @@ var gameOver = appStore.select("gameOver");
 var gameOverFade = false;
 var disconnected = false;
 var kicked = appStore.select("kicked");
-var killTxt = "";
-var continuity = false;
-var startPingTime = 0;
 var textSizeMult = 0.55;
 var startX = appStore.select("startX");
 var startY = appStore.select("startY");
 var gameMode: GameMode = null;
-var playerConfig = {
-	border: 6,
-	textColor: "#efefef",
-	textBorder: "#3a3a3a",
-	textBorderSize: 3,
-	defaultSize: 30,
-};
+
 const player = appStore.select("player");
 var target = {
 	f: 0,
@@ -639,8 +583,8 @@ function gameInput(event: MouseEvent) {
 	event.preventDefault();
 	event.stopPropagation();
 	var b = getCurrentWeapon(player.get())?.yOffset ?? 0;
-	mouseX = event.clientX;
-	mouseY = event.clientY;
+	let mouseX = event.clientX;
+	let mouseY = event.clientY;
 	lastAngle = target.f;
 	lastDist = target.d;
 	target.d = Math.sqrt(
@@ -2110,7 +2054,6 @@ function fetchUserWithIndex(a: number) {
 }
 function receiveServerData(a: number[]) {
 	let tmpNowTime = Date.now();
-	timeSinceLastUpdate = tmpNowTime - timeOfLastUpdate;
 	timeOfLastUpdate = tmpNowTime;
 	if (!gameOver.get()) {
 		for (let i = 0; i < gameObjects.length; ++i) {
@@ -2364,7 +2307,9 @@ function changeShirt(shirtId: number) {
 	if (!socket) return;
 	socket.emit("cShirt", shirtId);
 	localStorage.setItem("previousShirt", shirtId.toString());
-	currentShirt.innerHTML = document.getElementById(`shirtItem${shirtId}`).innerHTML.replace(/ x\d/, "");
+	currentShirt.innerHTML = document
+		.getElementById(`shirtItem${shirtId}`)
+		.innerHTML.replace(/ x\d/, "");
 	currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`).style.color;
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
@@ -2608,7 +2553,8 @@ function updateGameLoop() {
 		fpsUpdateUICounter = targetFPS;
 	}
 	oldTime = currentTime;
-	horizontalDT = verticalDT = 0;
+	let horizontalDT = 0;
+	let verticalDT = 0;
 	count++;
 	var doJump = 0;
 	if (keys.u) {
@@ -2626,8 +2572,6 @@ function updateGameLoop() {
 	if (keys.l) {
 		horizontalDT = -1;
 		// temp = 0;
-	} else {
-		keyd = 0;
 	}
 	if (keys.s) {
 		doJump = 0;
@@ -2704,7 +2648,6 @@ function updateGameLoop() {
 						playerReload(gameObjects[e], true);
 					}
 					if (keys.lm && !gameOver.get() && player.get().weapons.length > 0) {
-						keyd = 0;
 						if (
 							currentTime - getCurrentWeapon(gameObjects[e]).lastShot >=
 							getCurrentWeapon(gameObjects[e]).fireRate
@@ -3466,7 +3409,7 @@ function showWeaponSelector(wepType: 0 | 1) {
 			Default
 		</div>,
 	);
-	if (/*loggedIn && */camoDataList?.[classWeapon]) {
+	if (/*loggedIn && */ camoDataList?.[classWeapon]) {
 		for (let i = 0; i < camoDataList[classWeapon].length; ++i) {
 			let camo = camoDataList[classWeapon][i];
 			list.push(
@@ -4259,6 +4202,13 @@ function drawGameObjects(delta: number) {
 	d = null;
 }
 function drawPlayerNames() {
+	const playerConfig = {
+		border: 6,
+		textColor: "#efefef",
+		textBorder: "#3a3a3a",
+		textBorderSize: 3,
+		defaultSize: 30,
+	};
 	graph.lineWidth = playerConfig.textBorderSize;
 	graph.fillStyle = playerConfig.textColor;
 	graph.miterLimit = 1;
