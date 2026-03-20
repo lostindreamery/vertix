@@ -13,7 +13,8 @@ import {
 import { Room } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 import type { Player } from "core/src/types.ts";
-import { existsSync, readdirSync } from "node:fs";
+import { hats, camos } from "core/src/skins.ts";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const app = new Hono();
@@ -61,19 +62,17 @@ io.on("connection", (socket: Socket) => {
 
 	// todo cleanup, see if it's possible to find their original names?
 
-	const camoFiles = readdirSync(
-		join(import.meta.dirname, "../core/public/images/camos"),
-	);
 	socket.emit(
 		"updCmo",
-		camoFiles.length,
+		camos.length,
 		weapons.map(() =>
-			camoFiles
+			camos
 				.map((p) => ({
-					id: Number.parseInt(p.replace(".png", ""), 10),
-					name: p,
-					chance: 50,
+					id: p.id,
+					name: p.name,
+					chance: p.chance,
 					count: 0,
+					desc: p.desc,
 				}))
 				.toSorted((a, b) => a.id - b.id),
 		),
@@ -83,20 +82,17 @@ io.on("connection", (socket: Socket) => {
 	});
 
 	const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
-	const hatIds = readdirSync(hatPathBase)
-		.filter((h) => h !== "display.png")
-		.toSorted((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10));
-	const hatData = hatIds.map((id) => ({
-		id,
-		name: id,
-		desc: "Unknown",
-		chance: 50,
+	const hatData = hats.map((h) => ({
+		id: h.id,
+		name: h.name,
+		desc: h.desc,
+		chance: h.chance,
 		count: 0,
-		creator: "Unknown",
-		left: existsSync(join(hatPathBase, id, "l.png")),
-		up: existsSync(join(hatPathBase, id, "u.png")),
+		creator: h.creator,
+		left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
+		up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
 	}));
-	socket.emit("updHt", hatIds.length, hatData);
+	socket.emit("updHt", hats.length, hatData);
 
 	socket.on("cHat", (id) => {
 		player.account.hat = hatData[Number.parseInt(id, 10) - 1];

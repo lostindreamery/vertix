@@ -1,1398 +1,1652 @@
 export const hats = [
   {
+    id: 0,
     name: "Angels Dance",
     desc: "A hat in memory of Karoline Norgaard Bertelsen.",
     chance: 0.1,
     creator: "Rons"
   },
   {
+    id: 1,
     name: "Devil",
     desc: "The evilest hat.",
     chance: 1,
     creator: "Phazex"
   },
   {
+    id: 2,
     name: "Historic Artefact",
     desc: "One of several artefacts that went missing during the 'Artefacts of History' exhibition.",
     chance: 0.5,
     creator: "EatMyApples"
   },
   {
+    id: 3,
     name: "Historic Artefact",
     desc: "One of several artefacts that went missing during the 'Artefacts of History' exhibition.",
     chance: 0.1,
     creator: "EatMyApples"
   },
   {
+    id: 4,
     name: "Holy Hat",
     desc: "The hat of the pope.",
     chance: 0.1,
     creator: "undefined"
   },
   {
+    id: 5,
     name: "Limited Edition",
     desc: "A limited edition Dimsey wig. No longer available in stores.",
     chance: 0.1,
     creator: "Unknown"
   },
   {
+    id: 6,
     name: "Shroom",
     desc: "Not the mario one. Its just a mushroom.",
     chance: 0.1,
     creator: "Unknown"
   },
   {
+    id: 7,
     name: "Timeless Headwear",
     desc: "This headwear is said to bring bless its wearer with Fortune.",
     chance: 0.02,
     creator: "HighNoon"
   },
   {
+    id: 8,
     name: "Traffic Cone",
     desc: "It wont stop bullets. But at least you look smashing!",
     chance: 0.01,
     creator: "HighNoon"
   },
   {
+    id: 9,
     name: "WAGHAT",
     desc: "A hat for WorldAtGamesHD.",
     chance: 0.1,
     creator: "Unknown"
   },
   {
+    id: 10,
     name: "Zap Hat",
     desc: "A legendary Hat.",
     chance: 0.1,
     creator: "undefined"
   },
   {
+    id: 11,
     name: "Bat Hat",
     desc: "Stay out of the light.",
     chance: 6,
     creator: "EatMyApples"
   },
   {
+    id: 12,
     name: "BlueFlame",
     desc: "Played too much powdertay aig?",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 13,
     name: "Christmas Hat",
     desc: "Merry Christmas.",
     chance: 3,
     creator: "HighNoon"
   },
   {
+    id: 14,
     name: "Drowsy Hat",
     desc: "Don't fall asleep mid game.",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 15,
     name: "Fez Hat",
     desc: "Don't sue me phil.",
     chance: 4,
     creator: "EatMyApples"
   },
   {
+    id: 16,
     name: "Flame",
     desc: "It will keep you war at night",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 17,
     name: "Giant Robot",
     desc: "I never watched power rangers...",
     chance: 5,
     creator: "SII"
   },
   {
+    id: 18,
     name: "Health Bar",
     desc: "An extra health bar?",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 19,
     name: "La Crown",
     desc: "A crown only for worthy players.",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 20,
     name: "Long Ears",
     desc: "The name already explains what they are...",
     chance: 5,
     creator: "EatMyApples"
   },
   {
+    id: 21,
     name: "Pan Hat",
     desc: "Not peter pan. The other one.",
     chance: 5,
     creator: "EatMyApples"
   },
   {
+    id: 22,
     name: "Sly",
     desc: "Dont really know about this one",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 23,
     name: "Volume",
     desc: "Drop the bass!",
     chance: 5,
     creator: "Unknown"
   },
   {
+    id: 24,
     name: "Noodle Shop",
     desc: "For the ramen lovers.",
     chance: 10,
     creator: "EatMyApples"
   },
   {
+    id: 25,
     name: "Darkness",
     desc: "Pure Evil",
     chance: 10,
     creator: "Unknown"
   },
   {
+    id: 26,
     name: "Funnel Hat",
     desc: "This funnels socialist ideologies into your brain.",
     chance: 10,
     creator: "Unknown"
   },
   {
+    id: 27,
     name: "Midhord",
     desc: "Sick horns bruv",
     chance: 9,
     creator: "Unknown"
   },
   {
+    id: 28,
     name: "Midhord",
     desc: "Sick horns bruv",
     chance: 9,
     creator: "Unknown"
   },
   {
+    id: 29,
     name: "Noodle Shop",
     desc: "For the ramen lovers.",
     chance: 10,
     creator: "EatMyApples"
   },
   {
+    id: 30,
     name: "Pointed Hat",
     desc: "An unusual hat from a time long past.",
     chance: 10,
     creator: "Sidney"
   },
   {
+    id: 31,
     name: "Slimehead",
     desc: "Too slime.",
     chance: 10,
     creator: "Unknown"
   },
   {
+    id: 32,
     name: "Sorting Hat",
     desc: "Believed by many to increase a wearers decision making ability.",
     chance: 10,
     creator: "Unknown"
   },
   {
+    id: 33,
     name: "Beer Hat",
     desc: "You might get Tipsy.",
     chance: 20,
     creator: "EatMyApples"
   },
   {
+    id: 34,
     name: "Blue Bull Can",
     desc: "This hat wont give you wings.",
     chance: 30,
     creator: "EatMyApples"
   },
   {
+    id: 35,
     name: "Cake Hat",
     desc: "Get a haircut m8",
     chance: 30,
     creator: "TheEni45"
   },
   {
+    id: 36,
     name: "Cool Cap",
     desc: "A cool cap. It becomes even cooler when you rotate it.",
     chance: 20,
     creator: "EatMyApples"
   },
   {
+    id: 37,
     name: "Djiango Headwear",
     desc: "A historic artefact. A much more recent one however.",
     chance: 30,
     creator: "Sidney"
   },
   {
+    id: 38,
     name: "Forester Hat",
     desc: "Got wood?",
     chance: 30,
     creator: "Rexiar"
   },
   {
+    id: 39,
     name: "Historic Artefact",
     desc: "One of several artefacts that went missing during the 'Artefacts of History' exhibition.",
     chance: 25,
     creator: "EatMyApples"
   },
   {
+    id: 40,
     name: "Homeless Hat",
     desc: "Worn by all homeless individuals as required by law.",
     chance: 30,
     creator: "EatMyApples"
   },
   {
+    id: 41,
     name: "Leprechaun Hat",
     desc: "It wont make you any luckier...",
     chance: 30,
     creator: "Rexiar"
   },
   {
+    id: 42,
     name: "Mughead",
     desc: "A souvenir referencing the popular childrens cartoon: Cuphead & Mughead.",
     chance: 30,
     creator: "EatMyApples"
   },
   {
+    id: 43,
     name: "Nickey Mouse",
     desc: "A souvenir from the recently closed Dimsey Land.",
     chance: 40,
     creator: "HighNoon"
   },
   {
+    id: 44,
     name: "Red Headband",
     desc: "A headband commonly worn by bikers.",
     chance: 20,
     creator: "EatMyApples"
   },
   {
+    id: 45,
     name: "Pokers Hat",
     desc: "A hat worn by Gamblers and Criminals alike.",
     chance: 30,
     creator: "Sidney"
   },
   {
+    id: 46,
     name: "Postmans Hat",
     desc: "Common hat worn by postmen all around the nation.",
     chance: 20,
     creator: "EatMyApples"
   },
   {
+    id: 47,
     name: "Simple Hat",
     desc: "A simple yet oddly familiar hat.",
     chance: 30,
     creator: "EatMyApples"
   },
   {
+    id: 48,
     name: "Tentacle",
     desc: "We are all thinking it...",
     chance: 20,
     creator: "Unknown"
   },
   {
+    id: 49,
     name: "Tinfoil Hat",
     desc: "Worn by members of the Lunar Empire Cult.",
     chance: 30,
     creator: "EatMyApples"
   },
   {
+    id: 50,
     name: "Vape Hat",
     desc: "A hat only worn by members of the Vape Nation.",
     chance: 30,
     creator: "EatMyApples"
   },
   {
+    id: 51,
     name: "Afghanistan Hat",
     desc: "For players from Afghanistan.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 52,
     name: "Armenia Hat",
     desc: "For players from Armenia.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 53,
     name: "Russie Mate",
     desc: "For players from Australia.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 54,
     name: "Batmansk",
     desc: "The mask any player deserves.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 55,
     name: "Belgium Flag",
     desc: "For players from Belgium.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 56,
     name: "Boba Slim",
     desc: "If your bounty hunting career doesnt take off, become a rapper.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 57,
     name: "Brain",
     desc: "It wont make you smarter. But you look great!",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 58,
     name: "Bucket",
     desc: "All Hail Plankton!",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 59,
     name: "Bulgarian Hat",
     desc: "For players from Bulgaria.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 60,
     name: "Chefs Hat",
     desc: "Only the best chefs earn the right to wear this hat.",
     chance: 100,
     creator: "HighNoon"
   },
   {
+    id: 61,
     name: "Chicken Head",
     desc: "Harvested from Free Range Chickens!",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 62,
     name: "Colombia Hat",
     desc: "For players from Colombia.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 63,
     name: "Cupcake",
     desc: "Delicious!",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 64,
     name: "Deadpool",
     desc: "A deadpool Mask.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 65,
     name: "Denmark Hat",
     desc: "For players from Denmark.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 66,
     name: "Deutschland Hat",
     desc: "For players from Germany.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 67,
     name: "Disco Cut",
     desc: "A haircut way ahead of its time.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 68,
     name: "Stubby",
     desc: "Looks pretty good right?",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 69,
     name: "Donald Trumpster",
     desc: "Make Vertix Great Again!",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 70,
     name: "England Hat",
     desc: "For players from England.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 71,
     name: "Finland Hat",
     desc: "For players from Finland.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 72,
     name: "Finn Hat",
     desc: "From that TV show and that one Youtuber who makes videos with Vanoss",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 73,
     name: "Flash Mask",
     desc: "No. It doesnt make you faster.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 74,
     name: "Giraffe Hat",
     desc: "Its a giraffe. Nothing special about it.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 75,
     name: "Hammer Hat",
     desc: "A hammer hat. (Germans will get it...)",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 76,
     name: "Hat Mask",
     desc: "Dont get jim carried away with it.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 77,
     name: "Holland",
     desc: "For players from Holland.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 78,
     name: "Homerino",
     desc: "Really dough?",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 79,
     name: "Hunters Headwear",
     desc: "Most commonly worn by hunters on the prowl.",
     chance: 100,
     creator: "Sidney"
   },
   {
+    id: 80,
     name: "India Hat",
     desc: "For players from India.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 81,
     name: "Italy Hat",
     desc: "For players from Italy.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 82,
     name: "Japan Hat",
     desc: "For players from Japan.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 83,
     name: "La France",
     desc: "For players from France.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 84,
     name: "Lichtenstein Hat",
     desc: "For players from Lichtenstein.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 85,
     name: "Lighthouse",
     desc: "No brain surgeons here.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 86,
     name: "Link",
     desc: "Headwear of a True Hero!",
     chance: 90,
     creator: "Unknown"
   },
   {
+    id: 87,
     name: "Madagascar",
     desc: "For players from Madagascar.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 88,
     name: "Marge",
     desc: "Get a haircut m8",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 89,
     name: "Marvelous Hat",
     desc: "A cynical article of clothing if there ever was one.",
     chance: 100,
     creator: "Sidney"
   },
   {
+    id: 90,
     name: "Niger Hat",
     desc: "For players from Niger.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 91,
     name: "Nigeria Hat",
     desc: "For players from Nigeria.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 92,
     name: "Officers Hat",
     desc: "Standard issue police headwear.",
     chance: 90,
     creator: "HighNoon"
   },
   {
+    id: 93,
     name: "Orange",
     desc: "Your head has an orange on it dude...",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 94,
     name: "Paintbucket",
     desc: "Another bucket for your head",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 95,
     name: "Peru Hat",
     desc: "For players from Peru.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 96,
     name: "Pinkey Boo",
     desc: "Im not gonna say it...",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 97,
     name: "Plumbers Hat",
     desc: "Pap de pupi",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 98,
     name: "Poland Hat",
     desc: "For players from Poland.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 99,
     name: "Portugal Hat",
     desc: "For players from Portugal.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 100,
     name: "Priesters Hat",
     desc: "It kinda looks like a priest right?",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 101,
     name: "Red Eyes",
     desc: "Just a bunch of red eyes",
     chance: 80,
     creator: "Unknown"
   },
   {
+    id: 102,
     name: "Robber Mask",
     desc: "At least you didnt steal this mask",
     chance: 80,
     creator: "Rexiar"
   },
   {
+    id: 103,
     name: "Russia Hat",
     desc: "For players from Russia.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 104,
     name: "Sheriff Hat",
     desc: "Wow! A Normal looking hat???",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 105,
     name: "Siren",
     desc: "Wee Woo Wee Woo",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 106,
     name: "Spain Flag",
     desc: "For players from Spain.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 107,
     name: "Sockhead",
     desc: "You sock at this.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 108,
     name: "Steve",
     desc: "Microsoft dont sue me.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 109,
     name: "Straw Hat",
     desc: "A cheap hat.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 110,
     name: "Stubby",
     desc: "Looks pretty good right?",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 111,
     name: "Sweden Flag",
     desc: "For players from Sweden.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 112,
     name: "Switzerland Hat",
     desc: "For players from Switzerland.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 113,
     name: "Talcat Souvenir",
     desc: "A limited edition souvenir. No longer available due to copyright claims by Dimsey Corp.",
     chance: 10,
     creator: "EatMyApples"
   },
   {
+    id: 114,
     name: "Terminator",
     desc: "Ill be back.",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 115,
     name: "Trooper Helmet",
     desc: "Execute order 69",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 116,
     name: "Turdhead",
     desc: "Yup. We are running out of ideas here...",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 117,
     name: "UAE Hat",
     desc: "For players from UAE.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 118,
     name: "Ukraine Hat",
     desc: "For players from Ukraine.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 119,
     name: "USA Hat",
     desc: "Vertix has been played over 1 million times in the U.S. Thank you! Here is a hat.",
     chance: 60,
     creator: "EatMyApples"
   },
   {
+    id: 120,
     name: "Weight Head",
     desc: "Weight What...",
     chance: 100,
     creator: "Unknown"
   },
   {
+    id: 121,
     name: "Yemen Hat",
     desc: "For players from Yemen.",
     chance: 100,
     creator: "EatMyApples"
   },
   {
+    id: 122,
     name: "Yodu Mask",
     desc: "A good mask this is.",
     chance: 100,
     creator: "Unknown"
   }
-]
+];
 
 export const camos = [
-	{
-		name: "Apples",
-		chance: 0.1,
-		desc: "Grenade Launcher weapon skin.",
-	},
   {
+    id: 0,
+    name: "Apples",
+    chance: 0.1,
+    desc: "Grenade Launcher weapon skin."
+  },
+  {
+    id: 1,
     name: "Art of War",
     chance: 1,
     desc: "Minigun weapon skin."
   },
   {
+    id: 2,
     name: "Chess",
     chance: 0.1,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 3,
     name: "Gold",
     chance: 1,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 4,
     name: "Torn",
     chance: 0.1,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 5,
     name: "Blitz",
     chance: 4,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 6,
     name: "Bloodshot",
     chance: 6,
     desc: "Minigun weapon skin."
   },
   {
+    id: 7,
     name: "Circuit",
     chance: 4,
     desc: "Flamethrower weapon skin."
   },
   {
-    name: "DNA",
+  	id: 8,
+   	name: "DNA",
     chance: 5,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 9,
     name: "Glow",
     chance: 6,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 10,
     name: "Intensity",
     chance: 5,
     desc: "Sniper weapon skin."
   },
   {
+    id: 11,
     name: "Lightning",
     chance: 3,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 12,
     name: "X-Ray",
     chance: 5,
     desc: "Minigun weapon skin."
   },
   {
+    id: 13,
     name: "Adaptive",
     chance: 9,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 14,
     name: "Breach",
     chance: 9,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 15,
     name: "Carbon",
     chance: 10,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 16,
     name: "Caustic",
     chance: 8,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 17,
     name: "Champion",
     chance: 9,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 18,
     name: "Christmas",
     chance: 9,
     desc: "Minigun weapon skin."
   },
   {
+    id: 19,
     name: "Faded",
     chance: 10,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 20,
     name: "Flute",
     chance: 10,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 21,
     name: "Hydro",
     chance: 10,
     desc: "Sniper weapon skin."
   },
   {
+    id: 22,
     name: "Ice",
     chance: 9,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 23,
     name: "Lava",
     chance: 7,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 24,
     name: "Monster",
     chance: 10,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 25,
     name: "Neon",
     chance: 15,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 26,
     name: "Pleck",
     chance: 10,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 27,
     name: "Ultra",
     chance: 10,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 28,
     name: "Autumn",
     chance: 25,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 29,
     name: "Blingeringo",
     chance: 30,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 30,
     name: "Digital",
     chance: 40,
     desc: "Sniper weapon skin."
   },
   {
+    id: 31,
     name: "Dragon",
     chance: 40,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 32,
     name: "Drift",
     chance: 40,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 33,
     name: "Execution",
     chance: 40,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 34,
     name: "Fries",
     chance: 40,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 35,
     name: "Rainbow",
     chance: 40,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 36,
     name: "Stingray",
     chance: 25,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 37,
     name: "Skulls",
     chance: 22,
     desc: "Sniper weapon skin."
   },
   {
+    id: 38,
     name: "Abstract",
     chance: 80,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 39,
     name: "Aqua",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 40,
     name: "Avatar",
     chance: 50,
     desc: "Minigun weapon skin."
   },
   {
+    id: 41,
     name: "Bacon",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 42,
     name: "Baning",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 43,
     name: "Barb Wire",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 44,
     name: "Battle Camo",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 45,
     name: "Beam",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 46,
     name: "Betting",
     chance: 100,
     desc: "Sniper weapon skin."
   },
   {
+    id: 47,
     name: "Black Ops",
     chance: 60,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 48,
     name: "Blanket",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 49,
     name: "Brace",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 50,
     name: "Brick",
     chance: 100,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 51,
     name: "Bulletz",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 52,
     name: "Busters",
     chance: 100,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 53,
     name: "Caliber",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 54,
     name: "Cash Money",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 55,
     name: "Castle",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 56,
     name: "Chain",
     chance: 60,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 57,
     name: "Coutch",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 58,
     name: "Crimson",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 59,
     name: "Crumble",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 60,
     name: "Curl",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 61,
     name: "Dash",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 62,
     name: "Daybreak",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 63,
     name: "Desert",
     chance: 80,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 64,
     name: "Dirt",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 65,
     name: "Dust",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 66,
     name: "Eclipse",
     chance: 100,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 67,
     name: "Emerald",
     chance: 80,
     desc: "Sniper weapon skin."
   },
   {
+    id: 68,
     name: "Finding",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 69,
     name: "Flank",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 70,
     name: "Flat",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 71,
     name: "Flopper",
     chance: 100,
     desc: "Sniper weapon skin."
   },
   {
+    id: 72,
     name: "Fright",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 73,
     name: "Future",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 74,
     name: "Go",
     chance: 100,
     desc: "Minigun weapon skin."
   },
   {
+    id: 75,
     name: "Hazmat",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 76,
     name: "Herb",
     chance: 100,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 77,
     name: "Herringbone",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 78,
     name: "Inferno",
     chance: 90,
     desc: "Minigun weapon skin."
   },
   {
+    id: 79,
     name: "Insane",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 80,
     name: "Joker",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 81,
     name: "Jungle",
     chance: 100,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 82,
     name: "Kite",
     chance: 100,
     desc: "Minigun weapon skin."
   },
   {
+    id: 83,
     name: "Leopard",
     chance: 100,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 84,
     name: "Lore",
     chance: 100,
     desc: "Sniper weapon skin."
   },
   {
+    id: 85,
     name: "Mime",
     chance: 100,
     desc: "Minigun weapon skin."
   },
   {
+    id: 86,
     name: "Missing",
     chance: 100,
     desc: "Sniper weapon skin."
   },
   {
+    id: 87,
     name: "Moonshine",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 88,
     name: "Navy",
     chance: 100,
     desc: "Minigun weapon skin."
   },
   {
+    id: 89,
     name: "Neon",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 90,
     name: "Net",
     chance: 100,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 91,
     name: "Octopus",
     chance: 100,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 92,
     name: "Panther",
     chance: 90,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 93,
     name: "Paradox",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 94,
     name: "Pede",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 95,
     name: "Piano",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 96,
     name: "Pika",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 97,
     name: "Poison",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 98,
     name: "Police",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 99,
     name: "Pop",
     chance: 90,
     desc: "Minigun weapon skin."
   },
   {
+    id: 100,
     name: "Portal",
     chance: 100,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 101,
     name: "Present",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 102,
     name: "Rainen",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 103,
     name: "Redstone",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 104,
     name: "Robbing",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 105,
     name: "Rogue",
     chance: 60,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 106,
     name: "Roulette",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 107,
     name: "Rust",
     chance: 80,
     desc: "Rocket Launcher weapon skin."
   },
   {
+    id: 108,
     name: "Scale",
     chance: 80,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 109,
     name: "Shark",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 110,
     name: "Slob",
     chance: 100,
     desc: "Grenade Launcher weapon skin."
   },
   {
+    id: 111,
     name: "Snow",
     chance: 100,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 112,
     name: "Spank",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 113,
     name: "Spek",
     chance: 100,
     desc: "Sniper weapon skin."
   },
   {
+    id: 114,
     name: "Spike",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 115,
     name: "Splat",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 116,
     name: "Splinter",
     chance: 70,
     desc: "Shotgun weapon skin."
   },
   {
+    id: 117,
     name: "Stuck",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 118,
     name: "Stunning",
     chance: 100,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 119,
     name: "Swiss",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 120,
     name: "Takenout",
     chance: 100,
     desc: "Desert Eagle weapon skin."
   },
   {
+    id: 121,
     name: "Tarment",
     chance: 100,
     desc: "Machine Pistol weapon skin."
   },
   {
+    id: 122,
     name: "Taxi",
     chance: 100,
     desc: "Minigun weapon skin."
   },
   {
+    id: 123,
     name: "Tiger",
     chance: 100,
     desc: "Flamethrower weapon skin."
   },
   {
+    id: 124,
     name: "Track",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 125,
     name: "Urban",
     chance: 15,
     desc: "Sniper weapon skin."
   },
   {
+    id: 126,
     name: "Versa",
     chance: 100,
     desc: "Machine Gun weapon skin."
   },
   {
+    id: 127,
     name: "Webbing",
     chance: 100,
     desc: "Sniper weapon skin."
   },
   {
+    id: 128,
     name: "Wood",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 129,
     name: "Woodland",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   },
   {
+    id: 130,
     name: "Zombie",
     chance: 100,
     desc: "Toy Blaster weapon skin."
   }
-]
+];
