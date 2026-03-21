@@ -81,4 +81,14 @@ export const gameModes: GameMode[] = [
 		teams: false,
 		killScoreMult: 1,
 	},
+	{
+		code: "pyro",
+		score: 1000,
+		name: "Pyro War",
+		desc1: "Burn them Up!",
+		desc2: "Burn them Up!",
+		maps: [5, 3, 8, 9, 16, 18],
+		teams: false,
+		killScoreMult: 1,
+	},
 ];
