@@ -97,16 +97,21 @@ io.on("connection", (socket: Socket) => {
 		player.account.hat = hatData[id - 1];
 	});
 
-	const shirtPathBase = join(import.meta.dirname, "../core/public/images/shirts");
-	const shirtData = shirts.map((s) => ({
-		id: s.id,
-		name: s.name,
-		desc: s.desc,
-		chance: s.chance,
-		count: 0,
-		left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
-		up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
-	})).toSorted((a, b) => a.id - b.id);
+	const shirtPathBase = join(
+		import.meta.dirname,
+		"../core/public/images/shirts",
+	);
+	const shirtData = shirts
+		.map((s) => ({
+			id: s.id,
+			name: s.name,
+			desc: s.desc,
+			chance: s.chance,
+			count: 0,
+			left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
+			up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
+		}))
+		.toSorted((a, b) => a.id - b.id);
 	socket.emit("updShrt", shirts.length, shirtData);
 
 	socket.on("cShirt", (id) => {
