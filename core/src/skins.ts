@@ -1522,427 +1522,427 @@ export const camos = [
 
 export const shirts = [
   {
-    id: 0,
+    id: 54,
     name: "Burned",
     chance: 1,
     desc: "You are hawt"
   },
   {
-    id: 1,
+    id: 70,
     name: "Golden Shirt",
     chance: 1,
     desc: "Pure Gold"
   },
   {
-    id: 2,
+    id: 77,
     name: "Ultra Armor",
     chance: 1,
     desc: "Super Sick"
   },
   {
-    id: 3,
+    id: 37,
     name: "Aqua Shirtis",
     chance: 10,
     desc: "Aqua vitalis"
   },
   {
-    id: 4,
+    id: 38,
     name: "Artificial",
     chance: 10,
     desc: "It aint real"
   },
   {
-    id: 5,
+    id: 45,
     name: "Battle Shirt",
     chance: 10,
     desc: "To arms men!"
   },
   {
-    id: 6,
+    id: 49,
     name: "Bling Shirt",
     chance: 10,
     desc: "Looks Fresh my dude"
   },
   {
-    id: 7,
+    id: 6,
     name: "Blue Flame Shirt",
     chance: 10,
     desc: "Supa Hot Faya"
   },
   {
-    id: 8,
+    id: 7,
     name: "Bounty Hunter Armor",
     chance: 10,
     desc: "Hey Bobba"
   },
   {
-    id: 9,
+    id: 50,
     name: "Brace Shirt",
     chance: 10,
     desc: "Caution"
   },
   {
-    id: 10,
+    id: 51,
     name: "Brushed Shirt",
     chance: 10,
     desc: "Looks like my car"
   },
   {
-    id: 11,
+    id: 19,
     name: "Champions Top",
     chance: 10,
     desc: "Only For a true Champion!"
   },
   {
-    id: 12,
+    id: 22,
     name: "Darkness Suit",
     chance: 10,
     desc: "Thats evil!"
   },
   {
-    id: 13,
+    id: 29,
     name: "Half Robot",
     chance: 15,
     desc: "Beep Boop"
   },
   {
-    id: 14,
+    id: 57,
     name: "Metal Top",
     chance: 15,
     desc: "Turns you into a cybork"
-  },
-  {
-    id: 15,
-    name: "Pleck",
+	},
+	{
+    id: 21,
+    name: "Barb Wire Armor",
     chance: 10,
-    desc: "Machine Pistol weapon skin."
+    desc: "Thorns III"
   },
   {
-    id: 16,
+    id: 79,
     name: "Volume Shirt",
     chance: 10,
     desc: "Still no sound??"
   },
   {
-    id: 17,
+    id: 35,
     name: "Acid Shirt",
     chance: 30,
     desc: "Dont hurt yourself"
   },
   {
-    id: 18,
+    id: 41,
     name: "B Shirt",
     chance: 20,
     desc: "From the popular B Movie"
   },
   {
-    id: 19,
+    id: 47,
     name: "Betting Shirt",
     chance: 25,
     desc: "Casino Royale was ok"
   },
   {
-    id: 20,
+    id: 48,
     name: "Blanket",
     chance: 45,
     desc: "This will keep you warm"
   },
   {
-    id: 21,
+    id: 8, //CANT FIND
     name: "Bones",
     chance: 30,
     desc: "Are you going trick or treating?"
   },
   {
-    id: 22,
+    id: 52,
     name: "Bull Shirt",
     chance: 40,
     desc: "Still no wings?"
   },
   {
-    id: 23,
+    id: 13,
     name: "Burger Shirt",
     chance: 30,
     desc: "HHHHL"
   },
   {
-    id: 24,
+    id: 23,
     name: "Deadpool Top",
     chance: 40,
     desc: "Deadpools handerrafted top"
   },
   {
-    id: 25,
+    id: 59,
     name: "Jailhouse",
     chance: 20,
     desc: "Do you have a miss piggy?"
   },
   {
-    id: 26,
+    id: 63,
     name: "Key Shirt",
     chance: 30,
     desc: "Locked up"
   },
   {
-    id: 27,
+    id: 60,
     name: "Lamp Shirt",
     chance: 20,
     desc: "Nice and bright"
   },
   {
-    id: 28,
+    id: 61,
     name: "Lighthouse",
     chance: 30,
     desc: "Which would be worse...?"
   },
   {
-    id: 29,
+    id: 62,
     name: "Link Shirt",
     chance: 20,
     desc: "Zelda is a girl bro..."
   },
   {
-    id: 30,
+    id: 64,
     name: "Marius Shirt",
     chance: 40,
     desc: "From the popular Marius the plumb"
   },
   {
-    id: 31,
+    id: 73,
     name: "Stubby Shirt",
     chance: 40,
     desc: "No idea..."
   },
   {
-    id: 32,
+    id: 36,
     name: "Apple Shirt",
     chance: 50,
     desc: "Great minds think different"
   },
   {
-    id: 33,
+    id: 39,
     name: "Autumn Shirt",
     chance: 100,
     desc: "Its that time of year"
   },
   {
-    id: 34,
+    id: 40,
     name: "Avatar Shirt",
     chance: 60,
     desc: "Not that one. The other one"
   },
   {
-    id: 35,
+    id: 42,
     name: "Baby Shirt",
     chance: 99,
     desc: "Waaaceeee"
   },
   {
-    id: 36,
+    id: 43,
     name: "Baning Shirt",
     chance: 100,
     desc: "Ban this Shirt"
   },
   {
-    id: 37,
+    id: 3,
     name: "Baseball Shirt",
     chance: 100,
     desc: "Strike One!"
   },
   {
-    id: 38,
+    id: 4,
     name: "Bat Shirt",
     chance: 100,
     desc: "You deserve this one"
   },
   {
-    id: 39,
+    id: 46,
     name: "Beam Shirt",
     chance: 100,
     desc: "Beam me up before you go go"
   },
   {
-    id: 40,
+    id: 5,
     name: "Beer Top",
     chance: 100,
     desc: "Dont wear it too long"
   },
   {
-    id: 41,
+    id: 9,
     name: "Booth",
     chance: 100,
     desc: "Its a booth? No idea..."
   },
   {
-    id: 42,
+    id: 10,
     name: "Brain Matter",
     chance: 10,
     desc: "Avoid during a zombie outbreak"
   },
   {
-    id: 43,
+    id: 11,
     name: "Bucket Top",
     chance: 100,
     desc: "Just as bad as the hat"
   },
   {
-    id: 44,
+    id: 12,
     name: "Bug Shirt",
     chance: 100,
     desc: "Really bugs me that I cant think of any puns..."
   },
   {
-    id: 45,
-    name: "Bullee Shirt",
+    id: 53,
+    name: "Bullez Shirt",
     chance: 60,
     desc: "This is the cheap version"
   },
   {
-    id: 46,
+    id: 55,
     name: "C Shirt",
     chance: 100,
     desc: "C word"
   },
   {
-    id: 47,
+    id: 14,
     name: "Captains Jacket",
     chance: 100,
     desc: "I like Boats"
   },
   {
-    id: 48,
+    id: 15,
     name: "Cat Shirt",
     chance: 100,
     desc: "A shirt with a cat on it"
   },
   {
-    id: 49,
+    id: 16,
     name: "Chicken Body",
     chance: 100,
     desc: "Quack quack?"
   },
   {
-    id: 50,
+    id: 56,
     name: "Christmas Shirt",
     chance: 100,
     desc: "Merry CHRISTmas"
   },
   {
-    id: 51,
+    id: 17,
     name: "Clone Armor",
     chance: 90,
     desc: "Decreased accuracy. For real"
   },
   {
-    id: 52,
+    id: 20,
     name: "Cupcake Top",
     chance: 100,
     desc: "Yummy!"
   },
   {
-    id: 53,
+    id: 24,
     name: "Dispenser Shirt",
     chance: 100,
     desc: "You dispense things"
   },
   {
-    id: 54,
+    id: 25,
     name: "Execution Shirt",
     chance: 100,
     desc: "Perfect for Weddings"
   },
   {
-    id: 55,
+    id: 44,
     name: "FCB Shirt",
     chance: 100,
     desc: "Fc Bacel!!!"
   },
   {
-    id: 56,
+    id: 26,
     name: "Flame Shirt",
     chance: 100,
     desc: "I spit that!"
   },
   {
-    id: 57,
+    id: 27,
     name: "Funnel Body",
     chance: 100,
     desc: "Yeah we are really running out of ideas"
   },
   {
-    id: 58,
+    id: 28,
     name: "Giraffe Top",
     chance: 100,
     desc: "Gives you Neck Length +10"
   },
   {
-    id: 59,
+    id: 30,
     name: "Halo Top",
     chance: 100,
     desc: "Microsoft Plis"
   },
   {
-    id: 60,
+    id: 31,
     name: "Hammer Shirt",
     chance: 100,
     desc: "Germans will think its great"
   },
   {
-    id: 61,
+    id: 33,
     name: "Homers Tummy",
     chance: 100,
     desc: "Doughhhhh"
   },
   {
-    id: 62,
+    id: 32,
     name: "HP Shirt",
     chance: 100,
     desc: "Health Bar Shirt"
   },
   {
-    id: 63,
+    id: 58,
     name: "Jacket",
     chance: 100,
     desc: "Just a normal jacket"
   },
   {
-    id: 64,
+    id: 67,
     name: "Paint Shirt",
     chance: 60,
     desc: "Do you have the bucket?"
   },
   {
-    id: 65,
+    id: 18,
     name: "Pan Shirt",
     chance: 100,
     desc: "Frying Pan?"
   },
   {
-    id: 66,
+    id: 69,
     name: "Phins Shirt",
     chance: 50,
     desc: "Algebruv?"
   },
   {
-    id: 67,
+    id: 68,
     name: "Pink Shirt",
     chance: 100,
     desc: "Hey Boss?"
   },
   {
-    id: 68,
+    id: 1,
     name: "Pokeshirt",
     chance: 100,
     desc: "Gotta wear them all."
   },
   {
-    id: 69,
+    id: 65,
     name: "Orange Shirt",
     chance: 90,
     desc: "Annoying isnt it?"
   },
   {
-    id: 70,
+    id: 66,
     name: "Outcast Shirt",
     chance: 50,
     desc: "Not the band"
@@ -1954,13 +1954,13 @@ export const shirts = [
     desc: "Better aim (Not really)"
   },
   {
-    id: 72,
+    id: 2,
     name: "Steves Shirt",
     chance: 100,
     desc: "Microsoft Plis"
   },
   {
-    id: 73,
+    id: 72,
     name: "Stew Shirt",
     chance: 100,
     desc: "What the duce?"
@@ -1978,13 +1978,13 @@ export const shirts = [
     desc: "Please no Ted 3"
   },
   {
-    id: 76,
+    id: 34,
     name: "Trumps Body",
     chance: 100,
     desc: "Make vertix great again!"
   },
   {
-    id: 77,
+    id: 76,
     name: "Turd Shirt",
     chance: 100,
     desc: "Eatpoop.io"
@@ -1996,7 +1996,7 @@ export const shirts = [
     desc: "V shirt"
   },
   {
-    id: 79,
+    id: 80,
     name: "Winter Shirt",
     chance: 100,
     desc: "Cool...."

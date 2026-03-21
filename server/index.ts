@@ -94,7 +94,7 @@ io.on("connection", (socket: Socket) => {
 	socket.emit("updHt", hats.length, hatData);
 
 	socket.on("cHat", (id) => {
-		player.account.hat = hatData[Number.parseInt(id, 10) - 1];
+		player.account.hat = hatData[id - 1];
 	});
 
 	const shirtPathBase = join(import.meta.dirname, "../core/public/images/shirts");
@@ -106,11 +106,11 @@ io.on("connection", (socket: Socket) => {
 		count: 0,
 		left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
 		up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
-	}));
+	})).toSorted((a, b) => a.id - b.id);
 	socket.emit("updShrt", shirts.length, shirtData);
 
 	socket.on("cShirt", (id) => {
-		player.account.shirt = hatData[Number.parseInt(id, 10) - 1];
+		player.account.shirt = shirtData[id - 1];
 	});
 
 	socket.on("cSrv", (data) => {
