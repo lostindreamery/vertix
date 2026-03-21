@@ -324,7 +324,8 @@ export const hats = [
 	{
 		id: 47,
 		name: "Funnel Hat",
-		desc: "This funnels socialist ideologies into your brain.",
+		// desc: "This funnels socialist ideologies into your brain.",
+		desc: "It's a funnel",
 		chance: 10,
 		creator: "Unknown",
 	},
@@ -576,7 +577,8 @@ export const hats = [
 	{
 		id: 83,
 		name: "Donald Trumpster",
-		desc: "Make Vertix Great Again!",
+		// desc: "Make Vertix Great Again!",
+		desc: "Abolish ICE",
 		chance: 100,
 		creator: "Unknown",
 	},
@@ -1761,7 +1763,8 @@ export const shirts = [
 		id: 34,
 		name: "Trumps Body",
 		chance: 100,
-		desc: "Make vertix great again!",
+		// desc: "Make vertix great again!",
+		desc: "Abolish ICE",
 	},
 	{
 		id: 35,
@@ -1887,7 +1890,8 @@ export const shirts = [
 		id: 55,
 		name: "C Shirt",
 		chance: 100,
-		desc: "C word",
+		// desc: "C word",
+		desc: "C shirt",
 	},
 	{
 		id: 56,
@@ -1911,7 +1915,8 @@ export const shirts = [
 		id: 59,
 		name: "Jailhouse",
 		chance: 20,
-		desc: "Do you have a miss piggy?",
+		// desc: "Do you have a miss piggy?",
+		desc: "Imprisoned",
 	},
 	{
 		id: 60,
