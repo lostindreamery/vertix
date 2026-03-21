@@ -144,15 +144,15 @@ Array.from(document.getElementsByClassName("dropUpLink") as HTMLCollectionOf<HTM
 function clickDropUpLink(index: number) {
 	for (let i = 0; i < dropUpLinksCount; ++i) {
 		const tmpIndex = i + 1;
-			if (tmpIndex === index && activeIndex !== index) {
-				activeIndex = index;
-				document.getElementById(`di${tmpIndex}`).style.opacity = "1";
-				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "auto";
-			} else {
-				document.getElementById(`di${tmpIndex}`).style.opacity = "0";
-				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
-				if (tmpIndex === index) activeIndex = -1;
-			}
+		if (tmpIndex === index && activeIndex !== index) {
+			activeIndex = index;
+			document.getElementById(`di${tmpIndex}`).style.opacity = "1";
+			document.getElementById(`di${tmpIndex}`).style.pointerEvents = "auto";
+		} else {
+			document.getElementById(`di${tmpIndex}`).style.opacity = "0";
+			document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
+			if (tmpIndex === index) activeIndex = -1;
+		}
 	}
 }
 
@@ -716,7 +716,7 @@ function keyDown(event: KeyboardEvent) {
 		saveKeysToCookie();
 	} else if (mainCanvas === document.activeElement) {
 		event.preventDefault();
-		keyMap[event.key] = event.type === "keydown";
+		keyMap[event.key.length === 1 ? event.key.toLowerCase() : event.key] = event.type === "keydown";
 		if (event.key === "Escape" && gameStart.get()) {
 			showESCMenu();
 		}
@@ -746,7 +746,7 @@ function keyDown(event: KeyboardEvent) {
 		if (keyMap[keysList.reloadKey] && !keys.rl) {
 			keys.rl = true;
 		}
-		if (event.key === keysList.chatToggleKey) {
+		if (keyMap[keysList.chatToggleKey]) {
 			document.getElementById("chatInput").focus();
 		}
 		if (
@@ -764,36 +764,37 @@ function keyDown(event: KeyboardEvent) {
 mainCanvas.addEventListener("keyup", keyUp, false);
 function keyUp(event: KeyboardEvent) {
 	event.preventDefault();
-	keyMap[event.key] = event.type === "keydown";
-	if (event.key === keysList.upKey) {
+	const normalizedKey = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+	keyMap[normalizedKey] = event.type === "keydown";
+	if (normalizedKey === keysList.upKey) {
 		keys.u = false;
 	}
-	if (event.key === keysList.downKey) {
+	if (normalizedKey === keysList.downKey) {
 		keys.d = false;
 	}
-	if (event.key === keysList.leftKey) {
+	if (normalizedKey === keysList.leftKey) {
 		keys.l = false;
 	}
-	if (event.key === keysList.rightKey) {
+	if (normalizedKey === keysList.rightKey) {
 		keys.r = false;
 	}
-	if (event.key === keysList.jumpKey) {
+	if (normalizedKey === keysList.jumpKey) {
 		keys.s = false;
 	}
-	if (event.key === keysList.reloadKey) {
+	if (normalizedKey === keysList.reloadKey) {
 		keys.rl = false;
 	}
-	if (event.key === keysList.incWeapKey) {
+	if (normalizedKey === keysList.incWeapKey) {
 		playerSwapWeapon(findUserByIndex(player.get().index), 1);
 	}
-	if (event.key === keysList.decWeapKey) {
+	if (normalizedKey === keysList.decWeapKey) {
 		playerSwapWeapon(findUserByIndex(player.get().index), -1);
 	}
-	if (event.key === keysList.sprayKey) {
+	if (normalizedKey === keysList.sprayKey) {
 		sendSpray();
 	}
 	if (
-		event.key === keysList.leaderboardKey &&
+		normalizedKey === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
 		!player.get().dead &&
 		!gameOver.get() &&
@@ -1662,137 +1663,137 @@ function showStatTable(
 			}
 		}
 	}
-		document.getElementById("gameStatBoard").textContent = "";
+	document.getElementById("gameStatBoard").textContent = "";
+	addRowToStatTable(
+		[
+			{
+				text: "NAME",
+				className: "headerL",
+				color: "#fff",
+			},
+			{
+				text: "SCORE",
+				className: "headerC",
+				color: "#fff",
+			},
+			{
+				text: "KILLS",
+				className: "headerC",
+				color: "#fff",
+			},
+			{
+				text: "DEATHS",
+				className: "headerC",
+				color: "#fff",
+			},
+			{
+				text: "DAMAGE",
+				className: "headerC",
+				color: "#fff",
+			},
+			{
+				text: gameMode.code === "zmtch" ? "GOALS" : "HEALING",
+				className: "headerC",
+				color: "#fff",
+			},
+			{
+				text: "REWARD",
+				className: "headerC",
+				color: "#fff",
+			},
+			{
+				text: "",
+				className: "headerC",
+				color: "#fff",
+			},
+		],
+		true,
+	);
+	for (const user of userList) {
+		if (!user.team) continue;
 		addRowToStatTable(
 			[
 				{
-					text: "NAME",
-					className: "headerL",
-					color: "#fff",
+					text: user.name,
+					className: "contL",
+					canClick: user.loggedIn,
+					color:
+						user.index === player.get().index
+							? "#fff"
+							: user.team !== player.get().team
+								? "#d95151"
+								: "#5151d9",
+					id: null,
+					userInfo: findUserByIndex(user.index),
 				},
 				{
-					text: "SCORE",
-					className: "headerC",
+					text: user.score || 0,
+					className: "contC",
 					color: "#fff",
+					id: null,
 				},
 				{
-					text: "KILLS",
-					className: "headerC",
+					text: user.kills || 0,
+					className: "contC",
 					color: "#fff",
+					id: null,
 				},
 				{
-					text: "DEATHS",
-					className: "headerC",
+					text: user.deaths || 0,
+					className: "contC",
 					color: "#fff",
+					id: null,
 				},
 				{
-					text: "DAMAGE",
-					className: "headerC",
+					text: user.totalDamage || 0,
+					className: "contC",
 					color: "#fff",
+					id: null,
 				},
 				{
-					text: gameMode.code === "zmtch" ? "GOALS" : "HEALING",
-					className: "headerC",
+					text: gameMode.code == "zmtch" ? user.totalGoals || 0 : user.totalHealing || 0,
+					className: "contC",
 					color: "#fff",
+					id: null,
 				},
 				{
-					text: "REWARD",
-					className: "headerC",
-					color: "#fff",
+					text: user.lastItem != null ? user.lastItem.name : "No Reward",
+					className: "rewardText",
+					color: user.lastItem != null ? getItemRarityColor(user.lastItem.chance) : "#fff",
+					id: null,
+					hoverInfo: user.lastItem,
 				},
 				{
-					text: "",
-					className: "headerC",
+					text: user.likes || 0,
+					className: "contC",
 					color: "#fff",
+					pos: user.index,
+					id: `likeStat${user.index}`,
+					uID: user.id,
 				},
 			],
-			true,
+			false,
 		);
-		for (const user of userList) {
-			if (!user.team) continue;
-			addRowToStatTable(
-				[
-					{
-						text: user.name,
-						className: "contL",
-						canClick: user.loggedIn,
-						color:
-							user.index === player.get().index
-								? "#fff"
-								: user.team !== player.get().team
-									? "#d95151"
-									: "#5151d9",
-						id: null,
-						userInfo: findUserByIndex(user.index),
-					},
-					{
-						text: user.score || 0,
-						className: "contC",
-						color: "#fff",
-						id: null,
-					},
-					{
-						text: user.kills || 0,
-						className: "contC",
-						color: "#fff",
-						id: null,
-					},
-					{
-						text: user.deaths || 0,
-						className: "contC",
-						color: "#fff",
-						id: null,
-					},
-					{
-						text: user.totalDamage || 0,
-						className: "contC",
-						color: "#fff",
-						id: null,
-					},
-					{
-						text: gameMode.code == "zmtch" ? user.totalGoals || 0 : user.totalHealing || 0,
-						className: "contC",
-						color: "#fff",
-						id: null,
-					},
-					{
-						text: user.lastItem != null ? user.lastItem.name : "No Reward",
-						className: "rewardText",
-						color: user.lastItem != null ? getItemRarityColor(user.lastItem.chance) : "#fff",
-						id: null,
-						hoverInfo: user.lastItem,
-					},
-					{
-						text: user.likes || 0,
-						className: "contC",
-						color: "#fff",
-						pos: user.index,
-						id: `likeStat${user.index}`,
-						uID: user.id,
-					},
-				],
-				false,
-			);
-		}
-		if (isEnd) {
-			if (isFading) {
-				overlayAlpha = overlayMaxAlpha;
-				animateOverlay = false;
+	}
+	if (isEnd) {
+		if (isFading) {
+			overlayAlpha = overlayMaxAlpha;
+			animateOverlay = false;
+			gameOverFade = true;
+			deactiveAllAnimTexts();
+			document.getElementById("gameStatWrapper").style.display = "block";
+		} else {
+			hideStatTable();
+			hideUI(false);
+			animateOverlay = true;
+			window.setTimeout(() => {
 				gameOverFade = true;
-				deactiveAllAnimTexts();
+			}, 2500);
+			window.setTimeout(() => {
 				document.getElementById("gameStatWrapper").style.display = "block";
-			} else {
-				hideStatTable();
-				hideUI(false);
-				animateOverlay = true;
-				window.setTimeout(() => {
-					gameOverFade = true;
-				}, 2500);
-				window.setTimeout(() => {
-					document.getElementById("gameStatWrapper").style.display = "block";
-				}, 4500);
-			}
+			}, 4500);
 		}
+	}
 }
 function hideStatTable() {
 	showUI();
@@ -2407,32 +2408,32 @@ function sortUsersByPosition(a: (typeof gameObjects)[number], b: (typeof gameObj
 	}
 }
 function updateLeaderboard(data: number[]) {
-		let test: Node[] = [];
-		test.push(<span class="title">LEADERBOARD</span>);
+	let test: Node[] = [];
+	test.push(<span class="title">LEADERBOARD</span>);
 
-		for (let i = 0; i < data.length; i++) {
-			let tmpPlayer = findUserByIndex(data[0 + i]);
-			if (tmpPlayer == null) continue;
-			test.push(<br />);
-			if (tmpPlayer.index === player.get().index) {
-				test.push(
-					<span class="me">
-						{i + 1}. {player.get().name}
-						{player.get().account.clan && ` [${player.get().account.clan}]`}
-					</span>,
-				);
-			} else if (tmpPlayer.name) {
-				test.push(
-					<>
-						<span class={tmpPlayer.team !== player.get().team ? "red" : "blue"}>
-							{i + 1}. {tmpPlayer.name}
-						</span>
-						{tmpPlayer.account.clan && <span class="me"> [{tmpPlayer.account.clan}]</span>}
-					</>,
-				);
-			}
+	for (let i = 0; i < data.length; i++) {
+		let tmpPlayer = findUserByIndex(data[0 + i]);
+		if (tmpPlayer == null) continue;
+		test.push(<br />);
+		if (tmpPlayer.index === player.get().index) {
+			test.push(
+				<span class="me">
+					{i + 1}. {player.get().name}
+					{player.get().account.clan && ` [${player.get().account.clan}]`}
+				</span>,
+			);
+		} else if (tmpPlayer.name) {
+			test.push(
+				<>
+					<span class={tmpPlayer.team !== player.get().team ? "red" : "blue"}>
+						{i + 1}. {tmpPlayer.name}
+					</span>
+					{tmpPlayer.account.clan && <span class="me"> [{tmpPlayer.account.clan}]</span>}
+				</>,
+			);
 		}
-		document.getElementById("status").replaceChildren(...test);
+	}
+	document.getElementById("status").replaceChildren(...test);
 }
 function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var redProgress = document.getElementById("redProgress");
@@ -2440,26 +2441,26 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var blueProgress = document.getElementById("blueProgress");
 	var redProgCont = document.getElementById("redProgCont");
 	if (!gameMode) return;
-		if (gameMode.teams) {
-			blueText.textContent = "A";
-			redProgCont.style.display = "";
-			if (player.get().team === "red") {
-				redProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
-				redProgress.style.width = `${scoreBlue}%`;
-				blueProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
-				blueProgress.style.width = `${scoreRed}%`;
-			} else {
-				redProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
-				redProgress.style.width = `${scoreRed}%`;
-				blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
-				blueProgress.style.width = `${scoreBlue}%`;
-			}
+	if (gameMode.teams) {
+		blueText.textContent = "A";
+		redProgCont.style.display = "";
+		if (player.get().team === "red") {
+			redProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
+			redProgress.style.width = `${scoreBlue}%`;
+			blueProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
+			blueProgress.style.width = `${scoreRed}%`;
 		} else {
-			scoreBlue = Math.round((player.get().score / scoreRed) * 100);
+			redProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
+			redProgress.style.width = `${scoreRed}%`;
 			blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
 			blueProgress.style.width = `${scoreBlue}%`;
-			blueText.textContent = "YOU";
-			redProgCont.style.display = "none";
+		}
+	} else {
+		scoreBlue = Math.round((player.get().score / scoreRed) * 100);
+		blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
+		blueProgress.style.width = `${scoreBlue}%`;
+		blueText.textContent = "YOU";
+		redProgCont.style.display = "none";
 	}
 }
 function showUI() {
