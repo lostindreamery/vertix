@@ -13,7 +13,7 @@ import {
 import { Room } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 import type { Player } from "core/src/types.ts";
-import { hats, camos } from "core/src/skins.ts";
+import { hats, camos, shirts } from "core/src/skins.ts";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -95,6 +95,22 @@ io.on("connection", (socket: Socket) => {
 
 	socket.on("cHat", (id) => {
 		player.account.hat = hatData[Number.parseInt(id, 10) - 1];
+	});
+
+	const shirtPathBase = join(import.meta.dirname, "../core/public/images/shirts");
+	const shirtData = shirts.map((s) => ({
+		id: s.id,
+		name: s.name,
+		desc: s.desc,
+		chance: s.chance,
+		count: 0,
+		left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
+		up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
+	}));
+	socket.emit("updShrt", shirts.length, shirtData);
+
+	socket.on("cShirt", (id) => {
+		player.account.shirt = hatData[Number.parseInt(id, 10) - 1];
 	});
 
 	socket.on("cSrv", (data) => {
