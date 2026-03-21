@@ -262,7 +262,10 @@ window.onload = () => {
 					}
 				});
 				document.getElementById("texturePackButton").onclick = () => {
-					loadModPack((document.getElementById("textureModInput") as HTMLInputElement).value, false);
+					loadModPack(
+						(document.getElementById("textureModInput") as HTMLInputElement).value,
+						false,
+					);
 				};
 				document.getElementById("registerButton").onclick = () => {
 					socket.emit("dbReg", {
@@ -2037,9 +2040,9 @@ function updateUserValue(data: any) {
 		if (b) {
 			if (gameOver.get()) {
 				if (data.l != undefined) {
-					data = document.createTextNode(tmpUser.likes.toString());
-					document.getElementById(`likeStat${tmpUser.index}`).textContent = "";
-					document.getElementById(`likeStat${tmpUser.index}`).appendChild(data);
+					document
+						.getElementById(`likeStat${tmpUser.index}`)
+						.replaceChildren(tmpUser.likes.toString());
 				}
 			} else {
 				showStatTable(getUsersList(), null, null, true, true, false);
@@ -2052,43 +2055,40 @@ function updateUserValue(data: any) {
 function fetchUserWithIndex(a: number) {
 	socket.emit("ftc", a);
 }
-function receiveServerData(a: number[]) {
-	let tmpNowTime = Date.now();
-	timeOfLastUpdate = tmpNowTime;
+function receiveServerData(data: number[]) {
+	timeOfLastUpdate = Date.now();
 	if (!gameOver.get()) {
-		for (let i = 0; i < gameObjects.length; ++i) {
-			if (gameObjects[i].type === "player") {
-				gameObjects[i].onScreen = false;
-			}
-		}
-		for (let d = 0; d < a.length; ) {
-			let b = a[0 + d];
-			const tmpUser = findUserByIndex(a[1 + d]);
-			if (a[1 + d] === player.get().index && tmpUser != null) {
+		gameObjects.forEach((obj) => {
+			if (obj.type === "player") obj.onScreen = false;
+		});
+		for (let d = 0; d < data.length; ) {
+			let b = data[0 + d];
+			const tmpUser = findUserByIndex(data[1 + d]);
+			if (data[1 + d] === player.get().index && tmpUser != null) {
 				if (b > 2) {
-					tmpUser.x = a[2 + d];
+					tmpUser.x = data[2 + d];
 				}
 				if (b > 3) {
-					tmpUser.y = a[3 + d];
+					tmpUser.y = data[3 + d];
 				}
 				if (b > 4) {
-					tmpUser.angle = a[4 + d];
+					tmpUser.angle = data[4 + d];
 				}
 				if (b > 5) {
-					tmpUser.isn = a[5 + d];
+					tmpUser.isn = data[5 + d];
 				}
 				tmpUser.onScreen = true;
 			} else if (tmpUser != null) {
 				if (b > 2) {
-					tmpUser.xSpeed = Math.abs(tmpUser.x - a[2 + d]);
-					tmpUser.x = a[2 + d];
+					tmpUser.xSpeed = Math.abs(tmpUser.x - data[2 + d]);
+					tmpUser.x = data[2 + d];
 				}
 				if (b > 3) {
-					tmpUser.ySpeed = Math.abs(tmpUser.y - a[3 + d]);
-					tmpUser.y = a[3 + d];
+					tmpUser.ySpeed = Math.abs(tmpUser.y - data[3 + d]);
+					tmpUser.y = data[3 + d];
 				}
 				if (b > 4) {
-					tmpUser.angle = a[4 + d];
+					tmpUser.angle = data[4 + d];
 				}
 				if (getCurrentWeapon(tmpUser) !== undefined) {
 					const wepAngle = Math.round((tmpUser.angle % 360) / 90) * 90;
@@ -2106,55 +2106,53 @@ function receiveServerData(a: number[]) {
 				//}
 				tmpUser.onScreen = true;
 			} else {
-				fetchUserWithIndex(a[1 + d]);
+				fetchUserWithIndex(data[1 + d]);
 			}
 			d += b;
 		}
 	}
-	for (let i = 0; i < gameObjects.length; i++) {
-		if (gameObjects[i].index === player.get().index) {
-			if (gameObjects[i].dead || gameOver.get() || thisInput.length > 80) {
-				thisInput = [];
-			}
-			let f = 0;
-			if (!gameObjects[i].dead) {
-				while (f < thisInput.length) {
-					if (thisInput[f].isn <= gameObjects[i].isn) {
-						thisInput.splice(f, 1);
-					} else {
-						let hdt = thisInput[f].hdt;
-						let vdt = thisInput[f].vdt;
-						const e = Math.sqrt(
-							thisInput[f].hdt * thisInput[f].hdt + thisInput[f].vdt * thisInput[f].vdt,
-						);
-						if (e !== 0) {
-							hdt /= e;
-							vdt /= e;
-						}
-						gameObjects[i].oldX = gameObjects[i].x;
-						gameObjects[i].oldY = gameObjects[i].y;
-						gameObjects[i].x += hdt * gameObjects[i].speed * thisInput[f].delta;
-						gameObjects[i].y += vdt * gameObjects[i].speed * thisInput[f].delta;
-						wallCol(gameObjects[i], gameMap.get().tiles, gameObjects);
-						f++;
-					}
-				}
-				gameObjects[i].x = Math.round(gameObjects[i].x);
-				gameObjects[i].y = Math.round(gameObjects[i].y);
-				updatePlayerInfo(gameObjects[i]);
-			}
+	for (const tmpObj of gameObjects) {
+		if (tmpObj.index !== player.get().index) continue;
+		if (tmpObj.dead || gameOver.get() || thisInput.length > 80) {
+			thisInput = [];
 		}
+		if (tmpObj.dead) continue;
+		let i = 0;
+		while (i < thisInput.length) {
+			if (thisInput[i].isn <= tmpObj.isn) {
+				thisInput.splice(i, 1);
+				continue;
+			}
+			let hdt = thisInput[i].hdt;
+			let vdt = thisInput[i].vdt;
+			const e = Math.sqrt(
+				thisInput[i].hdt * thisInput[i].hdt + thisInput[i].vdt * thisInput[i].vdt,
+			);
+			if (e !== 0) {
+				hdt /= e;
+				vdt /= e;
+			}
+			tmpObj.oldX = tmpObj.x;
+			tmpObj.oldY = tmpObj.y;
+			tmpObj.x += hdt * tmpObj.speed * thisInput[i].delta;
+			tmpObj.y += vdt * tmpObj.speed * thisInput[i].delta;
+			wallCol(tmpObj, gameMap.get().tiles, gameObjects);
+			i++;
+		}
+		tmpObj.x = Math.round(tmpObj.x);
+		tmpObj.y = Math.round(tmpObj.y);
+		updatePlayerInfo(tmpObj);
 	}
 }
-function updatePlayerInfo(a: Partial<Player>) {
-	player.get().x = a.x;
-	player.get().y = a.y;
-	player.get().dead = a.dead;
-	if (player.get().score < a.score) {
+function updatePlayerInfo(data: Partial<Player>) {
+	player.get().x = data.x;
+	player.get().y = data.y;
+	player.get().dead = data.dead;
+	if (player.get().score < data.score) {
 		playSound("score", player.get().x, player.get().y);
 	}
-	player.get().score = a.score;
-	player.get().health = a.health;
+	player.get().score = data.score;
+	player.get().health = data.health;
 }
 var currentHat = document.getElementById("currentHat");
 var hatList = document.getElementById("hatList");
@@ -2395,14 +2393,7 @@ function findUserByIndex(index: number): Player {
 	return null;
 }
 function getUsersList(): Player[] {
-	let tmpUsers = [];
-	for (let i = 0; i < gameObjects.length; ++i) {
-		if (gameObjects[i].type === "player") {
-			tmpUsers.push(gameObjects[i]);
-		}
-	}
-	tmpUsers.sort(sortUsersByScore);
-	return tmpUsers;
+	return gameObjects.filter((obj) => obj.type === "player").sort(sortUsersByScore);
 }
 function sortUsersByScore(a: Player, b: Player) {
 	if (b.score === a.score) {
@@ -2585,104 +2576,103 @@ function updateGameLoop() {
 		d /= e;
 	}
 	if (clientPrediction) {
-		for (let e = 0; e < gameObjects.length; e++) {
-			if (gameObjects[e].type === "player") {
-				if (gameObjects[e].index === player.get().index) {
-					gameObjects[e].oldX = gameObjects[e].x;
-					gameObjects[e].oldY = gameObjects[e].y;
-					if (!gameObjects[e].dead && !gameOver.get()) {
-						gameObjects[e].x += b * gameObjects[e].speed * delta;
-						gameObjects[e].y += d * gameObjects[e].speed * delta;
-					}
-					wallCol(gameObjects[e], gameMap.get().tiles, gameObjects);
-					gameObjects[e].x = Math.round(gameObjects[e].x);
-					gameObjects[e].y = Math.round(gameObjects[e].y);
-					gameObjects[e].angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
-					if (getCurrentWeapon(gameObjects[e]) !== undefined) {
-						let f = Math.round((gameObjects[e].angle % 360) / 90) * 90;
-						if (f === 0 || f === 360) {
-							getCurrentWeapon(gameObjects[e]).front = true;
-						} else if (f === 180) {
-							getCurrentWeapon(gameObjects[e]).front = false;
-						} else {
-							getCurrentWeapon(gameObjects[e]).front = true;
-						}
-					}
-					if (gameObjects[e].jumpCountdown > 0) {
-						gameObjects[e].jumpCountdown -= delta;
-					}
-					if (keys.s && gameObjects[e].jumpCountdown <= 0 && !gameOver.get()) {
-						playerJump(gameObjects[e]);
-						doJump = 1;
-					}
+		for (const tmpObj of gameObjects) {
+			if (tmpObj.type !== "player") continue;
+			if (tmpObj.index === player.get().index) {
+				tmpObj.oldX = tmpObj.x;
+				tmpObj.oldY = tmpObj.y;
+				if (!tmpObj.dead && !gameOver.get()) {
+					tmpObj.x += b * tmpObj.speed * delta;
+					tmpObj.y += d * tmpObj.speed * delta;
 				}
-				if (gameObjects[e].jumpY !== 0) {
-					gameObjects[e].jumpDelta -= gameObjects[e].gravityStrength * delta;
-					gameObjects[e].jumpY += gameObjects[e].jumpDelta * delta;
-					if (gameObjects[e].jumpY > 0) {
-						gameObjects[e].animIndex = 1;
+				wallCol(tmpObj, gameMap.get().tiles, gameObjects);
+				tmpObj.x = Math.round(tmpObj.x);
+				tmpObj.y = Math.round(tmpObj.y);
+				tmpObj.angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
+				if (getCurrentWeapon(tmpObj) !== undefined) {
+					let f = Math.round((tmpObj.angle % 360) / 90) * 90;
+					if (f === 0 || f === 360) {
+						getCurrentWeapon(tmpObj).front = true;
+					} else if (f === 180) {
+						getCurrentWeapon(tmpObj).front = false;
 					} else {
-						gameObjects[e].jumpY = 0;
-						gameObjects[e].jumpDelta = 0;
-						gameObjects[e].jumpCountdown = 250;
-					}
-					gameObjects[e].jumpY = Math.round(gameObjects[e].jumpY);
-				}
-				if (gameObjects[e].index == player.get().index && !gameOver.get()) {
-					let sendData = {
-						hdt: b,
-						vdt: d,
-						ts: currentTime,
-						isn: inputNumber,
-						s: doJump,
-						delta,
-					};
-					inputNumber++;
-					thisInput.push(sendData);
-					socket.emit("4", sendData);
-					if (userScroll != 0 && !gameOver.get()) {
-						playerSwapWeapon(gameObjects[e], userScroll);
-						userScroll = 0;
-					}
-					if (keys.rl && !gameOver.get()) {
-						playerReload(gameObjects[e], true);
-					}
-					if (keys.lm && !gameOver.get() && player.get().weapons.length > 0) {
-						if (
-							currentTime - getCurrentWeapon(gameObjects[e]).lastShot >=
-							getCurrentWeapon(gameObjects[e]).fireRate
-						) {
-							shootBullet(gameObjects[e]);
-						}
+						getCurrentWeapon(tmpObj).front = true;
 					}
 				}
-				if (gameOver.get()) {
-					gameObjects[e].animIndex = 0;
+				if (tmpObj.jumpCountdown > 0) {
+					tmpObj.jumpCountdown -= delta;
+				}
+				if (keys.s && tmpObj.jumpCountdown <= 0 && !gameOver.get()) {
+					playerJump(tmpObj);
+					doJump = 1;
+				}
+			}
+			if (tmpObj.jumpY !== 0) {
+				tmpObj.jumpDelta -= tmpObj.gravityStrength * delta;
+				tmpObj.jumpY += tmpObj.jumpDelta * delta;
+				if (tmpObj.jumpY > 0) {
+					tmpObj.animIndex = 1;
 				} else {
-					let f = Math.abs(b) + Math.abs(d);
-					if (gameObjects[e].index != player.get().index) {
-						f = Math.abs(gameObjects[e].xSpeed) + Math.abs(gameObjects[e].ySpeed);
+					tmpObj.jumpY = 0;
+					tmpObj.jumpDelta = 0;
+					tmpObj.jumpCountdown = 250;
+				}
+				tmpObj.jumpY = Math.round(tmpObj.jumpY);
+			}
+			if (tmpObj.index == player.get().index && !gameOver.get()) {
+				let sendData = {
+					hdt: b,
+					vdt: d,
+					ts: currentTime,
+					isn: inputNumber,
+					s: doJump,
+					delta,
+				};
+				inputNumber++;
+				thisInput.push(sendData);
+				socket.emit("4", sendData);
+				if (userScroll != 0 && !gameOver.get()) {
+					playerSwapWeapon(tmpObj, userScroll);
+					userScroll = 0;
+				}
+				if (keys.rl && !gameOver.get()) {
+					playerReload(tmpObj, true);
+				}
+				if (keys.lm && !gameOver.get() && player.get().weapons.length > 0) {
+					if (
+						currentTime - getCurrentWeapon(tmpObj).lastShot >=
+						getCurrentWeapon(tmpObj).fireRate
+					) {
+						shootBullet(tmpObj);
 					}
-					if (f > 0) {
-						gameObjects[e].frameCountdown -= delta / 4;
-						if (gameObjects[e].frameCountdown <= 0) {
-							gameObjects[e].animIndex++;
-							if (gameObjects[e].jumpY == 0 && gameObjects[e].onScreen && !gameObjects[e].dead) {
-								stillDustParticle(gameObjects[e].x, gameObjects[e].y, false);
-							}
-							if (gameObjects[e].animIndex >= 3) {
-								gameObjects[e].animIndex = 1;
-							} else if (gameObjects[e].animIndex == 2 && gameObjects[e].jumpY <= 0) {
-								playSound("step1", gameObjects[e].x, gameObjects[e].y);
-							}
-							gameObjects[e].frameCountdown = 40;
+				}
+			}
+			if (gameOver.get()) {
+				tmpObj.animIndex = 0;
+			} else {
+				let f = Math.abs(b) + Math.abs(d);
+				if (tmpObj.index != player.get().index) {
+					f = Math.abs(tmpObj.xSpeed) + Math.abs(tmpObj.ySpeed);
+				}
+				if (f > 0) {
+					tmpObj.frameCountdown -= delta / 4;
+					if (tmpObj.frameCountdown <= 0) {
+						tmpObj.animIndex++;
+						if (tmpObj.jumpY == 0 && tmpObj.onScreen && !tmpObj.dead) {
+							stillDustParticle(tmpObj.x, tmpObj.y, false);
 						}
-					} else if (gameObjects[e].animIndex != 0) {
-						gameObjects[e].animIndex = 0;
+						if (tmpObj.animIndex >= 3) {
+							tmpObj.animIndex = 1;
+						} else if (tmpObj.animIndex == 2 && tmpObj.jumpY <= 0) {
+							playSound("step1", tmpObj.x, tmpObj.y);
+						}
+						tmpObj.frameCountdown = 40;
 					}
-					if (gameObjects[e].jumpY > 0) {
-						gameObjects[e].animIndex = 1;
-					}
+				} else if (tmpObj.animIndex != 0) {
+					tmpObj.animIndex = 0;
+				}
+				if (tmpObj.jumpY > 0) {
+					tmpObj.animIndex = 1;
 				}
 			}
 		}
@@ -2949,24 +2939,18 @@ function drawMiniMap() {
 		mapContext.drawImage(cachedMiniMap, 0, 0, mapScale, mapScale);
 	}
 	mapContext.globalAlpha = 1;
-	for (let i = 0; i < gameObjects.length; ++i) {
+	for (const tmpObj of gameObjects) {
 		if (
-			gameObjects[i].type === "player" &&
-			gameObjects[i].onScreen &&
-			(gameObjects[i].index === player.get().index ||
-				gameObjects[i].team === player.get().team ||
-				gameObjects[i].isBoss)
+			tmpObj.type === "player" &&
+			tmpObj.onScreen &&
+			(tmpObj.index === player.get().index || tmpObj.team === player.get().team || tmpObj.isBoss)
 		) {
 			mapContext.fillStyle =
-				gameObjects[i].index === player.get().index
-					? "#fff"
-					: gameObjects[i].isBoss
-						? "#db4fcd"
-						: "#5151d9";
+				tmpObj.index === player.get().index ? "#fff" : tmpObj.isBoss ? "#db4fcd" : "#5151d9";
 			mapContext.beginPath();
 			mapContext.arc(
-				(gameObjects[i].x / gameWidth) * mapScale,
-				(gameObjects[i].y / gameHeight) * mapScale,
+				(tmpObj.x / gameWidth) * mapScale,
+				(tmpObj.y / gameHeight) * mapScale,
 				pingScale,
 				0,
 				Math.PI * 2,
@@ -3475,40 +3459,38 @@ function loadPlayerSpriteArray(
 	base: string,
 	classes: typeof characterClasses | typeof specialClasses,
 ) {
-	for (let i = 0; i < classes.length; ++i) {
+	for (const { folderName, hasDown } of classes) {
 		let upSprites: Sprite[] = [];
 		let downSprites: Sprite[] = [];
 		let leftSprites: Sprite[] = [];
 		let rightSprites: Sprite[] = [];
-		upSprites.push(getSprite(`${base}characters/${classes[i].folderName}/up`));
-		downSprites.push(getSprite(`${base}characters/${classes[i].folderName}/down`));
-		leftSprites.push(getSprite(`${base}characters/${classes[i].folderName}/left`));
-		rightSprites.push(getSprite(`${base}characters/${classes[i].folderName}/left`));
-		for (let j = 0; j < animLength; ++j) {
-			let tmpIndex = j;
-			upSprites.push(getSprite(`${base}characters/${classes[i].folderName}/up${tmpIndex + 1}`));
-			let tmpSprite = classes[i].hasDown
-				? getSprite(`${base}characters/${classes[i].folderName}/down${tmpIndex + 1}`)
-				: getSprite(`${base}characters/${classes[i].folderName}/up${tmpIndex + 1}`);
+		upSprites.push(getSprite(`${base}characters/${folderName}/up`));
+		downSprites.push(getSprite(`${base}characters/${folderName}/down`));
+		leftSprites.push(getSprite(`${base}characters/${folderName}/left`));
+		rightSprites.push(getSprite(`${base}characters/${folderName}/left`));
+		for (let i = 0; i < animLength; ++i) {
+			let tmpIndex = i;
+			upSprites.push(getSprite(`${base}characters/${folderName}/up${tmpIndex + 1}`));
+			let tmpSprite = hasDown
+				? getSprite(`${base}characters/${folderName}/down${tmpIndex + 1}`)
+				: getSprite(`${base}characters/${folderName}/up${tmpIndex + 1}`);
 			downSprites.push(tmpSprite);
 			if (tmpIndex >= 2) {
 				tmpIndex = 0;
 			}
-			leftSprites.push(getSprite(`${base}characters/${classes[i].folderName}/left${tmpIndex + 1}`));
-			rightSprites.push(
-				getSprite(`${base}characters/${classes[i].folderName}/left${tmpIndex + 1}`),
-			);
+			leftSprites.push(getSprite(`${base}characters/${folderName}/left${tmpIndex + 1}`));
+			rightSprites.push(getSprite(`${base}characters/${folderName}/left${tmpIndex + 1}`));
 		}
 		classSpriteSheets.push({
 			upSprites,
 			downSprites,
 			leftSprites,
 			rightSprites,
-			arm: getSprite(`${base}characters/${classes[i].folderName}/arm`),
-			hD: getSprite(`${base}characters/${classes[i].folderName}/hd`),
-			hU: getSprite(`${base}characters/${classes[i].folderName}/hu`),
-			hL: getSprite(`${base}characters/${classes[i].folderName}/hl`),
-			hR: getSprite(`${base}characters/${classes[i].folderName}/hl`),
+			arm: getSprite(`${base}characters/${folderName}/arm`),
+			hD: getSprite(`${base}characters/${folderName}/hd`),
+			hU: getSprite(`${base}characters/${folderName}/hu`),
+			hL: getSprite(`${base}characters/${folderName}/hl`),
+			hR: getSprite(`${base}characters/${folderName}/hl`),
 		});
 	}
 }
