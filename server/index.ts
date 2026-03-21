@@ -60,20 +60,19 @@ io.on("connection", (socket: Socket) => {
 		true,
 	);
 
-	// todo cleanup, see if it's possible to find their original names?
-
 	socket.emit(
 		"updCmo",
 		camos.length,
 		weapons.map(() =>
 			camos
+				.filter((h) => !h.hide)
 				.map((p) => ({
 					id: p.id,
 					name: p.name,
 					chance: p.chance,
 					count: 0,
 				}))
-				.toSorted((a, b) => a.id - b.id),
+				.toSorted((a, b) => a.chance - b.chance),
 		),
 	);
 	socket.on("cCamo", (data) => {
@@ -82,6 +81,7 @@ io.on("connection", (socket: Socket) => {
 
 	const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
 	const hatData = hats
+		.filter((h) => !h.hide)
 		.map((h) => ({
 			id: h.id,
 			name: h.name,
@@ -92,11 +92,11 @@ io.on("connection", (socket: Socket) => {
 			left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
 			up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
 		}))
-		.toSorted((a, b) => a.id - b.id);
+		.toSorted((a, b) => a.chance - b.chance);
 	socket.emit("updHt", hats.length, hatData);
 
 	socket.on("cHat", (id) => {
-		player.account.hat = hatData[id - 1];
+		player.account.hat = hats[id - 1];
 	});
 
 	const shirtPathBase = join(
@@ -104,6 +104,7 @@ io.on("connection", (socket: Socket) => {
 		"../core/public/images/shirts",
 	);
 	const shirtData = shirts
+		.filter((h) => !h.hide)
 		.map((s) => ({
 			id: s.id,
 			name: s.name,
@@ -113,11 +114,11 @@ io.on("connection", (socket: Socket) => {
 			left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
 			up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
 		}))
-		.toSorted((a, b) => a.id - b.id);
+		.toSorted((a, b) => a.chance - b.chance)
 	socket.emit("updShrt", shirts.length, shirtData);
 
 	socket.on("cShirt", (id) => {
-		player.account.shirt = shirtData[id - 1];
+		player.account.shirt = shirts[id - 1];
 	});
 
 	socket.on("cSrv", (data) => {

@@ -524,6 +524,7 @@ export const hats = [
 		desc: "The superior version",
 		chance: 0,
 		creator: "Unknown",
+		hide: true,
 	},
 	{
 		id: 76,
@@ -531,6 +532,7 @@ export const hats = [
 		desc: "Why so silly?",
 		chance: 0,
 		creator: "Unknown",
+		hide: true,
 	},
 	{
 		id: 77,
@@ -538,6 +540,7 @@ export const hats = [
 		desc: "Hate that movie",
 		chance: 0,
 		creator: "Unknown",
+		hide: true,
 	},
 	{
 		id: 78,
@@ -545,6 +548,7 @@ export const hats = [
 		desc: "maybe?",
 		chance: 0,
 		creator: "Unknown",
+		hide: true,
 	},
 	{
 		id: 79,
@@ -573,6 +577,7 @@ export const hats = [
 		desc: "You dispense things",
 		chance: 0,
 		creator: "Unknown",
+		hide: true,
 	},
 	{
 		id: 83,
@@ -609,6 +614,7 @@ export const hats = [
 		desc: "Horrors within comprehesnion",
 		chance: 0,
 		creator: "Unknown",
+		hide: true,
 	},
 	{
 		id: 88,
@@ -1102,6 +1108,7 @@ export const camos = [
 		id: 42,
 		name: "Ducks",
 		chance: 0,
+		hide: true,
 	},
 	{
 		id: 43,
@@ -1527,6 +1534,7 @@ export const camos = [
 		id: 127,
 		name: "Unknown",
 		chance: 0,
+		hide: true,
 	},
 	{
 		id: 128,
@@ -1608,6 +1616,7 @@ export const shirts = [
 		name: "Bones",
 		chance: 30,
 		desc: "Are you going trick or treating?",
+		hide: true,
 	},
 	{
 		id: 9,
