@@ -81,16 +81,18 @@ io.on("connection", (socket: Socket) => {
 	});
 
 	const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
-	const hatData = hats.map((h) => ({
-		id: h.id,
-		name: h.name,
-		desc: h.desc,
-		chance: h.chance,
-		count: 0,
-		creator: h.creator,
-		left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
-		up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
-	}));
+	const hatData = hats
+		.map((h) => ({
+			id: h.id,
+			name: h.name,
+			desc: h.desc,
+			chance: h.chance,
+			count: 0,
+			creator: h.creator,
+			left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
+			up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
+		}))
+		.toSorted((a, b) => a.id - b.id);
 	socket.emit("updHt", hats.length, hatData);
 
 	socket.on("cHat", (id) => {
