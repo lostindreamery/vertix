@@ -144,7 +144,6 @@ Array.from(document.getElementsByClassName("dropUpLink") as HTMLCollectionOf<HTM
 function clickDropUpLink(index: number) {
 	for (let i = 0; i < dropUpLinksCount; ++i) {
 		const tmpIndex = i + 1;
-		try {
 			if (tmpIndex === index && activeIndex !== index) {
 				activeIndex = index;
 				document.getElementById(`di${tmpIndex}`).style.opacity = "1";
@@ -154,7 +153,6 @@ function clickDropUpLink(index: number) {
 				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
 				if (tmpIndex === index) activeIndex = -1;
 			}
-		} catch (_) {}
 	}
 }
 
@@ -675,7 +673,9 @@ function saveKeysToCookie() {
 if (localStorage.getItem("customControls")) {
 	try {
 		keysList = JSON.parse(localStorage.getItem("customControls"));
-	} catch (_) {}
+	} catch (e) {
+		console.error("Error in parsing custom control setting", e);
+	}
 	if (keysList) {
 		updateKeysUI();
 	}
@@ -1662,7 +1662,6 @@ function showStatTable(
 			}
 		}
 	}
-	try {
 		document.getElementById("gameStatBoard").textContent = "";
 		addRowToStatTable(
 			[
@@ -1794,7 +1793,6 @@ function showStatTable(
 				}, 4500);
 			}
 		}
-	} catch (_) {}
 }
 function hideStatTable() {
 	showUI();
@@ -2409,7 +2407,6 @@ function sortUsersByPosition(a: (typeof gameObjects)[number], b: (typeof gameObj
 	}
 }
 function updateLeaderboard(data: number[]) {
-	try {
 		let test: Node[] = [];
 		test.push(<span class="title">LEADERBOARD</span>);
 
@@ -2436,12 +2433,6 @@ function updateLeaderboard(data: number[]) {
 			}
 		}
 		document.getElementById("status").replaceChildren(...test);
-	} catch (err) {
-		// "throw it all in a try-catch, that'll fix it"
-		// - Sidney, probably
-		// I wonder what error was coming up here
-		console.error(err);
-	}
 }
 function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var redProgress = document.getElementById("redProgress");
@@ -2449,7 +2440,6 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var blueProgress = document.getElementById("blueProgress");
 	var redProgCont = document.getElementById("redProgCont");
 	if (!gameMode) return;
-	try {
 		if (gameMode.teams) {
 			blueText.textContent = "A";
 			redProgCont.style.display = "";
@@ -2470,10 +2460,6 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 			blueProgress.style.width = `${scoreBlue}%`;
 			blueText.textContent = "YOU";
 			redProgCont.style.display = "none";
-		}
-	} catch (err) {
-		// "throw it all in a try-catch, that'll fix it" pt 2
-		console.error(err);
 	}
 }
 function showUI() {
