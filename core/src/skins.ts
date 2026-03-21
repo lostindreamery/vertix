@@ -864,789 +864,658 @@ export const hats = [
 
 export const camos = [
   {
-    id: 0,
+    id: 35,
     name: "Apples",
     chance: 0.1,
-    desc: "Grenade Launcher weapon skin."
   },
   {
     id: 1,
     name: "Art of War",
     chance: 1,
-    desc: "Minigun weapon skin."
   },
   {
-    id: 2,
+    id: 38,
     name: "Chess",
     chance: 0.1,
-    desc: "Machine Pistol weapon skin."
+  },
+  {
+    id: 12,
+    name: "Gold",
+    chance: 1,
+  },
+  {
+    id: 30,
+    name: "Torn",
+    chance: 0.1,
   },
   {
     id: 3,
-    name: "Gold",
-    chance: 1,
-    desc: "Machine Gun weapon skin."
+    name: "Blitz",
+    chance: 4,
   },
   {
     id: 4,
-    name: "Torn",
-    chance: 0.1,
-    desc: "Shotgun weapon skin."
-  },
-  {
-    id: 5,
-    name: "Blitz",
-    chance: 4,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 6,
     name: "Bloodshot",
     chance: 6,
-    desc: "Minigun weapon skin."
   },
   {
     id: 7,
     name: "Circuit",
     chance: 4,
-    desc: "Flamethrower weapon skin."
   },
   {
-  	id: 8,
+  	id: 10,
    	name: "DNA",
     chance: 5,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 9,
-    name: "Glow",
-    chance: 6,
-    desc: "Machine Pistol weapon skin."
-  },
-  {
-    id: 10,
-    name: "Intensity",
-    chance: 5,
-    desc: "Sniper weapon skin."
   },
   {
     id: 11,
-    name: "Lightning",
-    chance: 3,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 12,
-    name: "X-Ray",
-    chance: 5,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 13,
-    name: "Adaptive",
-    chance: 9,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 14,
-    name: "Breach",
-    chance: 9,
-    desc: "Flamethrower weapon skin."
-  },
-  {
-    id: 15,
-    name: "Carbon",
-    chance: 10,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 16,
-    name: "Caustic",
-    chance: 8,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 17,
-    name: "Champion",
-    chance: 9,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 18,
-    name: "Christmas",
-    chance: 9,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 19,
-    name: "Faded",
-    chance: 10,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 20,
-    name: "Flute",
-    chance: 10,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 21,
-    name: "Hydro",
-    chance: 10,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 22,
-    name: "Ice",
-    chance: 9,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 23,
-    name: "Lava",
-    chance: 7,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 24,
-    name: "Monster",
-    chance: 10,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 25,
-    name: "Neon",
-    chance: 15,
-    desc: "Machine Pistol weapon skin."
-  },
-  {
-    id: 26,
-    name: "Pleck",
-    chance: 10,
-    desc: "Shotgun weapon skin."
-  },
-  {
-    id: 27,
-    name: "Ultra",
-    chance: 10,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 28,
-    name: "Autumn",
-    chance: 25,
-    desc: "Rocket Launcher weapon skin."
-  },
-  {
-    id: 29,
-    name: "Blingeringo",
-    chance: 30,
-    desc: "Rocket Launcher weapon skin."
-  },
-  {
-    id: 30,
-    name: "Digital",
-    chance: 40,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 31,
-    name: "Dragon",
-    chance: 40,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 32,
-    name: "Drift",
-    chance: 40,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 33,
-    name: "Execution",
-    chance: 40,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 34,
-    name: "Fries",
-    chance: 40,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 35,
-    name: "Rainbow",
-    chance: 40,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 36,
-    name: "Stingray",
-    chance: 25,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 37,
-    name: "Skulls",
-    chance: 22,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 38,
-    name: "Abstract",
-    chance: 80,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 39,
-    name: "Aqua",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 40,
-    name: "Avatar",
-    chance: 50,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 41,
-    name: "Bacon",
-    chance: 100,
-    desc: "Shotgun weapon skin."
-  },
-  {
-    id: 42,
-    name: "Baning",
-    chance: 100,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 43,
-    name: "Barb Wire",
-    chance: 100,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 44,
-    name: "Battle Camo",
-    chance: 100,
-    desc: "Flamethrower weapon skin."
+    name: "Glow",
+    chance: 6,
   },
   {
     id: 45,
-    name: "Beam",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
+    name: "Intensity",
+    chance: 5,
   },
   {
-    id: 46,
-    name: "Betting",
-    chance: 100,
-    desc: "Sniper weapon skin."
+    id: 17,
+    name: "Lightning",
+    chance: 3,
   },
   {
-    id: 47,
-    name: "Black Ops",
-    chance: 60,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 48,
-    name: "Blanket",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 49,
-    name: "Brace",
-    chance: 100,
-    desc: "Flamethrower weapon skin."
-  },
-  {
-    id: 50,
-    name: "Brick",
-    chance: 100,
-    desc: "Machine Pistol weapon skin."
+    id: 33,
+    name: "X-Ray",
+    chance: 5,
   },
   {
     id: 51,
-    name: "Bulletz",
-    chance: 100,
-    desc: "Machine Gun weapon skin."
+    name: "Adaptive",
+    chance: 9,
   },
   {
-    id: 52,
-    name: "Busters",
-    chance: 100,
-    desc: "Rocket Launcher weapon skin."
+    id: 36,
+    name: "Breach",
+    chance: 9,
   },
   {
-    id: 53,
-    name: "Caliber",
-    chance: 100,
-    desc: "Shotgun weapon skin."
+    id: 5,
+    name: "Carbon",
+    chance: 10,
   },
   {
-    id: 54,
-    name: "Cash Money",
-    chance: 100,
-    desc: "Shotgun weapon skin."
-  },
-  {
-    id: 55,
-    name: "Castle",
-    chance: 100,
-    desc: "Flamethrower weapon skin."
-  },
-  {
-    id: 56,
-    name: "Chain",
-    chance: 60,
-    desc: "Rocket Launcher weapon skin."
-  },
-  {
-    id: 57,
-    name: "Coutch",
-    chance: 100,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 58,
-    name: "Crimson",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 59,
-    name: "Crumble",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 60,
-    name: "Curl",
-    chance: 100,
-    desc: "Machine Gun weapon skin."
-  },
-  {
-    id: 61,
-    name: "Dash",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
+    id: 6,
+    name: "Caustic",
+    chance: 8,
   },
   {
     id: 62,
-    name: "Daybreak",
-    chance: 100,
-    desc: "Desert Eagle weapon skin."
+    name: "Champion",
+    chance: 9,
   },
   {
-    id: 63,
-    name: "Desert",
-    chance: 80,
-    desc: "Toy Blaster weapon skin."
+    id: 39,
+    name: "Christmas",
+    chance: 9,
+  },
+  {
+    id: 133,
+    name: "Faded",
+    chance: 10,
+  },
+  {
+    id: 131,
+    name: "Flute",
+    chance: 10,
+  },
+  {
+    id: 103,
+    name: "Hydro",
+    chance: 10,
+  },
+  {
+    id: 13,
+    name: "Ice",
+    chance: 9,
+  },
+  {
+    id: 15,
+    name: "Lava",
+    chance: 7,
+  },
+  {
+    id: 18,
+    name: "Monster",
+    chance: 10,
+  },
+  {
+    id: 52,
+    name: "Neon",
+    chance: 15,
+  },
+  {
+    id: 132,
+    name: "Pleck",
+    chance: 10,
+  },
+  {
+    id: 129,
+    name: "Ultra",
+    chance: 10,
+  },
+  {
+    id: 2,
+    name: "Autumn",
+    chance: 25,
+  },
+  {
+    id: 59,
+    name: "Blingeringo",
+    chance: 30,
+  },
+  {
+    id: 9,
+    name: "Digital",
+    chance: 40,
   },
   {
     id: 64,
+    name: "Dragon",
+    chance: 40,
+  },
+  {
+    id: 41,
+    name: "Drift",
+    chance: 40,
+  },
+  {
+    id: 95,
+    name: "Execution",
+    chance: 40,
+  },
+  {
+    id: 98,
+    name: "Fries",
+    chance: 40,
+  },
+  {
+    id: 23,
+    name: "Rainbow",
+    chance: 40,
+  },
+  {
+    id: 29,
+    name: "Stingray",
+    chance: 25,
+  },
+  {
+    id: 74,
+    name: "Skulls",
+    chance: 22,
+  },
+  {
+    id: 80,
+    name: "Abstract",
+    chance: 80,
+  },
+  {
+    id: 55,
+    name: "Aqua",
+    chance: 100,
+  },
+  {
+    id: 81,
+    name: "Avatar",
+    chance: 50,
+  },
+  {
+    id: 56,
+    name: "Bacon",
+    chance: 100,
+  },
+  {
+    id: 82,
+    name: "Baning",
+    chance: 100,
+  },
+  {
+    id: 57,
+    name: "Barb Wire",
+    chance: 100,
+  },
+  {
+    id: 58,
+    name: "Battle Camo",
+    chance: 100,
+  },
+  {
+    id: 83,
+    name: "Beam",
+    chance: 100,
+  },
+  {
+    id: 84,
+    name: "Betting",
+    chance: 100,
+  },
+  {
+    id: 34,
+    name: "Black Ops",
+    chance: 60,
+  },
+  {
+    id: 85,
+    name: "Blanket",
+    chance: 100,
+  },
+  {
+    id: 86,
+    name: "Brace",
+    chance: 100,
+  },
+  {
+    id: 60,
+    name: "Brick",
+    chance: 100,
+  },
+  {
+    id: 87,
+    name: "Bulletz",
+    chance: 100,
+  },
+  {
+    id: 89,
+    name: "Busters",
+    chance: 100,
+  },
+  {
+    id: 61,
+    name: "Caliber",
+    chance: 100,
+  },
+  {
+    id: 46,
+    name: "Cash Money",
+    chance: 100,
+  },
+  {
+    id: 128,
+    name: "Castle",
+    chance: 100,
+  },
+  {
+    id: 37,
+    name: "Chain",
+    chance: 60,
+  },
+  {
+    id: 90,
+    name: "Coutch",
+    chance: 100,
+  },
+  {
+    id: 91,
+    name: "Crimson",
+    chance: 100,
+  },
+  {
+    id: 92,
+    name: "Crumble",
+    chance: 100,
+  },
+  {
+    id: 63,
+    name: "Curl",
+    chance: 100,
+  },
+  {
+    id: 93,
+    name: "Dash",
+    chance: 100,
+  },
+  {
+    id: 94,
+    name: "Daybreak",
+    chance: 100,
+  },
+  {
+    id: 8,
+    name: "Desert",
+    chance: 80,
+  },
+  {
+    id: 53,
     name: "Dirt",
     chance: 100,
-    desc: "Machine Gun weapon skin."
   },
   {
     id: 65,
     name: "Dust",
     chance: 100,
-    desc: "Flamethrower weapon skin."
   },
   {
     id: 66,
     name: "Eclipse",
     chance: 100,
-    desc: "Rocket Launcher weapon skin."
   },
   {
     id: 67,
     name: "Emerald",
     chance: 80,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 68,
-    name: "Finding",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 69,
-    name: "Flank",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 70,
-    name: "Flat",
-    chance: 100,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 71,
-    name: "Flopper",
-    chance: 100,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 72,
-    name: "Fright",
-    chance: 100,
-    desc: "Shotgun weapon skin."
-  },
-  {
-    id: 73,
-    name: "Future",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 74,
-    name: "Go",
-    chance: 100,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 75,
-    name: "Hazmat",
-    chance: 100,
-    desc: "Flamethrower weapon skin."
-  },
-  {
-    id: 76,
-    name: "Herb",
-    chance: 100,
-    desc: "Machine Pistol weapon skin."
-  },
-  {
-    id: 77,
-    name: "Herringbone",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 78,
-    name: "Inferno",
-    chance: 90,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 79,
-    name: "Insane",
-    chance: 100,
-    desc: "Desert Eagle weapon skin."
-  },
-  {
-    id: 80,
-    name: "Joker",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 81,
-    name: "Jungle",
-    chance: 100,
-    desc: "Machine Pistol weapon skin."
-  },
-  {
-    id: 82,
-    name: "Kite",
-    chance: 100,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 83,
-    name: "Leopard",
-    chance: 100,
-    desc: "Rocket Launcher weapon skin."
-  },
-  {
-    id: 84,
-    name: "Lore",
-    chance: 100,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 85,
-    name: "Mime",
-    chance: 100,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 86,
-    name: "Missing",
-    chance: 100,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 87,
-    name: "Moonshine",
-    chance: 100,
-    desc: "Shotgun weapon skin."
-  },
-  {
-    id: 88,
-    name: "Navy",
-    chance: 100,
-    desc: "Minigun weapon skin."
-  },
-  {
-    id: 89,
-    name: "Neon",
-    chance: 100,
-    desc: "Grenade Launcher weapon skin."
-  },
-  {
-    id: 90,
-    name: "Net",
-    chance: 100,
-    desc: "Rocket Launcher weapon skin."
-  },
-  {
-    id: 91,
-    name: "Octopus",
-    chance: 100,
-    desc: "Rocket Launcher weapon skin."
-  },
-  {
-    id: 92,
-    name: "Panther",
-    chance: 90,
-    desc: "Machine Pistol weapon skin."
-  },
-  {
-    id: 93,
-    name: "Paradox",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 94,
-    name: "Pede",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 95,
-    name: "Piano",
-    chance: 100,
-    desc: "Shotgun weapon skin."
   },
   {
     id: 96,
-    name: "Pika",
+    name: "Finding",
     chance: 100,
-    desc: "Desert Eagle weapon skin."
+  },
+  {
+    id: 43,
+    name: "Flank",
+    chance: 100,
   },
   {
     id: 97,
-    name: "Poison",
+    name: "Flat",
     chance: 100,
-    desc: "Flamethrower weapon skin."
   },
   {
-    id: 98,
-    name: "Police",
+    id: 68,
+    name: "Flopper",
     chance: 100,
-    desc: "Shotgun weapon skin."
   },
   {
     id: 99,
-    name: "Pop",
-    chance: 90,
-    desc: "Minigun weapon skin."
+    name: "Fright",
+    chance: 100,
   },
   {
     id: 100,
-    name: "Portal",
+    name: "Future",
     chance: 100,
-    desc: "Machine Pistol weapon skin."
   },
   {
     id: 101,
-    name: "Present",
+    name: "Go",
     chance: 100,
-    desc: "Grenade Launcher weapon skin."
+  },
+  {
+    id: 44,
+    name: "Hazmat",
+    chance: 100,
+  },
+  {
+    id: 77,
+    name: "Herb",
+    chance: 100,
   },
   {
     id: 102,
-    name: "Rainen",
+    name: "Herringbone",
     chance: 100,
-    desc: "Flamethrower weapon skin."
   },
   {
-    id: 103,
-    name: "Redstone",
-    chance: 100,
-    desc: "Machine Gun weapon skin."
+    id: 14,
+    name: "Inferno",
+    chance: 90,
   },
   {
     id: 104,
-    name: "Robbing",
+    name: "Insane",
     chance: 100,
-    desc: "Desert Eagle weapon skin."
+  },
+  {
+    id: 78,
+    name: "Joker",
+    chance: 100,
+  },
+  {
+    id: 79,
+    name: "Jungle",
+    chance: 100,
   },
   {
     id: 105,
-    name: "Rogue",
-    chance: 60,
-    desc: "Machine Pistol weapon skin."
+    name: "Kite",
+    chance: 100,
+  },
+  {
+    id: 16,
+    name: "Leopard",
+    chance: 100,
   },
   {
     id: 106,
-    name: "Roulette",
+    name: "Lore",
     chance: 100,
-    desc: "Shotgun weapon skin."
   },
   {
     id: 107,
-    name: "Rust",
-    chance: 80,
-    desc: "Rocket Launcher weapon skin."
+    name: "Mime",
+    chance: 100,
+  },
+  {
+    id: 69,
+    name: "Missing",
+    chance: 100,
+  },
+  {
+    id: 19,
+    name: "Moonshine",
+    chance: 100,
+  },
+  {
+    id: 20,
+    name: "Navy",
+    chance: 100,
   },
   {
     id: 108,
-    name: "Scale",
-    chance: 80,
-    desc: "Toy Blaster weapon skin."
+    name: "Neon",
+    chance: 100,
+  },
+  {
+    id: 21,
+    name: "Net",
+    chance: 100,
+  },
+  {
+    id: 70,
+    name: "Octopus",
+    chance: 100,
+  },
+  {
+    id: 22,
+    name: "Panther",
+    chance: 90,
+  },
+  {
+    id: 71,
+    name: "Paradox",
+    chance: 100,
   },
   {
     id: 109,
-    name: "Shark",
+    name: "Pede",
     chance: 100,
-    desc: "Flamethrower weapon skin."
+  },
+  {
+    id: 72,
+    name: "Piano",
+    chance: 100,
   },
   {
     id: 110,
-    name: "Slob",
+    name: "Pika",
     chance: 100,
-    desc: "Grenade Launcher weapon skin."
   },
   {
     id: 111,
-    name: "Snow",
+    name: "Poison",
     chance: 100,
-    desc: "Shotgun weapon skin."
+  },
+  {
+    id: 47,
+    name: "Police",
+    chance: 100,
+  },
+  {
+    id: 48,
+    name: "Pop",
+    chance: 90,
+  },
+  {
+    id: 73,
+    name: "Portal",
+    chance: 100,
   },
   {
     id: 112,
-    name: "Spank",
+    name: "Present",
     chance: 100,
-    desc: "Machine Gun weapon skin."
   },
   {
     id: 113,
-    name: "Spek",
+    name: "Rainen",
     chance: 100,
-    desc: "Sniper weapon skin."
   },
   {
     id: 114,
-    name: "Spike",
+    name: "Redstone",
     chance: 100,
-    desc: "Desert Eagle weapon skin."
   },
   {
     id: 115,
-    name: "Splat",
+    name: "Robbing",
     chance: 100,
-    desc: "Desert Eagle weapon skin."
+  },
+  {
+    id: 24,
+    name: "Rogue",
+    chance: 60,
   },
   {
     id: 116,
-    name: "Splinter",
-    chance: 70,
-    desc: "Shotgun weapon skin."
+    name: "Roulette",
+    chance: 100,
+  },
+  {
+    id: 25,
+    name: "Rust",
+    chance: 80,
+  },
+  {
+    id: 26,
+    name: "Scale",
+    chance: 80,
   },
   {
     id: 117,
-    name: "Stuck",
+    name: "Shark",
     chance: 100,
-    desc: "Machine Gun weapon skin."
   },
   {
     id: 118,
-    name: "Stunning",
+    name: "Slob",
     chance: 100,
-    desc: "Machine Pistol weapon skin."
+  },
+  {
+    id: 27,
+    name: "Snow",
+    chance: 100,
   },
   {
     id: 119,
-    name: "Swiss",
+    name: "Spank",
     chance: 100,
-    desc: "Toy Blaster weapon skin."
   },
   {
     id: 120,
-    name: "Takenout",
+    name: "Spek",
     chance: 100,
-    desc: "Desert Eagle weapon skin."
   },
   {
     id: 121,
-    name: "Tarment",
+    name: "Spike",
     chance: 100,
-    desc: "Machine Pistol weapon skin."
   },
   {
     id: 122,
-    name: "Taxi",
+    name: "Splat",
     chance: 100,
-    desc: "Minigun weapon skin."
+  },
+  {
+    id: 28,
+    name: "Splinter",
+    chance: 70,
   },
   {
     id: 123,
-    name: "Tiger",
+    name: "Stuck",
     chance: 100,
-    desc: "Flamethrower weapon skin."
   },
   {
     id: 124,
-    name: "Track",
+    name: "Stunning",
     chance: 100,
-    desc: "Toy Blaster weapon skin."
   },
   {
     id: 125,
-    name: "Urban",
-    chance: 15,
-    desc: "Sniper weapon skin."
+    name: "Swiss",
+    chance: 100,
+  },
+  {
+    id: 75,
+    name: "Takenout",
+    chance: 100,
+  },
+  {
+    id: 125,
+    name: "Tarment",
+    chance: 100,
+  },
+  {
+    id: 49,
+    name: "Taxi",
+    chance: 100,
+  },
+  {
+    id: 50,
+    name: "Tiger",
+    chance: 100,
   },
   {
     id: 126,
+    name: "Track",
+    chance: 100,
+  },
+  {
+    id: 31,
+    name: "Urban",
+    chance: 15,
+  },
+  {
+    id: 76,
     name: "Versa",
     chance: 100,
-    desc: "Machine Gun weapon skin."
   },
   {
-    id: 127,
+    id: 54,
     name: "Webbing",
     chance: 100,
-    desc: "Sniper weapon skin."
-  },
-  {
-    id: 128,
-    name: "Wood",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
-  },
-  {
-    id: 129,
-    name: "Woodland",
-    chance: 100,
-    desc: "Toy Blaster weapon skin."
   },
   {
     id: 130,
+    name: "Wood",
+    chance: 100,
+  },
+  {
+    id: 32,
+    name: "Woodland",
+    chance: 100,
+  },
+  {
+    id: 40,
     name: "Zombie",
     chance: 100,
-    desc: "Toy Blaster weapon skin."
   }
 ];

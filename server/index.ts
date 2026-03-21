@@ -72,13 +72,12 @@ io.on("connection", (socket: Socket) => {
 					name: p.name,
 					chance: p.chance,
 					count: 0,
-					desc: p.desc,
 				}))
 				.toSorted((a, b) => a.id - b.id),
 		),
 	);
 	socket.on("cCamo", (data) => {
-		playerWeps[data.weaponID].camo = data.camoID;
+		playerWeps[data.weaponID].camo = data.camoID - 1;
 	});
 
 	const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
