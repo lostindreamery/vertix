@@ -1338,9 +1338,9 @@ function setupSocket(sock: Socket) {
 			gameHeight = gameMap.get().height;
 			mapTileScale = a.tileScale;
 			gameObjects = a.usersInRoom;
-			for (let d = 0; d < gameObjects.length; ++d) {
-				gameObjects[d].type = "player";
-			}
+			gameObjects.forEach((obj) => {
+				obj.type = "player";
+			});
 			gameMode = gameMap.get().gameMode;
 			if (a.you.team === "blue") {
 				document.getElementById("gameModeText").textContent = gameMode.desc2;
@@ -1348,15 +1348,14 @@ function setupSocket(sock: Socket) {
 				document.getElementById("gameModeText").textContent = gameMode.desc1;
 			}
 			currentLikeButton = null;
-			for (let d = 0; d < gameMap.get().clutter.length; ++d) {
-				const b = gameMap.get().clutter[d];
-				b.type = "clutter";
-				gameObjects.push(b);
+			for (const clt of gameMap.get().clutter) {
+				clt.type = "clutter";
+				gameObjects.push(clt);
 			}
 			setupMap(gameMap.get(), mapTileScale);
 			cachedMiniMap = null;
 			deactivateSprays();
-			for (let d = 0; d < 100; ++d) {
+			for (let i = 0; i < 100; i++) {
 				bullets.push(new Projectile());
 			}
 		}
@@ -1535,44 +1534,43 @@ function setupSocket(sock: Socket) {
 				gameMap.select("pickups").select(d).select("active").set(a.active);
 			}
 		} else {
-			for (e = 0; e < gameObjects.length; ++e) {
-				if (gameObjects[e].type == "clutter" && gameObjects[e].indx == d) {
+			for (const tmpObj of gameObjects) {
+				if (tmpObj.type === "clutter" && tmpObj.indx === d) {
 					if (a.active != undefined) {
-						gameObjects[e].active = a.active;
+						tmpObj.active = a.active;
 					}
 					if (a.x != undefined) {
-						gameObjects[e].x = a.x;
+						tmpObj.x = a.x;
 					}
 					if (a.y != undefined) {
-						gameObjects[e].y = a.y;
+						tmpObj.y = a.y;
 					}
 				}
 			}
 		}
 	});
 	sock.on("tprt", (a) => {
-		var b = findUserByIndex(a.indx);
-		if (b !== undefined) {
-			b.x = a.newX;
-			b.y = a.newY;
-			createSmokePuff(b.x, b.y, 5, false, 1);
-			if (a.indx === player.get().index) {
-				player.get().x = a.newX;
-				player.get().y = a.newY;
-				startBigAnimText(
-					"ZONE ENTERED",
-					`+${a.scor} POINTS`,
-					2000,
-					true,
-					"#ffffff",
-					"#5151d9",
-					true,
-					1.3,
-				);
-			} else {
-				createSmokePuff(a.oldX, a.oldY, 5, false, 1);
-				showNotification(`${b.name} scored`);
-			}
+		var user = findUserByIndex(a.indx);
+		if (!user) return;
+		user.x = a.newX;
+		user.y = a.newY;
+		createSmokePuff(user.x, user.y, 5, false, 1);
+		if (a.indx === player.get().index) {
+			player.get().x = a.newX;
+			player.get().y = a.newY;
+			startBigAnimText(
+				"ZONE ENTERED",
+				`+${a.scor} POINTS`,
+				2000,
+				true,
+				"#ffffff",
+				"#5151d9",
+				true,
+				1.3,
+			);
+		} else {
+			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
+			showNotification(`${user.name} scored`);
 		}
 	});
 	sock.on("5", (a) => {
@@ -1646,12 +1644,12 @@ function showStatTable(
 					modeVoteBtn.setAttribute("id", `votesText${i}`);
 					modeVoteBtn.textContent = `${modeVoteData[i].name}: ${modeVoteData[i].votes}`;
 					document.getElementById("voteModeContainer").appendChild(modeVoteBtn);
-					modeVoteBtn.onclick = ((a, d) => () => {
+					modeVoteBtn.onclick = () => {
 						mainCanvas.focus();
-						socket.emit("modeVote", a.indx);
+						socket.emit("modeVote", modeVoteData[i].indx);
 						for (let j = 0; j < modeVoteData.length; ++j) {
 							if (
-								d === j &&
+								i === j &&
 								document.getElementById(`votesText${j}`).className === "modeVoteButton"
 							) {
 								document.getElementById(`votesText${j}`).className = "modeVoteButtonA";
@@ -1659,7 +1657,7 @@ function showStatTable(
 								document.getElementById(`votesText${j}`).className = "modeVoteButton";
 							}
 						}
-					})(modeVoteData[i], i);
+					};
 				}
 			}
 		}
@@ -1711,73 +1709,67 @@ function showStatTable(
 			],
 			true,
 		);
-		for (let g = 0; g < userList.length; ++g) {
-			if (!userList[g].team) continue;
+		for (const user of userList) {
+			if (!user.team) continue;
 			addRowToStatTable(
 				[
 					{
-						text: userList[g].name,
+						text: user.name,
 						className: "contL",
-						canClick: userList[g].loggedIn,
+						canClick: user.loggedIn,
 						color:
-							userList[g].index === player.get().index
+							user.index === player.get().index
 								? "#fff"
-								: userList[g].team !== player.get().team
+								: user.team !== player.get().team
 									? "#d95151"
 									: "#5151d9",
 						id: null,
-						userInfo: findUserByIndex(userList[g].index),
+						userInfo: findUserByIndex(user.index),
 					},
 					{
-						text: userList[g].score || 0,
+						text: user.score || 0,
 						className: "contC",
 						color: "#fff",
 						id: null,
 					},
 					{
-						text: userList[g].kills || 0,
+						text: user.kills || 0,
 						className: "contC",
 						color: "#fff",
 						id: null,
 					},
 					{
-						text: userList[g].deaths || 0,
+						text: user.deaths || 0,
 						className: "contC",
 						color: "#fff",
 						id: null,
 					},
 					{
-						text: userList[g].totalDamage || 0,
+						text: user.totalDamage || 0,
 						className: "contC",
 						color: "#fff",
 						id: null,
 					},
 					{
-						text:
-							gameMode.code == "zmtch"
-								? userList[g].totalGoals || 0
-								: userList[g].totalHealing || 0,
+						text: gameMode.code == "zmtch" ? user.totalGoals || 0 : user.totalHealing || 0,
 						className: "contC",
 						color: "#fff",
 						id: null,
 					},
 					{
-						text: userList[g].lastItem != null ? userList[g].lastItem.name : "No Reward",
+						text: user.lastItem != null ? user.lastItem.name : "No Reward",
 						className: "rewardText",
-						color:
-							userList[g].lastItem != null
-								? getItemRarityColor(userList[g].lastItem.chance)
-								: "#fff",
+						color: user.lastItem != null ? getItemRarityColor(user.lastItem.chance) : "#fff",
 						id: null,
-						hoverInfo: userList[g].lastItem,
+						hoverInfo: user.lastItem,
 					},
 					{
-						text: userList[g].likes || 0,
+						text: user.likes || 0,
 						className: "contC",
 						color: "#fff",
-						pos: userList[g].index,
-						id: `likeStat${userList[g].index}`,
-						uID: userList[g].id,
+						pos: user.index,
+						id: `likeStat${user.index}`,
+						uID: user.id,
 					},
 				],
 				false,
@@ -2000,56 +1992,56 @@ function getItemRarityColor(chance: number) {
 	}
 }
 function updateUserValue(data: any) {
-	var b = false;
+	var updated = false;
 	const tmpUser = findUserByIndex(data.i);
-	if (tmpUser != null) {
-		if (data.s != undefined) {
-			tmpUser.score = data.s;
-			b = true;
-		}
-		if (data.sp != undefined) {
-			tmpUser.spawnProtection = data.sp;
-		}
-		if (data.wi != undefined && data.i != player.get().index) {
-			playerEquipWeapon(tmpUser, data.wi);
-		}
-		if (data.l != undefined) {
-			tmpUser.likes = data.l;
-			b = true;
-		}
-		if (data.dea != undefined) {
-			tmpUser.deaths = data.dea;
-			b = true;
-		}
-		if (data.kil != undefined) {
-			tmpUser.kills = data.kil;
-			b = true;
-		}
-		if (data.dmg != undefined) {
-			tmpUser.totalDamage = data.dmg;
-			b = true;
-		}
-		if (data.hea != undefined) {
-			tmpUser.totalHealing = data.hea;
-			b = true;
-		}
-		if (tmpUser.index == player.get().index) {
-			updatePlayerInfo(tmpUser);
-			updateUiStats(tmpUser);
-		}
-		if (b) {
-			if (gameOver.get()) {
-				if (data.l != undefined) {
-					document
-						.getElementById(`likeStat${tmpUser.index}`)
-						.replaceChildren(tmpUser.likes.toString());
-				}
-			} else {
-				showStatTable(getUsersList(), null, null, true, true, false);
-			}
-		}
-	} else {
+	if (!tmpUser) {
 		fetchUserWithIndex(data.i);
+		return;
+	}
+	if (data.s != undefined) {
+		tmpUser.score = data.s;
+		updated = true;
+	}
+	if (data.sp != undefined) {
+		tmpUser.spawnProtection = data.sp;
+	}
+	if (data.wi != undefined && data.i != player.get().index) {
+		playerEquipWeapon(tmpUser, data.wi);
+	}
+	if (data.l != undefined) {
+		tmpUser.likes = data.l;
+		updated = true;
+	}
+	if (data.dea != undefined) {
+		tmpUser.deaths = data.dea;
+		updated = true;
+	}
+	if (data.kil != undefined) {
+		tmpUser.kills = data.kil;
+		updated = true;
+	}
+	if (data.dmg != undefined) {
+		tmpUser.totalDamage = data.dmg;
+		updated = true;
+	}
+	if (data.hea != undefined) {
+		tmpUser.totalHealing = data.hea;
+		updated = true;
+	}
+	if (tmpUser.index == player.get().index) {
+		updatePlayerInfo(tmpUser);
+		updateUiStats(tmpUser);
+	}
+	if (updated) {
+		if (gameOver.get()) {
+			if (data.l != undefined) {
+				document
+					.getElementById(`likeStat${tmpUser.index}`)
+					.replaceChildren(tmpUser.likes.toString());
+			}
+		} else {
+			showStatTable(getUsersList(), null, null, true, true, false);
+		}
 	}
 }
 function fetchUserWithIndex(a: number) {
@@ -2385,12 +2377,7 @@ function changeSpray(dir: number, sprayId: number) {
 //@ts-ignore
 window.changeSpray = changeSpray;
 function findUserByIndex(index: number): Player {
-	for (let i = 0; i < gameObjects.length; ++i) {
-		if (gameObjects[i].index === index) {
-			return gameObjects[i];
-		}
-	}
-	return null;
+	return gameObjects.find((obj) => obj.index === index) ?? null;
 }
 function getUsersList(): Player[] {
 	return gameObjects.filter((obj) => obj.type === "player").sort(sortUsersByScore);
@@ -2893,21 +2880,20 @@ var pingGrow = 0.4;
 var cachedMiniMap: HTMLCanvasElement | null = null;
 function getCachedMiniMap() {
 	fillCounter++;
-	if (cachedMiniMap == null && gameMap.get() && gameMap.get().tiles.length > 0) {
+	if (cachedMiniMap == null && gameMap.get()?.tiles.length > 0) {
 		let baseCanvasElem = document.createElement("canvas");
 		let baseCtx = baseCanvasElem.getContext("2d");
 		baseCanvasElem.width = mapScale;
 		baseCanvasElem.height = mapScale;
 		baseCtx.fillStyle = "#fff";
-		for (let i = 0; i < gameMap.get().tiles.length; ++i) {
-			if (gameMap.get().tiles[i].wall) {
-				baseCtx.fillRect(
-					(gameMap.get().tiles[i].x / gameWidth) * mapScale,
-					(gameMap.get().tiles[i].y / gameHeight) * mapScale,
-					((mapTileScale * 1.08) / gameWidth) * mapScale,
-					((mapTileScale * 1.08) / gameWidth) * mapScale,
-				);
-			}
+		for (const tile of gameMap.get().tiles) {
+			if (!tile.wall) continue;
+			baseCtx.fillRect(
+				(tile.x / gameWidth) * mapScale,
+				(tile.y / gameHeight) * mapScale,
+				((mapTileScale * 1.08) / gameWidth) * mapScale,
+				((mapTileScale * 1.08) / gameWidth) * mapScale,
+			);
 		}
 		let finalCanvasElem = document.createElement("canvas");
 		let finalCtx = finalCanvasElem.getContext("2d");
@@ -2916,17 +2902,15 @@ function getCachedMiniMap() {
 		finalCtx.globalAlpha = 0.1;
 		finalCtx.drawImage(baseCanvasElem, 0, 0);
 		finalCtx.globalAlpha = 1;
-		for (let d = 0; d < gameMap.get().tiles.length; ++d) {
-			if (gameMap.get().tiles[d].hardPoint) {
-				finalCtx.fillStyle =
-					gameMap.get().tiles[d].objTeam === player.get().team ? "#5151d9" : "#d95151";
-				finalCtx.fillRect(
-					(gameMap.get().tiles[d].x / gameWidth) * mapScale,
-					(gameMap.get().tiles[d].y / gameHeight) * mapScale,
-					((mapTileScale * 1.08) / gameWidth) * mapScale,
-					((mapTileScale * 1.08) / gameWidth) * mapScale,
-				);
-			}
+		for (const tile of gameMap.get().tiles) {
+			if (!tile.hardPoint) continue;
+			finalCtx.fillStyle = tile.objTeam === player.get().team ? "#5151d9" : "#d95151";
+			finalCtx.fillRect(
+				(tile.x / gameWidth) * mapScale,
+				(tile.y / gameHeight) * mapScale,
+				((mapTileScale * 1.08) / gameWidth) * mapScale,
+				((mapTileScale * 1.08) / gameWidth) * mapScale,
+			);
 		}
 		cachedMiniMap = finalCanvasElem;
 	}
@@ -2962,25 +2946,24 @@ function drawMiniMap() {
 	}
 	if (!gameMap.get()) return;
 	mapContext.globalAlpha = 1;
-	for (let i = 0; i < gameMap.get().pickups.length; ++i) {
-		if (gameMap.get().pickups[i].active) {
-			if (gameMap.get().pickups[i].type === "lootcrate") {
-				mapContext.fillStyle = "#ffd100";
-			} else if (gameMap.get().pickups[i].type === "healthpack") {
-				mapContext.fillStyle = "#5ed951";
-			}
-			mapContext.beginPath();
-			mapContext.arc(
-				(gameMap.get().pickups[i].x / gameWidth) * mapScale,
-				(gameMap.get().pickups[i].y / gameHeight) * mapScale,
-				pingScale,
-				0,
-				Math.PI * 2,
-				true,
-			);
-			mapContext.closePath();
-			mapContext.fill();
+	for (const pickup of gameMap.get().pickups) {
+		if (!pickup.active) continue;
+		if (pickup.type === "lootcrate") {
+			mapContext.fillStyle = "#ffd100";
+		} else if (pickup.type === "healthpack") {
+			mapContext.fillStyle = "#5ed951";
 		}
+		mapContext.beginPath();
+		mapContext.arc(
+			(pickup.x / gameWidth) * mapScale,
+			(pickup.y / gameHeight) * mapScale,
+			pingScale,
+			0,
+			Math.PI * 2,
+			true,
+		);
+		mapContext.closePath();
+		mapContext.fill();
 	}
 }
 function calculateUIScale() {
@@ -3022,9 +3005,9 @@ function sendSpray() {
 	socket.emit("crtSpr");
 }
 function deactivateSprays() {
-	for (let i = 0; i < userSprays.length; ++i) {
-		userSprays[i].active = false;
-	}
+	userSprays.forEach((spray) => {
+		spray.active = false;
+	});
 }
 function cacheSpray(img: Sprite) {
 	const tmpIndex = img.src;
@@ -3351,10 +3334,10 @@ function pickedCharacter(classId: number) {
 	);
 	localStorage.setItem("previousClass", classId.toString());
 	if (loggedIn) {
-		for (let i = 0; i < characterClasses[classId].weaponIndexes.length; ++i) {
-			let skinPref = localStorage.getItem(`wpnSkn${characterClasses[classId].weaponIndexes[i]}`);
+		for (const wepIdx of characterClasses[classId].weaponIndexes) {
+			let skinPref = localStorage.getItem(`wpnSkn${wepIdx}`);
 			if (skinPref) {
-				changeCamo(characterClasses[classId].weaponIndexes[i], parseInt(skinPref), false);
+				changeCamo(wepIdx, parseInt(skinPref), false);
 			}
 		}
 		if (localStorage.getItem("previousHat")) {
@@ -3394,8 +3377,7 @@ function showWeaponSelector(wepType: 0 | 1) {
 		</div>,
 	);
 	if (/*loggedIn && */ camoDataList?.[classWeapon]) {
-		for (let i = 0; i < camoDataList[classWeapon].length; ++i) {
-			let camo = camoDataList[classWeapon][i];
+		for (const camo of camoDataList[classWeapon]) {
 			list.push(
 				<div
 					class="hatSelectItem"
@@ -3565,13 +3547,13 @@ function loadDefaultSprites(base: string) {
 	healthPackSprite = getSprite(`${base}healthpack`);
 	lootCrateSprite = getSprite(`${base}lootCrate1`);
 	weaponSpriteSheet = [];
-	for (let i = 0; i < weaponNames.length; ++i) {
+	for (const name of weaponNames) {
 		weaponSpriteSheet.push({
-			upSprite: getSprite(`${base}weapons/${weaponNames[i]}/up`),
-			downSprite: getSprite(`${base}weapons/${weaponNames[i]}/up`),
-			leftSprite: getSprite(`${base}weapons/${weaponNames[i]}/left`),
-			rightSprite: getSprite(`${base}weapons/${weaponNames[i]}/left`),
-			icon: getSprite(`${base}weapons/${weaponNames[i]}/icon`),
+			upSprite: getSprite(`${base}weapons/${name}/up`),
+			downSprite: getSprite(`${base}weapons/${name}/up`),
+			leftSprite: getSprite(`${base}weapons/${name}/left`),
+			rightSprite: getSprite(`${base}weapons/${name}/left`),
+			icon: getSprite(`${base}weapons/${name}/icon`),
 		});
 	}
 	bulletSprites.push(getSprite(`${base}weapons/bullet`));
