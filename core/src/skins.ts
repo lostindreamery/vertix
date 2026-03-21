@@ -78,8 +78,8 @@ export const hats = [
 	},
 	{
 		id: 12,
-		name: "Volume",
-		desc: "Drop the bass!",
+		name: "Teddy Hat",
+		desc: "No comment.",
 		chance: 5,
 		creator: "Unknown",
 	},
@@ -518,6 +518,34 @@ export const hats = [
 		creator: "Phazex",
 	},
 	{
+		id: 75,
+		name: "Voxelibre",
+		desc: "The superior version",
+		chance: 0,
+		creator: "Unknown",
+	},
+	{
+		id: 76,
+		name: "Jonkler",
+		desc: "Why so silly?",
+		chance: 0,
+		creator: "Unknown",
+	},
+	{
+		id: 77,
+		name: "Cats",
+		desc: "Hate that movie",
+		chance: 0,
+		creator: "Unknown",
+	},
+	{
+		id: 78,
+		name: "Crown of Legends ",
+		desc: "maybe?",
+		chance: 0,
+		creator: "Unknown",
+	},
+	{
 		id: 79,
 		name: "Brain",
 		desc: "It wont make you smarter. But you look great!",
@@ -536,6 +564,13 @@ export const hats = [
 		name: "Cupcake",
 		desc: "Delicious!",
 		chance: 100,
+		creator: "Unknown",
+	},
+	{
+		id: 82,
+		name: "Dispenser Hat",
+		desc: "You dispense things",
+		chance: 0,
 		creator: "Unknown",
 	},
 	{
@@ -564,6 +599,13 @@ export const hats = [
 		name: "Link",
 		desc: "Headwear of a True Hero!",
 		chance: 90,
+		creator: "Unknown",
+	},
+	{
+		id: 87,
+		name: "Wendigo",
+		desc: "Horrors within comprehesnion",
+		chance: 0,
 		creator: "Unknown",
 	},
 	{
@@ -833,6 +875,13 @@ export const hats = [
 		creator: "Unknown",
 	},
 	{
+		id: 126,
+		name: "Volume",
+		desc: "Drop the bass!",
+		chance: 5,
+		creator: "Unknown",
+	},
+	{
 		id: 127,
 		name: "Historic Artefact",
 		desc: "One of several artefacts that went missing during the 'Artefacts of History' exhibition.",
@@ -1046,6 +1095,11 @@ export const camos = [
 		id: 41,
 		name: "Drift",
 		chance: 40,
+	},
+	{
+		id: 42,
+		name: "Ducks",
+		chance: 0,
 	},
 	{
 		id: 43,
@@ -1466,6 +1520,11 @@ export const camos = [
 		id: 126,
 		name: "Track",
 		chance: 100,
+	},
+	{
+		id: 127,
+		name: "Unknown",
+		chance: 0,
 	},
 	{
 		id: 128,
