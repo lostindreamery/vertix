@@ -4,7 +4,7 @@ import { io, type Socket } from "socket.io-client";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
-import { appStore } from "./state.ts";
+import { st } from "./state.svelte.ts";
 import type {
 	Account,
 	GameMode,
@@ -47,7 +47,6 @@ var playerType: string | undefined;
 var playerNameInput = document.getElementById("playerNameInput") as HTMLInputElement;
 var socket: Socket | undefined;
 var reason: string | undefined;
-var mobile = appStore.select("mobile");
 var room: any;
 var currentFPS = 0;
 var fillCounter = 0;
@@ -63,7 +62,7 @@ var thisInput: InputSendData[] = [];
 var timeOfLastUpdate = 0;
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
-	mobile.set(true);
+	st.mobile = true;
 	hideMenuUI();
 	hideUI(true);
 	alert("tried to open google play");
@@ -73,13 +72,12 @@ var previousClass = 0;
 var previousHat = 0;
 var previousShirt = 0;
 var previousSpray = 0;
-var startingGame = appStore.select("startingGame");
 var changingLobby = false;
 var inMainMenu = true;
 var loggedIn = false;
 function startGame(plrType: string) {
-	if (!startingGame.get() && !changingLobby) {
-		startingGame.set(true);
+	if (!st.startingGame && !changingLobby) {
+		st.startingGame = true;
 		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 		enterGame(plrType);
 		if (inMainMenu) {
@@ -103,9 +101,6 @@ function enterGame(plrType: string) {
 	hideMenuUI();
 	animateOverlay = true;
 	updateGameLoop();
-}
-function validNick() {
-	return /^\w*$/.exec(playerNameInput.value) !== null;
 }
 var clanDBMessage = document.getElementById("clanDBMessage");
 var clanStats = document.getElementById("clanStats");
@@ -201,7 +196,7 @@ function clearCustomMap() {
 }
 
 window.onload = async () => {
-	if (mobile.get()) {
+	if (st.mobile) {
 		document.getElementById("loadText").textContent = "MOBILE VERSION COMING SOON";
 		return;
 	}
@@ -240,7 +235,7 @@ window.onload = async () => {
 			transports: ["websocket"],
 			forceNew: false,
 		});
-		appStore.select("socket").set(socket);
+		st.socket = socket;
 		setupSocket(socket);
 	}
 	socket.once("connect", () => {
@@ -385,7 +380,7 @@ window.onload = async () => {
 							socket.close();
 							changingLobby = false;
 							socket = s;
-							appStore.select("socket").set(s);
+							st.socket = s;
 							setupSocket(socket);
 						});
 						socket.disconnect();
@@ -409,7 +404,7 @@ var newUsernameInput = document.getElementById("newUsernameInput") as HTMLInputE
 var youtubeChannelInput = document.getElementById("youtubeChannelInput") as HTMLInputElement;
 var editProfileMessage = document.getElementById("editProfileMessage");
 function updateAccountPage(a: Account) {
-	player.get().account = a;
+	st.player.account = a;
 	document.getElementById("accStatRank").replaceChildren(
 		<>
 			<b>Rank: </b>
@@ -448,10 +443,10 @@ function updateAccountPage(a: Account) {
 		</>,
 	);
 	document.getElementById("profileButton").onclick = () => {
-		showUserStatPage(player.get().account.user_name);
+		showUserStatPage(st.player.account.user_name);
 	};
-	newUsernameInput.value = player.get().account.user_name;
-	youtubeChannelInput.value = player.get().account.channel;
+	newUsernameInput.value = st.player.account.user_name;
+	youtubeChannelInput.value = st.player.account.channel;
 	document.getElementById("saveAccountData").onclick = () => {
 		socket.emit("dbEditUser", {
 			userName: newUsernameInput.value,
@@ -521,22 +516,13 @@ var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
 var gameWidth = 0;
 var gameHeight = 0;
-var maxScreenWidth = appStore.select("maxScreenWidth");
-var maxScreenHeight = appStore.select("maxScreenHeight");
-var viewMult = appStore.select("viewMult");
 var uiScale = 1;
 calculateUIScale();
-var gameStart = appStore.select("gameStart");
-var gameOver = appStore.select("gameOver");
 var gameOverFade = false;
 var disconnected = false;
-var kicked = appStore.select("kicked");
 var textSizeMult = 0.55;
-var startX = appStore.select("startX");
-var startY = appStore.select("startY");
 var gameMode: GameMode = null;
 
-const player = appStore.select("player");
 var target = {
 	f: 0,
 	d: 0,
@@ -546,7 +532,6 @@ var gameObjects: any[] = []; // todo
 //@ts-ignore
 window.gameObjects = gameObjects;
 var bullets: Projectile[] = [];
-let gameMap = appStore.select("gameMap");
 
 var mapTileScale = 0;
 var leaderboard = [];
@@ -579,7 +564,7 @@ function focusGame() {
 function gameInput(event: MouseEvent) {
 	event.preventDefault();
 	event.stopPropagation();
-	var b = getCurrentWeapon(player.get())?.yOffset ?? 0;
+	var b = getCurrentWeapon(st.player)?.yOffset ?? 0;
 	let mouseX = event.clientX;
 	let mouseY = event.clientY;
 	lastAngle = target.f;
@@ -587,7 +572,7 @@ function gameInput(event: MouseEvent) {
 	target.d = Math.sqrt(
 		Math.pow(mouseY - (screenHeight / 2 - b / 2), 2) + Math.pow(mouseX - screenWidth / 2, 2),
 	);
-	target.d *= Math.min(maxScreenWidth.get() / screenWidth, maxScreenHeight.get() / screenHeight);
+	target.d *= Math.min(st.maxScreenWidth / screenWidth, st.maxScreenHeight / screenHeight);
 	target.f = Math.atan2(screenHeight / 2 - b / 2 - mouseY, screenWidth / 2 - mouseX);
 	target.f = utils.roundNumber(target.f, 2);
 	target.d = utils.roundNumber(target.d, 2);
@@ -713,7 +698,7 @@ function keyDown(event: KeyboardEvent) {
 	} else if (mainCanvas === document.activeElement) {
 		event.preventDefault();
 		keyMap[event.key.length === 1 ? event.key.toLowerCase() : event.key] = event.type === "keydown";
-		if (event.key === "Escape" && gameStart.get()) {
+		if (event.key === "Escape" && st.gameStart) {
 			showESCMenu();
 		}
 		if (keyMap[keysList.upKey] && !keys.u) {
@@ -747,10 +732,10 @@ function keyDown(event: KeyboardEvent) {
 		}
 		if (
 			!!keyMap[keysList.leaderboardKey] &&
-			!!gameStart.get() &&
+			!!st.gameStart &&
 			!showingScoreBoard &&
-			!player.get().dead &&
-			!gameOver.get()
+			!st.player.dead &&
+			!st.gameOver
 		) {
 			showingScoreBoard = true;
 			showStatTable(getUsersList(), null, null, true, true, true);
@@ -781,10 +766,10 @@ function keyUp(event: KeyboardEvent) {
 		keys.rl = false;
 	}
 	if (normalizedKey === keysList.incWeapKey) {
-		playerSwapWeapon(findUserByIndex(player.get().index), 1);
+		playerSwapWeapon(findUserByIndex(st.player.index), 1);
 	}
 	if (normalizedKey === keysList.decWeapKey) {
-		playerSwapWeapon(findUserByIndex(player.get().index), -1);
+		playerSwapWeapon(findUserByIndex(st.player.index), -1);
 	}
 	if (normalizedKey === keysList.sprayKey) {
 		sendSpray();
@@ -792,9 +777,9 @@ function keyUp(event: KeyboardEvent) {
 	if (
 		normalizedKey === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
-		!player.get().dead &&
-		!gameOver.get() &&
-		!gameOver.get()
+		!st.player.dead &&
+		!st.gameOver &&
+		!st.gameOver
 	) {
 		hideStatTable();
 	}
@@ -804,11 +789,11 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 	try {
 		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
-			if (tmpChatUser.index === player.get().index) return;
+			if (tmpChatUser.index === st.player.index) return;
 			chat.addChatLine(
 				tmpChatUser.name,
 				a[1],
-				tmpChatUser.index === player.get().index,
+				tmpChatUser.index === st.player.index,
 				tmpChatUser.team,
 			);
 		} else if (a[0] === -1) {
@@ -949,7 +934,7 @@ var showChat = (document.getElementById("showChat") as HTMLInputElement).checked
 document.getElementById("showChat").addEventListener("click", function (this: HTMLInputElement) {
 	showChat = this.checked;
 	if (showChat) {
-		if (gameStart.get()) {
+		if (st.gameStart) {
 			document.getElementById("chatbox").style.display = "block";
 		}
 	} else {
@@ -992,7 +977,7 @@ var showLeader = (document.getElementById("showLeader") as HTMLInputElement).che
 document.getElementById("showLeader").addEventListener("click", function (this: HTMLInputElement) {
 	showLeader = this.checked;
 	if (showLeader) {
-		if (gameStart.get()) {
+		if (st.gameStart) {
 			document.getElementById("status").style.display = "block";
 		}
 	} else {
@@ -1062,11 +1047,11 @@ function kickPlayer(secondReason: string) {
 	hideMenuUI();
 	document.getElementById("startMenuWrapper").style.display = "none";
 	disconnected = true;
-	gameOver.set(true);
+	st.gameOver = true;
 	if (reason === undefined) {
 		reason = secondReason;
 	}
-	kicked.set(true);
+	st.kicked = true;
 	socket.close();
 	updateGameLoop();
 	stopAllSounds();
@@ -1160,28 +1145,28 @@ function setupSocket(sock: Socket) {
 		console.error(`ERROR: ${errorMsg}`);
 	});
 	sock.on("welcome", (b, d) => {
-		player.get().id = b.id;
-		player.get().room = b.room;
-		room = player.get().room;
-		player.get().name = playerName;
-		player.get().classIndex = playerClassIndex;
-		b.name = player.get().name;
+		st.player.id = b.id;
+		st.player.room = b.room;
+		room = st.player.room;
+		st.player.name = playerName;
+		st.player.classIndex = playerClassIndex;
+		b.name = st.player.name;
 		b.classIndex = playerClassIndex;
 		sock.emit("gotit", b, d, Date.now(), false);
-		player.get().dead = true;
+		st.player.dead = true;
 		if (d) {
 			deactiveAllAnimTexts();
-			gameStart.set(false);
+			st.gameStart = false;
 			hideUI(false);
 			document.getElementById("startMenuWrapper").style.display = "block";
 		}
-		if (gameOver.get()) {
+		if (st.gameOver) {
 			document.getElementById("gameStatWrapper").style.display = "none";
 		}
-		gameOver.set(false);
+		st.gameOver = false;
 		gameOverFade = false;
 		targetChanged = true;
-		if (mobile.get()) {
+		if (st.mobile) {
 			hideMenuUI();
 			hideUI(true);
 			document.getElementById("startMenuWrapper").style.display = "none";
@@ -1212,8 +1197,8 @@ function setupSocket(sock: Socket) {
 			localStorage.setItem("logKey", a.logKey);
 			localStorage.setItem("userName", a.text);
 			loggedIn = true;
-			player.get().loggedIn = true;
-			const user = findUserByIndex(player.get().index);
+			st.player.loggedIn = true;
+			const user = findUserByIndex(st.player.index);
 			if (user) {
 				user.loggedIn = true;
 			}
@@ -1264,8 +1249,8 @@ function setupSocket(sock: Socket) {
 			clanSignUp.style.display = "none";
 			clanStats.style.display = "block";
 			clanHeader.textContent = `[${a}] Clan:`;
-			player.get().account.clan = a;
-			const user = findUserByIndex(player.get().index);
+			st.player.account.clan = a;
+			const user = findUserByIndex(st.player.index);
 			if (user) {
 				user.account.clan = a;
 			}
@@ -1309,7 +1294,7 @@ function setupSocket(sock: Socket) {
 	sock.on("dbChangeUserR", (a, d) => {
 		if (d) {
 			localStorage.setItem("userName", a);
-			player.get().account.user_name = a;
+			st.player.account.user_name = a;
 			editProfileMessage.textContent = "Success. Account Updated.";
 		} else {
 			editProfileMessage.textContent = a;
@@ -1324,27 +1309,27 @@ function setupSocket(sock: Socket) {
 	sock.on("gameSetup", (a, d, e) => {
 		a = JSON.parse(a);
 		if (d) {
-			gameMap.set(a.mapData);
-			gameMap.select("tiles").set([]);
-			gameWidth = gameMap.get().width;
-			gameHeight = gameMap.get().height;
+			st.gameMap = a.mapData;
+			st.gameMap.tiles = [];
+			gameWidth = st.gameMap.width;
+			gameHeight = st.gameMap.height;
 			mapTileScale = a.tileScale;
 			gameObjects = a.usersInRoom;
 			gameObjects.forEach((obj) => {
 				obj.type = "player";
 			});
-			gameMode = gameMap.get().gameMode;
+			gameMode = st.gameMap.gameMode;
 			if (a.you.team === "blue") {
 				document.getElementById("gameModeText").textContent = gameMode.desc2;
 			} else {
 				document.getElementById("gameModeText").textContent = gameMode.desc1;
 			}
 			currentLikeButton = null;
-			for (const clt of gameMap.get().clutter) {
+			for (const clt of st.gameMap.clutter) {
 				clt.type = "clutter";
 				gameObjects.push(clt);
 			}
-			setupMap(gameMap.get(), mapTileScale);
+			setupMap(st.gameMap, mapTileScale);
 			cachedMiniMap = null;
 			deactivateSprays();
 			for (let i = 0; i < 100; i++) {
@@ -1352,28 +1337,28 @@ function setupSocket(sock: Socket) {
 			}
 		}
 		if (e) {
-			gameStart.set(true);
+			st.gameStart = true;
 			showUI();
 			document.getElementById("cvs").focus();
 		}
 		keys.lm = false;
-		maxScreenHeight.set(a.maxScreenHeight * a.viewMult);
-		maxScreenWidth.set(a.maxScreenWidth * a.viewMult);
-		viewMult.set(a.viewMult);
+		st.maxScreenHeight = a.maxScreenHeight * a.viewMult;
+		st.maxScreenWidth = a.maxScreenWidth * a.viewMult;
+		st.viewMult = a.viewMult;
 		a.you.type = "player";
-		player.set(a.you);
+		st.player = a.you;
 		e = findUserByIndex(a.you.index);
 		if (e != null) {
 			gameObjects[gameObjects.indexOf(e)] = a.you;
 		} else {
 			gameObjects.push(a.you);
 		}
-		updateWeaponUI(player.get(), true);
+		updateWeaponUI(st.player, true);
 		if (inMainMenu) {
 			$("#loadingWrapper").fadeOut(0, () => {});
 			inMainMenu = false;
 		}
-		startingGame.set(false);
+		st.startingGame = false;
 		resize();
 	});
 	sock.on("lb", updateLeaderboard);
@@ -1396,14 +1381,14 @@ function setupSocket(sock: Socket) {
 		var b = findUserByIndex(a.gID);
 		var e = Math.abs(a.amount);
 		if (
-			(a.dID != player.get().index || a.gID == player.get().index) &&
+			(a.dID != st.player.index || a.gID == st.player.index) &&
 			a.amount <= 0 &&
-			a.gID == player.get().index &&
+			a.gID == st.player.index &&
 			e != 0
 		) {
 			screenShake(e / 2, a.dir);
 		}
-		if (a.dID != null && a.dID == player.get().index && b != null && e > 0 && b.onScreen) {
+		if (a.dID != null && a.dID == st.player.index && b != null && e > 0 && b.onScreen) {
 			if (a.amount < 0) {
 				startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#d95151", e / 10);
 			} else {
@@ -1412,7 +1397,7 @@ function setupSocket(sock: Socket) {
 		}
 		if (a.bi != null) {
 			let svb = findServerBullet(a.bi);
-			if (svb?.owner.index !== player.get().index) {
+			if (svb?.owner.index !== st.player.index) {
 				if (b.onScreen && a.amount < 0) {
 					particleCone(
 						12,
@@ -1432,7 +1417,7 @@ function setupSocket(sock: Socket) {
 		}
 		if (b != null) {
 			b.health = a.h;
-			if (b.index == player.get().index) {
+			if (b.index == st.player.index) {
 				updatePlayerInfo(b);
 				updateUiStats(b);
 			}
@@ -1442,7 +1427,7 @@ function setupSocket(sock: Socket) {
 	sock.on("jum", otherJump);
 	sock.on("ex", createExplosion);
 	sock.on("r", (a) => {
-		var b = findUserByIndex(player.get().index);
+		var b = findUserByIndex(st.player.index);
 		if (b != null) {
 			/*
       if (b.weapons[a].ammo == b.weapons[a].maxAmmo) {
@@ -1459,8 +1444,8 @@ function setupSocket(sock: Socket) {
 		var destPlayer = findUserByIndex(event.gID);
 		var sourcePlayer = findUserByIndex(event.dID);
 		destPlayer.dead = true;
-		if (event.kB && event.gID !== player.get().index) {
-			if (event.dID === player.get().index) {
+		if (event.kB && event.gID !== st.player.index) {
+			if (event.dID === st.player.index) {
 				startBigAnimText(
 					"BOSS SLAIN",
 					`${event.sS} POINTS`,
@@ -1474,7 +1459,7 @@ function setupSocket(sock: Socket) {
 			} else {
 				showNotification(`${sourcePlayer.name} slayed the boss`);
 			}
-		} else if (event.dID === player.get().index && event.gID !== player.get().index) {
+		} else if (event.dID === st.player.index && event.gID !== st.player.index) {
 			playSound("kill1", sourcePlayer.x, sourcePlayer.y);
 			let killMsg = "";
 			if (destPlayer.team != sourcePlayer.team) {
@@ -1504,26 +1489,25 @@ function setupSocket(sock: Socket) {
 			}
 			startBigAnimText(killMsg, `${event.sS} POINTS`, 2000, true, "#ffffff", "#5151d9", true, 1.25);
 		}
-		if (event.gID === player.get().index) {
+		if (event.gID === st.player.index) {
 			hideStatTable();
-			gameStart.set(false);
+			st.gameStart = false;
 			hideUI(false);
-			player.get().dead = true;
+			st.player.dead = true;
 			window.setTimeout(() => {
-				if (!gameOver.get()) {
+				if (!st.gameOver) {
 					document.getElementById("startMenuWrapper").style.display = "block";
 					document.getElementById("linkBox").style.display = "block";
 				}
 			}, 1300);
-			playSound("death1", player.get().x, player.get().y);
+			playSound("death1", st.player.x, st.player.y);
 			startSoundTrack(1);
 		}
 	});
 	sock.on("4", (a, d, e) => {
 		if (e == 0) {
-			if (gameMap.get() != null && a.active != undefined) {
-				// typing thing?
-				gameMap.select("pickups").select(d).select("active").set(a.active);
+			if (st.gameMap != null && a.active != undefined) {
+				st.gameMap.pickups[d].active = a.active;
 			}
 		} else {
 			for (const tmpObj of gameObjects) {
@@ -1547,9 +1531,9 @@ function setupSocket(sock: Socket) {
 		user.x = a.newX;
 		user.y = a.newY;
 		createSmokePuff(user.x, user.y, 5, false, 1);
-		if (a.indx === player.get().index) {
-			player.get().x = a.newX;
-			player.get().y = a.newY;
+		if (a.indx === st.player.index) {
+			st.player.x = a.newX;
+			st.player.y = a.newY;
 			startBigAnimText(
 				"ZONE ENTERED",
 				`+${a.scor} POINTS`,
@@ -1569,13 +1553,13 @@ function setupSocket(sock: Socket) {
 		showNotification(a);
 	});
 	sock.on("6", (a, d, e) => {
-		if (!player.get().dead) {
+		if (!st.player.dead) {
 			startBigAnimText(a, d, 2000, true, "#ffffff", "#5151d9", true, e);
 		}
 	});
 	sock.on("7", (winner, userList, modeVoteData, isFading) => {
 		try {
-			gameOver.set(true);
+			st.gameOver = true;
 			document.getElementById("startMenuWrapper").style.display = "none";
 			showStatTable(userList, modeVoteData, winner, false, isFading, true);
 			startSoundTrack(1);
@@ -1595,7 +1579,7 @@ function updateVoteStats(a: any) {
 }
 function showESCMenu() {
 	deactiveAllAnimTexts();
-	gameStart.set(false);
+	st.gameStart = false;
 	hideUI(false);
 	document.getElementById("startMenuWrapper").style.display = "block";
 }
@@ -1616,13 +1600,13 @@ function showStatTable(
 			document.getElementById("winningTeamText").textContent = "";
 			document.getElementById("voteModeContainer").textContent = "";
 		} else {
-			let isWinner = player.get().team === winner || player.get().id === winner;
+			let isWinner = st.player.team === winner || st.player.id === winner;
 			if (!isFading) {
 				if (isWinner) {
 					startBigAnimText("Victory", "Well Played!", 2500, true, "#5151d9", "#ffffff", false, 2);
 					document.getElementById("winningTeamText").textContent = "VICTORY";
 					document.getElementById("winningTeamText").style.color = "#5151d9";
-				} else if (player.get().team != "") {
+				} else if (st.player.team != "") {
 					startBigAnimText("Defeat", "Bad Luck!", 2500, true, "#d95151", "#ffffff", false, 2);
 					document.getElementById("winningTeamText").textContent = "DEFEAT";
 					document.getElementById("winningTeamText").style.color = "#d95151";
@@ -1709,9 +1693,9 @@ function showStatTable(
 					className: "contL",
 					canClick: user.loggedIn,
 					color:
-						user.index === player.get().index
+						user.index === st.player.index
 							? "#fff"
-							: user.team !== player.get().team
+							: user.team !== st.player.team
 								? "#d95151"
 								: "#5151d9",
 					id: null,
@@ -1921,7 +1905,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 			} else {
 				btn.setAttribute("class", "gameStatLikeButton");
 			}
-			btn.style.display = m.pos === player.get().index ? "none" : "block";
+			btn.style.display = m.pos === st.player.index ? "none" : "block";
 			trow.appendChild(btn);
 			let tmpDiv = document.createElement("div");
 			tmpDiv.textContent = data[i].text.toString();
@@ -1938,7 +1922,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 }
 function addUser(userString: string) {
 	let parsed = JSON.parse(userString);
-	if (parsed.index !== player.get().index) {
+	if (parsed.index !== st.player.index) {
 		parsed.type = "player";
 		const b = findUserByIndex(parsed.index);
 		if (b == null) {
@@ -1949,7 +1933,7 @@ function addUser(userString: string) {
 	}
 }
 function removeUser(userIndex: number) {
-	if (userIndex !== player.get().index) {
+	if (userIndex !== st.player.index) {
 		let tmpUser = findUserByIndex(userIndex);
 		if (tmpUser != null) {
 			gameObjects.splice(gameObjects.indexOf(tmpUser), 1);
@@ -1995,7 +1979,7 @@ function updateUserValue(data: any) {
 	if (data.sp != undefined) {
 		tmpUser.spawnProtection = data.sp;
 	}
-	if (data.wi != undefined && data.i != player.get().index) {
+	if (data.wi != undefined && data.i != st.player.index) {
 		playerEquipWeapon(tmpUser, data.wi);
 	}
 	if (data.l != undefined) {
@@ -2018,12 +2002,12 @@ function updateUserValue(data: any) {
 		tmpUser.totalHealing = data.hea;
 		updated = true;
 	}
-	if (tmpUser.index == player.get().index) {
+	if (tmpUser.index == st.player.index) {
 		updatePlayerInfo(tmpUser);
 		updateUiStats(tmpUser);
 	}
 	if (updated) {
-		if (gameOver.get()) {
+		if (st.gameOver) {
 			if (data.l != undefined) {
 				document
 					.getElementById(`likeStat${tmpUser.index}`)
@@ -2039,14 +2023,14 @@ function fetchUserWithIndex(a: number) {
 }
 function receiveServerData(data: number[]) {
 	timeOfLastUpdate = Date.now();
-	if (!gameOver.get()) {
+	if (!st.gameOver) {
 		gameObjects.forEach((obj) => {
 			if (obj.type === "player") obj.onScreen = false;
 		});
 		for (let d = 0; d < data.length; ) {
 			let b = data[0 + d];
 			const tmpUser = findUserByIndex(data[1 + d]);
-			if (data[1 + d] === player.get().index && tmpUser != null) {
+			if (data[1 + d] === st.player.index && tmpUser != null) {
 				if (b > 2) {
 					tmpUser.x = data[2 + d];
 				}
@@ -2094,8 +2078,8 @@ function receiveServerData(data: number[]) {
 		}
 	}
 	for (const tmpObj of gameObjects) {
-		if (tmpObj.index !== player.get().index) continue;
-		if (tmpObj.dead || gameOver.get() || thisInput.length > 80) {
+		if (tmpObj.index !== st.player.index) continue;
+		if (tmpObj.dead || st.gameOver || thisInput.length > 80) {
 			thisInput = [];
 		}
 		if (tmpObj.dead) continue;
@@ -2118,7 +2102,7 @@ function receiveServerData(data: number[]) {
 			tmpObj.oldY = tmpObj.y;
 			tmpObj.x += hdt * tmpObj.speed * thisInput[i].delta;
 			tmpObj.y += vdt * tmpObj.speed * thisInput[i].delta;
-			wallCol(tmpObj, gameMap.get().tiles, gameObjects);
+			wallCol(tmpObj, st.gameMap.tiles, gameObjects);
 			i++;
 		}
 		tmpObj.x = Math.round(tmpObj.x);
@@ -2127,14 +2111,14 @@ function receiveServerData(data: number[]) {
 	}
 }
 function updatePlayerInfo(data: Partial<Player>) {
-	player.get().x = data.x;
-	player.get().y = data.y;
-	player.get().dead = data.dead;
-	if (player.get().score < data.score) {
-		playSound("score", player.get().x, player.get().y);
+	st.player.x = data.x;
+	st.player.y = data.y;
+	st.player.dead = data.dead;
+	if (st.player.score < data.score) {
+		playSound("score", st.player.x, st.player.y);
 	}
-	player.get().score = data.score;
-	player.get().health = data.health;
+	st.player.score = data.score;
+	st.player.health = data.health;
 }
 var currentHat = document.getElementById("currentHat");
 var hatList = document.getElementById("hatList");
@@ -2406,17 +2390,17 @@ function updateLeaderboard(data: number[]) {
 		let tmpPlayer = findUserByIndex(data[0 + i]);
 		if (tmpPlayer == null) continue;
 		test.push(<br />);
-		if (tmpPlayer.index === player.get().index) {
+		if (tmpPlayer.index === st.player.index) {
 			test.push(
 				<span class="me">
-					{i + 1}. {player.get().name}
-					{player.get().account.clan && ` [${player.get().account.clan}]`}
+					{i + 1}. {st.player.name}
+					{st.player.account.clan && ` [${st.player.account.clan}]`}
 				</span>,
 			);
 		} else if (tmpPlayer.name) {
 			test.push(
 				<>
-					<span class={tmpPlayer.team !== player.get().team ? "red" : "blue"}>
+					<span class={tmpPlayer.team !== st.player.team ? "red" : "blue"}>
 						{i + 1}. {tmpPlayer.name}
 					</span>
 					{tmpPlayer.account.clan && <span class="me"> [{tmpPlayer.account.clan}]</span>}
@@ -2435,7 +2419,7 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	if (gameMode.teams) {
 		blueText.textContent = "A";
 		redProgCont.style.display = "";
-		if (player.get().team === "red") {
+		if (st.player.team === "red") {
 			redProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
 			redProgress.style.width = `${scoreBlue}%`;
 			blueProgress.setAttribute("style", `display:block;width:${scoreRed}%`);
@@ -2447,7 +2431,7 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 			blueProgress.style.width = `${scoreBlue}%`;
 		}
 	} else {
-		scoreBlue = Math.round((player.get().score / scoreRed) * 100);
+		scoreBlue = Math.round((st.player.score / scoreRed) * 100);
 		blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
 		blueProgress.style.width = `${scoreBlue}%`;
 		blueText.textContent = "YOU";
@@ -2543,14 +2527,14 @@ function updateGameLoop() {
 	if (clientPrediction) {
 		for (const tmpObj of gameObjects) {
 			if (tmpObj.type !== "player") continue;
-			if (tmpObj.index === player.get().index) {
+			if (tmpObj.index === st.player.index) {
 				tmpObj.oldX = tmpObj.x;
 				tmpObj.oldY = tmpObj.y;
-				if (!tmpObj.dead && !gameOver.get()) {
+				if (!tmpObj.dead && !st.gameOver) {
 					tmpObj.x += b * tmpObj.speed * delta;
 					tmpObj.y += d * tmpObj.speed * delta;
 				}
-				wallCol(tmpObj, gameMap.get().tiles, gameObjects);
+				wallCol(tmpObj, st.gameMap.tiles, gameObjects);
 				tmpObj.x = Math.round(tmpObj.x);
 				tmpObj.y = Math.round(tmpObj.y);
 				tmpObj.angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
@@ -2567,7 +2551,7 @@ function updateGameLoop() {
 				if (tmpObj.jumpCountdown > 0) {
 					tmpObj.jumpCountdown -= delta;
 				}
-				if (keys.s && tmpObj.jumpCountdown <= 0 && !gameOver.get()) {
+				if (keys.s && tmpObj.jumpCountdown <= 0 && !st.gameOver) {
 					playerJump(tmpObj);
 					doJump = 1;
 				}
@@ -2584,7 +2568,7 @@ function updateGameLoop() {
 				}
 				tmpObj.jumpY = Math.round(tmpObj.jumpY);
 			}
-			if (tmpObj.index == player.get().index && !gameOver.get()) {
+			if (tmpObj.index == st.player.index && !st.gameOver) {
 				let sendData = {
 					hdt: b,
 					vdt: d,
@@ -2596,14 +2580,14 @@ function updateGameLoop() {
 				inputNumber++;
 				thisInput.push(sendData);
 				socket.emit("4", sendData);
-				if (userScroll != 0 && !gameOver.get()) {
+				if (userScroll != 0 && !st.gameOver) {
 					playerSwapWeapon(tmpObj, userScroll);
 					userScroll = 0;
 				}
-				if (keys.rl && !gameOver.get()) {
+				if (keys.rl && !st.gameOver) {
 					playerReload(tmpObj, true);
 				}
-				if (keys.lm && !gameOver.get() && player.get().weapons.length > 0) {
+				if (keys.lm && !st.gameOver && st.player.weapons.length > 0) {
 					if (
 						currentTime - getCurrentWeapon(tmpObj).lastShot >=
 						getCurrentWeapon(tmpObj).fireRate
@@ -2612,11 +2596,11 @@ function updateGameLoop() {
 					}
 				}
 			}
-			if (gameOver.get()) {
+			if (st.gameOver) {
 				tmpObj.animIndex = 0;
 			} else {
 				let f = Math.abs(b) + Math.abs(d);
-				if (tmpObj.index != player.get().index) {
+				if (tmpObj.index != st.player.index) {
 					f = Math.abs(tmpObj.xSpeed) + Math.abs(tmpObj.ySpeed);
 				}
 				if (f > 0) {
@@ -2643,39 +2627,39 @@ function updateGameLoop() {
 		}
 	}
 	gameObjects.sort(sortUsersByPosition);
-	if (!kicked.get()) {
-		if (gameOver.get()) {
+	if (!st.kicked) {
+		if (st.gameOver) {
 			doGame(delta);
 			if (gameOverFade && showUIFade) {
 				drawOverlay(graph, true, false);
 			}
-		} else if (player.get().dead && !inMainMenu) {
+		} else if (st.player.dead && !inMainMenu) {
 			doGame(delta);
 			drawOverlay(graph, true, false);
-		} else if (gameStart.get()) {
+		} else if (st.gameStart) {
 			doGame(delta);
 			drawOverlay(graph, false, true);
-			if (!mobile.get() && targetChanged) {
+			if (!st.mobile && targetChanged) {
 				targetChanged = false;
 				socket.emit("0", target.f);
 			}
-		} else if (!kicked.get()) {
+		} else if (!st.kicked) {
 			drawMenuBackground();
 			drawOverlay(graph, false, false);
 		}
 	}
-	if (disconnected || kicked.get()) {
+	if (disconnected || st.kicked) {
 		drawOverlay(graph, false, false);
-		const renderedReason = kicked.get()
+		const renderedReason = st.kicked
 			? reason !== ""
-				? renderShadedAnimText(reason, viewMult.get() * 48, "#ffffff", 6, "")
-				: renderShadedAnimText("You were kicked", viewMult.get() * 48, "#ffffff", 6, "")
-			: renderShadedAnimText("Disconnected", viewMult.get() * 48, "#ffffff", 6, "");
+				? renderShadedAnimText(reason, st.viewMult * 48, "#ffffff", 6, "")
+				: renderShadedAnimText("You were kicked", st.viewMult * 48, "#ffffff", 6, "")
+			: renderShadedAnimText("Disconnected", st.viewMult * 48, "#ffffff", 6, "");
 		if (renderedReason !== undefined) {
 			graph.drawImage(
 				renderedReason,
-				maxScreenWidth.get() / 2 - renderedReason.width / 2,
-				maxScreenHeight.get() / 2 - renderedReason.height / 2,
+				st.maxScreenWidth / 2 - renderedReason.width / 2,
+				st.maxScreenHeight / 2 - renderedReason.height / 2,
 				renderedReason.width,
 				renderedReason.height,
 			);
@@ -2687,7 +2671,7 @@ function updateGameLoop() {
 }
 function otherJump(userIdx: number) {
 	var tmpPlayer = findUserByIndex(userIdx);
-	if (tmpPlayer && player.get().index !== userIdx) {
+	if (tmpPlayer && st.player.index !== userIdx) {
 		playerJump(tmpPlayer);
 	}
 }
@@ -2722,7 +2706,7 @@ function drawOverlay(ctx: CanvasRenderingContext2D, fadeUp: boolean, fadeDown: b
 	if (overlayAlpha > 0) {
 		ctx.fillStyle = "#2e3031";
 		ctx.globalAlpha = overlayAlpha;
-		ctx.fillRect(0, 0, maxScreenWidth.get(), maxScreenHeight.get());
+		ctx.fillRect(0, 0, st.maxScreenWidth, st.maxScreenHeight);
 		ctx.globalAlpha = 1;
 	}
 }
@@ -2731,19 +2715,19 @@ var drawMiniMapCounter = 0;
 function doGame(delta: number) {
 	updateScreenShake(/*delta*/);
 	if (target != null) {
-		startX.set(
-			player.get().x -
-				maxScreenWidth.get() / 2 +
-				-appStore.get().shake.x +
-				target.dOffset * Math.cos(target.f + Math.PI),
-		);
-		startY.set(
-			player.get().y -
-				20 -
-				maxScreenHeight.get() / 2 +
-				-appStore.get().shake.y +
-				target.dOffset * Math.sin(target.f + Math.PI),
-		);
+		st.startX =
+			st.player.x -
+			st.maxScreenWidth / 2 +
+			-st.shake.x +
+			target.dOffset * Math.cos(target.f + Math.PI);
+
+		st.startY =
+			st.player.y -
+			20 -
+			st.maxScreenHeight / 2 +
+			-st.shake.y +
+			target.dOffset * Math.sin(target.f + Math.PI);
+
 		if (fillCounter > 1 && socket) {
 			socket.emit("kil");
 		}
@@ -2764,7 +2748,7 @@ function doGame(delta: number) {
 	updateNotifications(delta);
 	drawUI();
 	drawMiniMapCounter--;
-	if (drawMiniMapCounter <= 0 && gameStart.get()) {
+	if (drawMiniMapCounter <= 0 && st.gameStart) {
 		fillCounter = 0;
 		drawMiniMapCounter = drawMiniMapFPS;
 		drawMiniMap();
@@ -2775,7 +2759,7 @@ function resize() {
 	screenWidth = Math.round(window.innerWidth);
 	screenHeight = Math.round(window.innerHeight);
 	calculateUIScale();
-	var a = Math.max(screenWidth / maxScreenWidth.get(), screenHeight / maxScreenHeight.get());
+	var a = Math.max(screenWidth / st.maxScreenWidth, screenHeight / st.maxScreenHeight);
 	mainCanvas.width = screenWidth;
 	mainCanvas.height = screenHeight;
 	graph.setTransform(
@@ -2783,8 +2767,8 @@ function resize() {
 		0,
 		0,
 		a,
-		(screenWidth - maxScreenWidth.get() * a) / 2,
-		(screenHeight - maxScreenHeight.get() * a) / 2,
+		(screenWidth - st.maxScreenWidth * a) / 2,
+		(screenHeight - st.maxScreenHeight * a) / 2,
 	);
 	document.getElementById("startMenuWrapper").style.transform =
 		`perspective(1px) translate(-50%, -50%) scale(${uiScale})`;
@@ -2799,39 +2783,39 @@ function drawEdgeShader() {
 	try {
 		if (grd == null) {
 			grd = graph.createRadialGradient(
-				player.get().x - startX.get(),
-				player.get().y - startY.get(),
+				st.player.x - st.startX,
+				st.player.y - st.startY,
 				0,
-				player.get().x - startX.get(),
-				player.get().y - startY.get(),
-				maxScreenWidth.get() / 2,
+				st.player.x - st.startX,
+				st.player.y - st.startY,
+				st.maxScreenWidth / 2,
 			);
 			grd.addColorStop(0, "rgba(0,0,0,0.0)");
 			grd.addColorStop(1, "rgba(0,0,0,0.4");
 		}
 		graph.fillStyle = grd;
-		graph.fillRect(0, 0, maxScreenWidth.get(), maxScreenHeight.get());
+		graph.fillRect(0, 0, st.maxScreenWidth, st.maxScreenHeight);
 	} catch (err) {
 		console.error(err);
 	}
 }
 
 function drawGameLights(delta: number) {
-	if (!appStore.get().sprites.light) return;
+	if (!st.sprites.light) return;
 	graph.globalCompositeOperation = "lighter";
 	graph.globalAlpha = 0.2;
 	for (const tmpObject of bullets) {
 		if (!showGlows || tmpObject.spriteIndex === 2 || !tmpObject.active) continue;
 		let tmpBulletGlowWidth = tmpObject.glowWidth || Math.min(200, tmpObject.width * 14);
 		let tmpBulletGlowHeight = tmpObject.glowHeight || tmpObject.height * 2.5;
-		let lightX = tmpObject.x - startX.get();
-		let lightY = tmpObject.y - startY.get();
+		let lightX = tmpObject.x - st.startX;
+		let lightY = tmpObject.y - st.startY;
 		if (!canSee(lightX, lightY, tmpBulletGlowWidth, tmpBulletGlowHeight)) continue;
 		graph.save();
 		graph.translate(lightX, lightY);
 		drawSprite(
 			graph,
-			appStore.get().sprites.light as Sprite,
+			st.sprites.light,
 			-(tmpBulletGlowWidth / 2),
 			-(tmpBulletGlowHeight / 2) + tmpObject.height / 2,
 			tmpBulletGlowWidth,
@@ -2858,13 +2842,13 @@ var pingGrow = 0.4;
 var cachedMiniMap: HTMLCanvasElement | null = null;
 function getCachedMiniMap() {
 	fillCounter++;
-	if (cachedMiniMap == null && gameMap.get()?.tiles.length > 0) {
+	if (cachedMiniMap == null && st.gameMap?.tiles.length > 0) {
 		let baseCanvasElem = document.createElement("canvas");
 		let baseCtx = baseCanvasElem.getContext("2d");
 		baseCanvasElem.width = mapScale;
 		baseCanvasElem.height = mapScale;
 		baseCtx.fillStyle = "#fff";
-		for (const tile of gameMap.get().tiles) {
+		for (const tile of st.gameMap.tiles) {
 			if (!tile.wall) continue;
 			baseCtx.fillRect(
 				(tile.x / gameWidth) * mapScale,
@@ -2880,9 +2864,9 @@ function getCachedMiniMap() {
 		finalCtx.globalAlpha = 0.1;
 		finalCtx.drawImage(baseCanvasElem, 0, 0);
 		finalCtx.globalAlpha = 1;
-		for (const tile of gameMap.get().tiles) {
+		for (const tile of st.gameMap.tiles) {
 			if (!tile.hardPoint) continue;
-			finalCtx.fillStyle = tile.objTeam === player.get().team ? "#5151d9" : "#d95151";
+			finalCtx.fillStyle = tile.objTeam === st.player.team ? "#5151d9" : "#d95151";
 			finalCtx.fillRect(
 				(tile.x / gameWidth) * mapScale,
 				(tile.y / gameHeight) * mapScale,
@@ -2905,10 +2889,10 @@ function drawMiniMap() {
 		if (
 			tmpObj.type === "player" &&
 			tmpObj.onScreen &&
-			(tmpObj.index === player.get().index || tmpObj.team === player.get().team || tmpObj.isBoss)
+			(tmpObj.index === st.player.index || tmpObj.team === st.player.team || tmpObj.isBoss)
 		) {
 			mapContext.fillStyle =
-				tmpObj.index === player.get().index ? "#fff" : tmpObj.isBoss ? "#db4fcd" : "#5151d9";
+				tmpObj.index === st.player.index ? "#fff" : tmpObj.isBoss ? "#db4fcd" : "#5151d9";
 			mapContext.beginPath();
 			mapContext.arc(
 				(tmpObj.x / gameWidth) * mapScale,
@@ -2922,9 +2906,9 @@ function drawMiniMap() {
 			mapContext.fill();
 		}
 	}
-	if (!gameMap.get()) return;
+	if (!st.gameMap) return;
 	mapContext.globalAlpha = 1;
-	for (const pickup of gameMap.get().pickups) {
+	for (const pickup of st.gameMap.pickups) {
 		if (!pickup.active) continue;
 		if (pickup.type === "lootcrate") {
 			mapContext.fillStyle = "#ffd100";
@@ -2945,9 +2929,7 @@ function drawMiniMap() {
 	}
 }
 function calculateUIScale() {
-	uiScale =
-		((screenHeight + screenWidth) / (maxScreenWidth.getInitial() + maxScreenHeight.getInitial())) *
-		1.25;
+	uiScale = ((screenHeight + screenWidth) / (1920 + 1080)) * 1.25;
 }
 function drawMenuBackground() {}
 function drawUI() {}
@@ -3013,7 +2995,7 @@ function drawSprays() {
 		if (!sp.active) continue;
 		let tmpSpray = cachedSprays[`${sp.src}`];
 		if (!tmpSpray) continue;
-		graph.drawImage(tmpSpray, sp.xPos - startX.get(), sp.yPos - startY.get());
+		graph.drawImage(tmpSpray, sp.xPos - st.startX, sp.yPos - st.startY);
 	}
 }
 var spritesLoaded = false;
@@ -3110,7 +3092,7 @@ function updateWeaponUI(tmpPlayer: Player, force: boolean) {
 function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
 	// for some reason, the action cooldown elements sometimes aren't created?
 	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
-		updateWeaponUI(player.get(), false);
+		updateWeaponUI(st.player, false);
 	}
 	let tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
@@ -3187,7 +3169,7 @@ function findServerBullet(bulletIndex: number) {
 	return bullets.find((b) => b.serverIndex === bulletIndex);
 }
 function someoneShot(evt: ShootEvent) {
-	if (evt.i !== player.get().index) {
+	if (evt.i !== st.player.index) {
 		let tmpPlayer = findUserByIndex(evt.i);
 		if (tmpPlayer != null) {
 			shootNextBullet(evt, tmpPlayer, target.d, currentTime, getNextBullet(bullets));
@@ -3197,10 +3179,10 @@ function someoneShot(evt: ShootEvent) {
 function updateBullets(delta: number) {
 	graph.globalAlpha = 1;
 	for (const bullet of bullets) {
-		bullet.update(delta, currentTime, gameObjects, gameMap.get().tiles, gameObjects);
+		bullet.update(delta, currentTime, gameObjects, st.gameMap.tiles, gameObjects);
 		if (bullet.active) {
-			let b = bullet.x - startX.get();
-			let d = bullet.y - startY.get();
+			let b = bullet.x - st.startX;
+			let d = bullet.y - st.startY;
 			if (canSee(b, d, bullet.height, bullet.height)) {
 				graph.save();
 				graph.translate(b, d);
@@ -3240,18 +3222,18 @@ function updateBullets(delta: number) {
 		}
 		if (showBTrails && bullet.trailAlpha > 0) {
 			graph.save();
-			let b = Math.round(bullet.startX - startX.get());
-			let d = Math.round(bullet.startY - startY.get());
-			let e = Math.round(bullet.x - startX.get());
-			let f = Math.round(bullet.y - startY.get());
-			let trailGrad = graph.createLinearGradient(b, d, e, f);
+			let x = Math.round(bullet.startX - st.startX);
+			let y = Math.round(bullet.startY - st.startY);
+			let x2 = Math.round(bullet.x - st.startX);
+			let y2 = Math.round(bullet.y - st.startY);
+			let trailGrad = graph.createLinearGradient(x, y, x2, y2);
 			trailGrad.addColorStop(0, "rgba(255, 255, 255, 0)");
 			trailGrad.addColorStop(1, `rgba(255, 255, 255, ${bullet.trailAlpha})`);
 			graph.strokeStyle = trailGrad;
 			graph.lineWidth = bullet.trailWidth;
 			graph.beginPath();
-			graph.moveTo(b, d);
-			graph.lineTo(e, f);
+			graph.moveTo(x, y);
+			graph.lineTo(x2, y2);
 			graph.closePath();
 			graph.stroke();
 			graph.restore();
@@ -3503,7 +3485,7 @@ function loadDefaultSprites(base: string) {
 	wallSprite = getSprite(`${base}wall1`);
 	ambientSprites.push(getSprite(`${base}ambient1`));
 	darkFillerSprite = getSprite(`${base}darkfiller`);
-	appStore.select("sprites", "light").set(getSprite(`${base}lighting`));
+	st.sprites.light = getSprite(`${base}lighting`);
 	floorSprites.push(getSprite(`${base}ground1`));
 	floorSprites.push(getSprite(`${base}ground2`));
 	floorSprites.push(getSprite(`${base}ground3`));
@@ -3511,17 +3493,15 @@ function loadDefaultSprites(base: string) {
 	wallSpritesSeg.push(getSprite(`${base}wallSegment1`));
 	wallSpritesSeg.push(getSprite(`${base}wallSegment2`));
 	wallSpritesSeg.push(getSprite(`${base}wallSegment3`));
-	appStore
-		.select("sprites", "particles")
-		.set([
-			getSprite(`${base}particles/blood/blood`),
-			getSprite(`${base}particles/oil/oil`),
-			getSprite(`${base}particles/wall`),
-			getSprite(`${base}particles/hole`),
-			getSprite(`${base}particles/blood/splatter1`),
-			getSprite(`${base}particles/blood/splatter2`),
-			getSprite(`${base}particles/explosion`),
-		]);
+	st.sprites.particles = [
+		getSprite(`${base}particles/blood/blood`),
+		getSprite(`${base}particles/oil/oil`),
+		getSprite(`${base}particles/wall`),
+		getSprite(`${base}particles/hole`),
+		getSprite(`${base}particles/blood/splatter1`),
+		getSprite(`${base}particles/blood/splatter2`),
+		getSprite(`${base}particles/explosion`),
+	];
 	healthPackSprite = getSprite(`${base}healthpack`);
 	lootCrateSprite = getSprite(`${base}lootCrate1`);
 	weaponSpriteSheet = [];
@@ -3564,14 +3544,14 @@ async function loadModPack(url: string, isBaseAssets: boolean) {
 		if (loadingTexturePack) return;
 		let modPath = "";
 		if (isBaseAssets) {
-			appStore.select("doSounds").set(false);
+			st.doSounds = false;
 			modPath = "/res.zip";
 		} else {
 			if (url === "") {
 				setModInfoText("Please enter a mod Key/URL");
 				return false;
 			}
-			appStore.select("doSounds").set(true);
+			st.doSounds = true;
 			loadingTexturePack = true;
 			if (url.includes(".")) {
 				modPath = url;
@@ -3887,7 +3867,7 @@ function drawGameObjects(delta: number) {
 	var d = null;
 	for (const tmpObject of gameObjects) {
 		if (tmpObject.type === "player") {
-			if (!tmpObject.dead && (tmpObject.index === player.get().index || tmpObject.onScreen)) {
+			if (!tmpObject.dead && (tmpObject.index === st.player.index || tmpObject.onScreen)) {
 				if (tmpObject.jumpY === undefined) {
 					tmpObject.jumpY = 0;
 				}
@@ -3897,8 +3877,8 @@ function drawGameObjects(delta: number) {
 				playerContext.translate(playerCanvas.width / 2, playerCanvas.height / 2);
 				let m = (Math.PI / 180) * tmpObject.angle;
 				let k = Math.round((tmpObject.angle % 360) / 90) * 90;
-				let h = tmpObject.x - startX.get();
-				let g = tmpObject.y - tmpObject.jumpY - startY.get();
+				let h = tmpObject.x - st.startX;
+				let g = tmpObject.y - tmpObject.jumpY - st.startY;
 				if (tmpObject.animIndex === 1) {
 					g -= 3;
 				}
@@ -4057,7 +4037,7 @@ function drawGameObjects(delta: number) {
 				if (tmpObject.spawnProtection > 0) {
 					playerContext.globalCompositeOperation = "source-atop";
 					playerContext.fillStyle =
-						tmpObject.team != player.get().team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
+						tmpObject.team != st.player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
 					playerContext.fillRect(
 						-playerCanvas.width / 2,
 						-playerCanvas.height / 2,
@@ -4107,9 +4087,9 @@ function drawGameObjects(delta: number) {
 			}
 			drawSprite(
 				graph,
-				flagSprites[tmpObject.ai + (tmpObject.team == player.get().team ? 0 : 3)],
-				tmpObject.x - tmpObject.w / 2 - startX.get(),
-				tmpObject.y - tmpObject.h - startY.get(),
+				flagSprites[tmpObject.ai + (tmpObject.team == st.player.team ? 0 : 3)],
+				tmpObject.x - tmpObject.w / 2 - st.startX,
+				tmpObject.y - tmpObject.h - st.startY,
 				tmpObject.w,
 				tmpObject.h,
 				0,
@@ -4121,13 +4101,13 @@ function drawGameObjects(delta: number) {
 		} else if (
 			tmpObject.type === "clutter" &&
 			tmpObject.active &&
-			canSee(tmpObject.x - startX.get(), tmpObject.y - startY.get(), tmpObject.w, tmpObject.h)
+			canSee(tmpObject.x - st.startX, tmpObject.y - st.startY, tmpObject.w, tmpObject.h)
 		) {
 			drawSprite(
 				graph,
 				clutterSprites[tmpObject.i],
-				tmpObject.x - startX.get(),
-				tmpObject.y - tmpObject.h - startY.get(),
+				tmpObject.x - st.startX,
+				tmpObject.y - tmpObject.h - st.startY,
 				tmpObject.w,
 				tmpObject.h,
 				0,
@@ -4160,21 +4140,21 @@ function drawPlayerNames() {
 		if (
 			tmpObject.type !== "player" ||
 			tmpObject.dead ||
-			(tmpObject.index !== player.get().index && !tmpObject.onScreen)
+			(tmpObject.index !== st.player.index && !tmpObject.onScreen)
 		)
 			continue;
 
 		let d = tmpObject.height / 3.2;
 		let e = Math.min(200, (tmpObject.maxHealth / 100) * 100);
-		let shapeX = tmpObject.x - startX.get();
-		let shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - startY.get();
+		let shapeX = tmpObject.x - st.startX;
+		let shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - st.startY;
 		if (tmpObject.account !== undefined && tmpObject.account.hat != null) {
 			shapeY -= tmpObject.account.hat.nameY;
 		}
 		let playerName = tmpObject.name;
 		let rankText = tmpObject.loggedIn ? tmpObject.account.rank : "";
 		// h = graph.measureText(playerName);
-		let nameColor = tmpObject.team !== player.get().team ? "#d95151" : "#5151d9";
+		let nameColor = tmpObject.team !== st.player.team ? "#d95151" : "#5151d9";
 		if (showNames) {
 			let renderedName = renderShadedAnimText(playerName, d * textSizeMult, "#ffffff", 5, "");
 			if (renderedName != undefined) {
@@ -4232,8 +4212,8 @@ function drawBackground() {
 		darkFillerSprite,
 		0,
 		0,
-		maxScreenWidth.get(),
-		maxScreenHeight.get(),
+		st.maxScreenWidth,
+		st.maxScreenHeight,
 		0,
 		false,
 		0,
@@ -4384,20 +4364,20 @@ function renderSideWalks(
 	}
 }
 function drawMap(layer: number) {
-	if (!gameMap.get()) return;
-	for (const tile of gameMap.get().tiles) {
+	if (!st.gameMap) return;
+	for (const tile of st.gameMap.tiles) {
 		if (layer === 0) {
 			if (
 				!tile.wall &&
-				canSee(tile.x - startX.get(), tile.y - startY.get(), mapTileScale, mapTileScale)
+				canSee(tile.x - st.startX, tile.y - st.startY, mapTileScale, mapTileScale)
 			) {
 				let tmpTlSprite = getCachedFloor(tile);
 				if (tmpTlSprite !== undefined) {
 					drawSprite(
 						graph,
 						tmpTlSprite,
-						tile.x - startX.get(),
-						tile.y - startY.get(),
+						tile.x - st.startX,
+						tile.y - st.startY,
 						tmpTlSprite.width,
 						tmpTlSprite.height,
 						0,
@@ -4413,8 +4393,8 @@ function drawMap(layer: number) {
 				tile.wall &&
 				!tile.bottom &&
 				canSee(
-					tile.x - startX.get(),
-					tile.y - startY.get() + mapTileScale * 0.5,
+					tile.x - st.startX,
+					tile.y - st.startY + mapTileScale * 0.5,
 					mapTileScale,
 					mapTileScale * 0.75,
 				)
@@ -4422,8 +4402,8 @@ function drawMap(layer: number) {
 				drawSprite(
 					graph,
 					wallSpritesSeg[tile.spriteIndex],
-					tile.x - startX.get(),
-					tile.y + Math.round(mapTileScale / 2) - startY.get(),
+					tile.x - st.startX,
+					tile.y + Math.round(mapTileScale / 2) - st.startY,
 					mapTileScale,
 					mapTileScale / 2,
 					0,
@@ -4437,8 +4417,8 @@ function drawMap(layer: number) {
 			layer === 2 &&
 			tile.wall &&
 			canSee(
-				tile.x - startX.get(),
-				tile.y - startY.get() - mapTileScale * 0.5,
+				tile.x - st.startX,
+				tile.y - st.startY - mapTileScale * 0.5,
 				mapTileScale,
 				mapTileScale,
 			)
@@ -4448,8 +4428,8 @@ function drawMap(layer: number) {
 				drawSprite(
 					graph,
 					tmpTlSprite,
-					tile.x - startX.get(),
-					Math.round(tile.y - mapTileScale / 2 - startY.get()),
+					tile.x - st.startX,
+					Math.round(tile.y - mapTileScale / 2 - st.startY),
 					mapTileScale,
 					mapTileScale,
 					0,
@@ -4462,19 +4442,16 @@ function drawMap(layer: number) {
 		}
 	}
 	if (layer === 0) {
-		for (const tmpPickup of gameMap.get().pickups) {
-			if (
-				!tmpPickup.active ||
-				!canSee(tmpPickup.x - startX.get(), tmpPickup.y - startY.get(), 0, 0)
-			)
+		for (const tmpPickup of st.gameMap.pickups) {
+			if (!tmpPickup.active || !canSee(tmpPickup.x - st.startX, tmpPickup.y - st.startY, 0, 0))
 				continue;
 
 			if (tmpPickup.type === "healthpack") {
 				drawSprite(
 					graph,
 					healthPackSprite,
-					tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
-					tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
+					tmpPickup.x - tmpPickup.scale / 2 - st.startX,
+					tmpPickup.y - tmpPickup.scale / 2 - st.startY,
 					tmpPickup.scale,
 					tmpPickup.scale,
 					0,
@@ -4487,8 +4464,8 @@ function drawMap(layer: number) {
 				drawSprite(
 					graph,
 					lootCrateSprite,
-					tmpPickup.x - tmpPickup.scale / 2 - startX.get(),
-					tmpPickup.y - tmpPickup.scale / 2 - startY.get(),
+					tmpPickup.x - tmpPickup.scale / 2 - st.startX,
+					tmpPickup.y - tmpPickup.scale / 2 - st.startY,
 					tmpPickup.scale,
 					tmpPickup.scale,
 					0,

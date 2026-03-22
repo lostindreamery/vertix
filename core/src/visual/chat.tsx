@@ -1,8 +1,5 @@
-import type { Socket } from "socket.io-client";
-import { appStore } from "../state.ts";
+import { st } from "../state.svelte.ts";
 
-const player = appStore.select("player");
-const mobile = appStore.select("mobile");
 let currentChatType = "ALL";
 const chatInput = document.getElementById("chatInput") as HTMLInputElement;
 const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
@@ -24,16 +21,12 @@ export class ChatManager {
 		if (event.key === "Enter") {
 			let msg = chatInput.value.replace(/(<([^>]+)>)/gi, "");
 			if (msg !== "") {
-				(appStore.select("socket").get() as Socket).emit(
-					"cht",
-					msg.substring(0, 50),
-					currentChatType,
-				);
+				st.socket.emit("cht", msg.substring(0, 50), currentChatType);
 				this.addChatLine(
-					player.get().name,
+					st.player.name,
 					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg,
 					true,
-					player.get().team,
+					st.player.team,
 				);
 				chatInput.value = "";
 				mainCanvas.focus();
@@ -41,7 +34,7 @@ export class ChatManager {
 		}
 	}
 	appendMessage(msgElem: HTMLElement) {
-		if (mobile.get()) return;
+		if (st.mobile) return;
 
 		const chatbox = document.getElementById("chatbox");
 		const chatList = document.getElementById("chatList");
@@ -51,7 +44,7 @@ export class ChatManager {
 		chatList.appendChild(msgElem);
 	}
 	addChatLine(authorName: string, text: string, fromSelf: boolean, type: string) {
-		if (mobile.get()) return;
+		if (st.mobile) return;
 
 		// b = checkProfanityString(b);
 		let listElem = document.createElement("li");
@@ -63,7 +56,7 @@ export class ChatManager {
 				source = "notif";
 			}
 		} else {
-			source = player.get().team === type ? "blue" : "red";
+			source = st.player.team === type ? "blue" : "red";
 		}
 		this.chatLineCounter++;
 		listElem.className = source;

@@ -1,11 +1,8 @@
 import { Howl } from "howler";
-import { appStore } from "./state.ts";
+import { st } from "./state.svelte.ts";
 import { getDistance } from "./utils.ts";
 
 // todo logic cleanup
-
-const player = appStore.select("player");
-const doSounds = appStore.select("doSounds");
 
 let soundList: Record<
 	string,
@@ -103,7 +100,7 @@ const soundMeta = [
 		id: "track1",
 		loop: true,
 		onload: () => {
-			if (player.get().dead && !appStore.get().startingGame) {
+			if (st.player.dead && !st.startingGame) {
 				soundList.track1.sound.play();
 				currentTrack = 1;
 			}
@@ -114,7 +111,7 @@ const soundMeta = [
 		id: "track2",
 		loop: true,
 		onload: () => {
-			if (!player.get().dead && appStore.get().gameStart && !appStore.get().gameOver) {
+			if (!st.player.dead && st.gameStart && !st.gameOver) {
 				soundList.track2.sound.play();
 				currentTrack = 2;
 			}
@@ -122,7 +119,7 @@ const soundMeta = [
 	},
 ];
 export function loadSounds(base: string) {
-	if (!doSounds.get()) {
+	if (!st.doSounds) {
 		return false;
 	}
 	soundList = {};
@@ -147,7 +144,7 @@ function loadSound(src: string, sound: (typeof soundMeta)[number], format: strin
 }
 var currentTrack = 0;
 export function startSoundTrack(id: number) {
-	if (!doSounds.get() || soundList.track1 == undefined || soundList.track2 == undefined) {
+	if (!st.doSounds || soundList.track1 == undefined || soundList.track2 == undefined) {
 		return false;
 	}
 	try {
@@ -172,9 +169,9 @@ export function startSoundTrack(id: number) {
 }
 var maxHearDist = 1500;
 export function playSound(soundId: string, x: number, y: number) {
-	if (!appStore.get().kicked && doSounds.get()) {
+	if (!st.kicked && st.doSounds) {
 		try {
-			let tmpDist = getDistance(player.get().x, player.get().y, x, y);
+			let tmpDist = getDistance(st.player.x, st.player.y, x, y);
 			if (tmpDist <= maxHearDist) {
 				let tmpSoundEntry = soundList[soundId];
 				if (tmpSoundEntry !== undefined) {
@@ -189,7 +186,7 @@ export function playSound(soundId: string, x: number, y: number) {
 	}
 }
 export function stopAllSounds() {
-	if (!doSounds.get()) {
+	if (!st.doSounds) {
 		return false;
 	}
 	for (let i = 0; i < soundMeta.length; ++i) {

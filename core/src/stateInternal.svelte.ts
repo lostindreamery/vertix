@@ -1,7 +1,7 @@
-import { store } from "@simplestack/store";
-import type { Player } from "./types.ts";
+import type { Socket } from "socket.io-client";
+import type { Player, Sprite } from "./types.ts";
 
-export const appStore = store({
+export const st = $state({
 	gameMap: null as any,
 	maxScreenWidth: 1920,
 	maxScreenHeight: 1080,
@@ -19,10 +19,9 @@ export const appStore = store({
 		scale: 0,
 		dir: 0,
 	},
-	// typescript breaks when any part of the (main?) store is typed as an html element or socket
 	sprites: {
-		light: null as object | null,
-		particles: [],
+		light: null as Sprite | null,
+		particles: [] as Sprite[],
 	},
 	doSounds: false,
 	kicked: false,
@@ -30,5 +29,6 @@ export const appStore = store({
 	gameStart: false,
 	gameOver: false,
 	mobile: false,
-	socket: null as object | null,
+	socket: null as Socket | null,
 });
+

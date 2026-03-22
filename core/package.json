@@ -7,7 +7,7 @@
 		"preview": "vite preview"
 	},
 	"devDependencies": {
-		"@simplestack/store": "^0.7.6",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@types/howler": "^2.2.12",
 		"@types/jquery": "^4.0.0",
 		"@zip.js/zip.js": "^2.8.23",

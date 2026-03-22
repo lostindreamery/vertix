@@ -114,7 +114,7 @@ io.on("connection", (socket: Socket) => {
 			left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
 			up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
 		}))
-		.toSorted((a, b) => a.chance - b.chance)
+		.toSorted((a, b) => a.chance - b.chance);
 	socket.emit("updShrt", shirts.length, shirtData);
 
 	socket.on("cShirt", (id) => {

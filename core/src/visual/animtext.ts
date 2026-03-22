@@ -1,12 +1,11 @@
-import { appStore } from "../state.ts";
+import { st } from "../state.svelte.ts";
 import { randomInt, shadeColor } from "../utils.ts";
 
 const textSizeMult = 0.55;
-const bigTextSize = (appStore.get().maxScreenHeight / 7.7) * textSizeMult;
+const bigTextSize = (st.maxScreenHeight / 7.7) * textSizeMult;
 const medTextSize = bigTextSize * 0.85;
 const textGap = bigTextSize * 1.2;
-const bigTextY = appStore.get().maxScreenHeight / 4.3;
-const viewMult = appStore.select("viewMult");
+const bigTextY = st.maxScreenHeight / 4.3;
 
 export class AnimText {
 	text = "";
@@ -65,8 +64,8 @@ export class AnimText {
 		if (this.useStart) {
 			window.graph.drawImage(
 				this.cachedImage,
-				this.x - appStore.get().startX - (this.cachedImage.width / 2) * this.scale,
-				this.y - appStore.get().startY - (this.cachedImage.height / 2) * this.scale,
+				this.x - st.startX - (this.cachedImage.width / 2) * this.scale,
+				this.y - st.startY - (this.cachedImage.height / 2) * this.scale,
 				this.cachedImage.width * this.scale,
 				this.cachedImage.height * this.scale,
 			);
@@ -96,17 +95,17 @@ export function showNotification(text: string) {
 	}
 	notifications[notificationIndex].text = text;
 	notifications[notificationIndex].alpha = 1;
-	notifications[notificationIndex].x = appStore.get().maxScreenWidth / 2;
+	notifications[notificationIndex].x = st.maxScreenWidth / 2;
 	notifications[notificationIndex].fadeSpeed = 0.003;
 	notifications[notificationIndex].fadeDelay = 800;
-	notifications[notificationIndex].fontSize = notificationsSize * viewMult.get();
+	notifications[notificationIndex].fontSize = notificationsSize * st.viewMult;
 	notifications[notificationIndex].scale = 1;
 	notifications[notificationIndex].scaleSpeed = 0.005;
 	notifications[notificationIndex].minScale = 1;
 	notifications[notificationIndex].maxScale = 1.5;
 	notifications[notificationIndex].cachedImage = renderShadedAnimText(
 		text,
-		notificationsSize * viewMult.get(),
+		notificationsSize * st.viewMult,
 		"#ffffff",
 		7,
 		"Italic ",
@@ -125,13 +124,10 @@ export function positionNotifications() {
 	if (activeNotifications > 0) {
 		notifications.sort(sortByAlpha);
 		let b = 0;
-		const yBase =
-			appStore.get().maxScreenHeight -
-			notifications.length * notificationsGap * viewMult.get() -
-			100;
+		const yBase = st.maxScreenHeight - notifications.length * notificationsGap * st.viewMult - 100;
 		for (let i = 0; i < notifications.length; ++i) {
 			if (notifications[i].active) {
-				notifications[i].y = yBase + notificationsGap * viewMult.get() * b;
+				notifications[i].y = yBase + notificationsGap * st.viewMult * b;
 				b++;
 			}
 		}
@@ -195,7 +191,7 @@ function startAnimText(
 	if (!tmpText) return;
 	Object.assign(tmpText, opts);
 	tmpText.text = tmpText.text.toUpperCase();
-	tmpText.fontSize *= viewMult.get();
+	tmpText.fontSize *= st.viewMult;
 	tmpText.scale = 1;
 	tmpText.maxScale = 1.6;
 	tmpText.minScale = 1;
@@ -224,7 +220,7 @@ export function startBigAnimText(
 		startAnimText(
 			{
 				text,
-				x: appStore.get().maxScreenWidth / 2,
+				x: st.maxScreenWidth / 2,
 				y: bigTextY,
 				xSpeed: 0,
 				ySpeed: -0.1,
@@ -247,8 +243,8 @@ export function startBigAnimText(
 		startAnimText(
 			{
 				text: secondaryText,
-				x: appStore.get().maxScreenWidth / 2,
-				y: bigTextY + textGap * viewMult.get() * fontSizeMult,
+				x: st.maxScreenWidth / 2,
+				y: bigTextY + textGap * st.viewMult * fontSizeMult,
 				xSpeed: 0,
 				ySpeed: -0.04,
 				fadeSpeed: 0.0025,
@@ -284,7 +280,7 @@ export function startMovingAnimText(
 			xSpeed: 0,
 			ySpeed: -0.15,
 			fadeSpeed: 0.0025,
-			fontSize: appStore.get().maxScreenHeight / 26 + extraFontSize,
+			fontSize: st.maxScreenHeight / 26 + extraFontSize,
 			scaleSpeed: 0.005,
 			useStart: true,
 			fadeDelay: 350,

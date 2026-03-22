@@ -1,16 +1,9 @@
-import type { Store } from "@simplestack/store";
-import { appStore } from "../state.ts";
-import type { Sprite, Tile } from "../types.ts";
+import { playSound } from "../sound.ts";
+import { st } from "../state.svelte.ts";
+import type { Tile } from "../types.ts";
 import { canSee, getAngle, getDistance, isImageOk, randomFloat, randomInt } from "../utils.ts";
 import { createFlash } from "./flash.ts";
 import { screenShake } from "./shake.ts";
-import { playSound } from "../sound.ts";
-
-const startX = appStore.select("startX");
-const startY = appStore.select("startY");
-const player = appStore.select("player");
-const gameMap = appStore.select("gameMap");
-const particleSprites: Store<Sprite[]> = appStore.select("sprites", "particles");
 
 class Particle {
 	rotation = 0;
@@ -66,18 +59,18 @@ class Particle {
 	draw() {
 		if (
 			!this.active ||
-			!particleSprites.get()[this.spriteIndex] ||
-			!isImageOk(particleSprites.get()[this.spriteIndex])
+			!st.sprites.particles[this.spriteIndex] ||
+			!isImageOk(st.sprites.particles[this.spriteIndex])
 		)
 			return;
 
 		window.graph.globalAlpha = this.alpha;
 		if (this.rotation !== 0) {
 			window.graph.save();
-			window.graph.translate(this.x - startX.get(), this.y - startY.get());
+			window.graph.translate(this.x - st.startX, this.y - st.startY);
 			window.graph.rotate(this.rotation);
 			window.graph.drawImage(
-				particleSprites.get()[this.spriteIndex],
+				st.sprites.particles[this.spriteIndex],
 				-(this.scale / 2),
 				-(this.scale / 2),
 				this.scale,
@@ -86,9 +79,9 @@ class Particle {
 			window.graph.restore();
 		} else {
 			window.graph.drawImage(
-				particleSprites.get()[this.spriteIndex],
-				this.x - startX.get() - this.scale / 2,
-				this.y - startY.get() - this.scale / 2,
+				st.sprites.particles[this.spriteIndex],
+				this.x - st.startX - this.scale / 2,
+				this.y - st.startY - this.scale / 2,
 				this.scale,
 				this.scale,
 			);
@@ -96,13 +89,13 @@ class Particle {
 	}
 
 	checkInWall() {
-		gameMap.get().tiles.forEach((tmpTl: Tile) => {
+		st.gameMap.tiles.forEach((tmpTl: Tile) => {
 			if (!tmpTl.wall || !tmpTl.hasCollision) return;
 			if (
 				this.x >= tmpTl.x &&
 				this.x <= tmpTl.x + tmpTl.scale &&
 				this.y > tmpTl.y &&
-				this.y < tmpTl.y + tmpTl.scale - player.get().height
+				this.y < tmpTl.y + tmpTl.scale - st.player.height
 			) {
 				this.active = false;
 			}
@@ -120,8 +113,8 @@ export function updateParticles(delta: number, layer: number) {
 			(localStorage.getItem("showParticles") === "true" || cachedParticles[i].forceShow) &&
 			cachedParticles[i].active &&
 			canSee(
-				cachedParticles[i].x - startX.get(),
-				cachedParticles[i].y - startY.get(),
+				cachedParticles[i].x - st.startX,
+				cachedParticles[i].y - st.startY,
 				cachedParticles[i].scale,
 				cachedParticles[i].scale,
 			)
@@ -210,9 +203,9 @@ var maxExplosionDuration = 400;
 var maxShake = 9;
 
 export function createExplosion(x: number, y: number, scale: number) {
-	let tmpDist = getDistance(x, y, player.get().x, player.get().y);
+	let tmpDist = getDistance(x, y, st.player.x, st.player.y);
 	if (tmpDist <= maxShakeDist) {
-		let tmpDir = getAngle(x, player.get().x, y, player.get().y);
+		let tmpDir = getAngle(x, st.player.x, y, st.player.y);
 		screenShake(scale * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
 	}
 	playSound("explosion", x, y);

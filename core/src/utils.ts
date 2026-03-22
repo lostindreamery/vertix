@@ -1,5 +1,5 @@
 import type { Projectile } from "./logic/projectile.ts";
-import { appStore } from "./state.ts";
+import { st } from "./state.svelte.ts";
 import type { Player, Tile } from "./types.ts";
 
 var bulletIndex = 0;
@@ -384,10 +384,5 @@ export function isImageOk(img: HTMLImageElement) {
 }
 
 export function canSee(x: number, y: number, width: number, height: number) {
-	return (
-		x + width > 0 &&
-		y + height > 0 &&
-		x < appStore.get().maxScreenWidth &&
-		y < appStore.get().maxScreenHeight
-	);
+	return x + width > 0 && y + height > 0 && x < st.maxScreenWidth && y < st.maxScreenHeight;
 }

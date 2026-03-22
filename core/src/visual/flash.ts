@@ -1,8 +1,4 @@
-import { appStore } from "../state.ts";
-import type { Sprite } from "../types.ts";
-
-const startX = appStore.select("startX");
-const startY = appStore.select("startY");
+import { st } from "../state.svelte.ts";
 
 export class FlashGlow {
 	initScale = 0;
@@ -29,9 +25,9 @@ export class FlashGlow {
 	draw() {
 		if (!this.active) return;
 		window.graph.drawImage(
-			appStore.get().sprites.light as Sprite,
-			this.x - startX.get() - this.scale / 2,
-			this.y - startY.get() - this.scale / 2,
+			st.sprites.light,
+			this.x - st.startX - this.scale / 2,
+			this.y - st.startY - this.scale / 2,
 			this.scale,
 			this.scale,
 		);

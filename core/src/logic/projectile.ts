@@ -1,10 +1,8 @@
 import { playSound } from "../sound.ts";
-import { appStore } from "../state.ts";
+import { st } from "../state.svelte.ts";
 import type { Player, Tile } from "../types.ts";
 import { getDistance, randomInt } from "../utils.ts";
 import { createLiquid, particleCone, stillDustParticle } from "../visual/particle.ts";
-
-const player = appStore.select("player");
 
 export class Projectile {
 	width = 0;
@@ -132,7 +130,7 @@ export class Projectile {
 					}
 					if (
 						this.active &&
-						(typeof window === "undefined" || this.owner.index == player.get().index)
+						(typeof window === "undefined" || this.owner.index == st.player.index)
 					) {
 						for (let i = 0; i < players.length; i++) {
 							let tmpPlayer = players[i];
