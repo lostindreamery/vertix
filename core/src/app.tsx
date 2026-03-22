@@ -195,211 +195,6 @@ function clearCustomMap() {
 	document.getElementById("customMapButton").textContent = "Select Map";
 }
 
-window.onload = async () => {
-	if (st.mobile) {
-		document.getElementById("loadText").textContent = "MOBILE VERSION COMING SOON";
-		return;
-	}
-	document.documentElement.style.overflow = "hidden";
-	document.getElementById("gameAreaWrapper").style.opacity = "1";
-	drawMenuBackground();
-	document.getElementById("settingsButton").onclick = () => {
-		if (settings.style.maxHeight === "200px") {
-			settings.style.maxHeight = "0px";
-		} else {
-			settings.style.maxHeight = "200px";
-			howTo.style.maxHeight = "0px";
-		}
-	};
-	document.getElementById("instructionButton").onclick = () => {
-		if (howTo.style.maxHeight === "200px") {
-			howTo.style.maxHeight = "0px";
-		} else {
-			howTo.style.maxHeight = "200px";
-			settings.style.maxHeight = "0px";
-		}
-	};
-	document.getElementById("leaderButton").onclick = () => {
-		window.open("/leaderboards.html", "_blank");
-	};
-	hideUI(true);
-	$(".noRightClick").on("contextmenu", (_) => false);
-	resize();
-	$("#loadingWrapper").fadeOut(200, () => {});
-
-	const resp = await fetch("http://localhost:1118/getIP");
-	const { ip, port } = await resp.json();
-	if (!socket) {
-		socket = io(`http://${devTest ? "localhost" : ip}:${port}`, {
-			reconnection: true,
-			transports: ["websocket"],
-			forceNew: false,
-		});
-		st.socket = socket;
-		setupSocket(socket);
-	}
-	socket.once("connect", () => {
-		var logKey = localStorage.getItem("logKey");
-		var userName = localStorage.getItem("userName");
-		if (logKey && logKey !== "" && userName && userName !== "") {
-			socket.emit("dbLogin", {
-				lgKey: logKey,
-				userName: userName,
-				userPass: false,
-			});
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Logging in...";
-		} else {
-			loadSavedClass();
-		}
-		document.getElementById("startButton").onclick = () => {
-			startGame("player");
-		};
-		playerNameInput.addEventListener("keypress", (event) => {
-			if (event.code === "Enter") {
-				startGame("player");
-			}
-		});
-		document.getElementById("texturePackButton").onclick = () => {
-			loadModPack((document.getElementById("textureModInput") as HTMLInputElement).value, false);
-		};
-		document.getElementById("registerButton").onclick = () => {
-			socket.emit("dbReg", {
-				userName: userNameInput.value,
-				userEmail: userEmailInput.value,
-				userPass: userPassInput.value,
-			});
-			loginUserNm = userNameInput.value;
-			loginUserPs = userPassInput.value;
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Registering...";
-		};
-		document.getElementById("loginButton").onclick = () => {
-			startLogin();
-		};
-		document.getElementById("logoutButton").onclick = () => {
-			loggedInWrapper.style.display = "none";
-			loginWrapper.style.display = "block";
-			loginMessage.textContent = "";
-			loggedIn = false;
-			resetHatList();
-			resetShirtList();
-			userName = logKey = "";
-			localStorage.setItem("logKey", "");
-			localStorage.setItem("userName", "");
-			socket.emit("dbLogout");
-		};
-		document.getElementById("recoverButton").onclick = () => {
-			socket.emit("dbRecov", {
-				userMail: userEmailInput.value,
-			});
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("createClanButton").onclick = () => {
-			socket.emit("dbClanCreate", {
-				clanName: (document.getElementById("clanNameInput") as HTMLInputElement).value,
-			});
-			clanDBMessage.style.display = "block";
-			clanDBMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("joinClanButton").onclick = () => {
-			socket.emit("dbClanJoin", {
-				clanKey: (document.getElementById("clanKeyInput") as HTMLInputElement).value,
-			});
-			clanDBMessage.style.display = "block";
-			clanDBMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("inviteClanButton").onclick = () => {
-			socket.emit("dbClanInvite", {
-				userName: clanInviteInput.value,
-			});
-			clanInvMessage.style.display = "block";
-			clanInvMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("kickClanButton").onclick = () => {
-			socket.emit("dbClanKick", {
-				userName: clanInviteInput.value,
-			});
-			clanInvMessage.style.display = "block";
-			clanInvMessage.textContent = "Please Wait...";
-		};
-		leaveClanButton.onclick = () => {
-			socket.emit("dbClanLeave");
-		};
-		document.getElementById("setChatClanButton").onclick = () => {
-			socket.emit("dbClanChatURL", {
-				chUrl: (document.getElementById("clanChatInput") as HTMLInputElement).value,
-			});
-			clanChtMessage.style.display = "inline-block";
-			clanChtMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("createServerButton").onclick = () => {
-			var modes = [];
-			for (let i = 0; i < 9; ++i) {
-				if ((document.getElementById(`serverMode${i}`) as HTMLInputElement).checked) {
-					modes.push(i);
-				}
-			}
-			socket.emit("cSrv", {
-				srvPlayers: (document.getElementById("serverPlayers") as HTMLInputElement).value,
-				srvHealthMult: (document.getElementById("serverHealthMult") as HTMLInputElement).value,
-				srvSpeedMult: (document.getElementById("serverSpeedMult") as HTMLInputElement).value,
-				srvPass: (document.getElementById("serverPass") as HTMLInputElement).value,
-				srvMap: customMap,
-				srvClnWr: (document.getElementById("clanWarEnabled") as HTMLInputElement).checked,
-				srvModes: modes,
-			});
-		};
-		document.getElementById("joinLobbyButton").onclick = () => {
-			if (changingLobby) return;
-			if (!lobbyInput.value.split("/")[0].trim()) {
-				lobbyMessage.style.display = "block";
-				lobbyMessage.textContent = "Please enter a valid IP";
-				return;
-			}
-			lobbyMessage.style.display = "block";
-			lobbyMessage.textContent = "Please wait...";
-			changingLobby = true;
-			const s = io(`http://${lobbyInput.value.split("/")[0]}:${port}`, {
-				reconnection: true,
-				forceNew: true,
-			});
-			s.once("connect", () => {
-				s.emit("create", {
-					room: lobbyInput.value.split("/")[1],
-					servPass: lobbyPass.value,
-					lgKey: logKey,
-					userName: userName,
-				});
-				s.once("lobbyRes", (a, d) => {
-					lobbyMessage.textContent = a.resp || a;
-					if (d) {
-						socket.removeListener("disconnect");
-						socket.once("disconnect", () => {
-							socket.close();
-							changingLobby = false;
-							socket = s;
-							st.socket = s;
-							setupSocket(socket);
-						});
-						socket.disconnect();
-					} else {
-						changingLobby = false;
-						s.disconnect();
-						s.close();
-					}
-				});
-			});
-			s.on("connect_error", (_) => {
-				lobbyMessage.textContent = "No Server Found.";
-				changingLobby = false;
-				s.close();
-			});
-		};
-	});
-};
-
 var newUsernameInput = document.getElementById("newUsernameInput") as HTMLInputElement;
 var youtubeChannelInput = document.getElementById("youtubeChannelInput") as HTMLInputElement;
 var editProfileMessage = document.getElementById("editProfileMessage");
@@ -4560,3 +4355,213 @@ function callUpdate() {
 	}
 }
 callUpdate();
+
+async function startup() {
+	if (st.mobile) {
+		document.getElementById("loadText").textContent = "MOBILE VERSION COMING SOON";
+		return;
+	}
+	document.documentElement.style.overflow = "hidden";
+	document.getElementById("gameAreaWrapper").style.opacity = "1";
+	drawMenuBackground();
+	document.getElementById("settingsButton").onclick = () => {
+		if (settings.style.maxHeight === "200px") {
+			settings.style.maxHeight = "0px";
+		} else {
+			settings.style.maxHeight = "200px";
+			howTo.style.maxHeight = "0px";
+		}
+	};
+	document.getElementById("instructionButton").onclick = () => {
+		if (howTo.style.maxHeight === "200px") {
+			howTo.style.maxHeight = "0px";
+		} else {
+			howTo.style.maxHeight = "200px";
+			settings.style.maxHeight = "0px";
+		}
+	};
+	document.getElementById("leaderButton").onclick = () => {
+		window.open("/leaderboards.html", "_blank");
+	};
+	hideUI(true);
+	$(".noRightClick").on("contextmenu", (_) => false);
+	resize();
+	$("#loadingWrapper").fadeOut(200, () => {});
+
+	const resp = await fetch("http://localhost:1118/getIP");
+	const { ip, port } = await resp.json();
+	if (!socket) {
+		socket = io(`http://${devTest ? "localhost" : ip}:${port}`, {
+			reconnection: true,
+			transports: ["websocket"],
+			forceNew: false,
+		});
+		st.socket = socket;
+		setupSocket(socket);
+	}
+	socket.once("connect", () => {
+		var logKey = localStorage.getItem("logKey");
+		var userName = localStorage.getItem("userName");
+		if (logKey && logKey !== "" && userName && userName !== "") {
+			socket.emit("dbLogin", {
+				lgKey: logKey,
+				userName: userName,
+				userPass: false,
+			});
+			loginMessage.style.display = "block";
+			loginMessage.textContent = "Logging in...";
+		} else {
+			loadSavedClass();
+		}
+		document.getElementById("startButton").onclick = () => {
+			startGame("player");
+		};
+		playerNameInput.addEventListener("keypress", (event) => {
+			if (event.code === "Enter") {
+				startGame("player");
+			}
+		});
+		document.getElementById("texturePackButton").onclick = () => {
+			loadModPack((document.getElementById("textureModInput") as HTMLInputElement).value, false);
+		};
+		document.getElementById("registerButton").onclick = () => {
+			socket.emit("dbReg", {
+				userName: userNameInput.value,
+				userEmail: userEmailInput.value,
+				userPass: userPassInput.value,
+			});
+			loginUserNm = userNameInput.value;
+			loginUserPs = userPassInput.value;
+			loginMessage.style.display = "block";
+			loginMessage.textContent = "Registering...";
+		};
+		document.getElementById("loginButton").onclick = () => {
+			startLogin();
+		};
+		document.getElementById("logoutButton").onclick = () => {
+			loggedInWrapper.style.display = "none";
+			loginWrapper.style.display = "block";
+			loginMessage.textContent = "";
+			loggedIn = false;
+			resetHatList();
+			resetShirtList();
+			userName = logKey = "";
+			localStorage.setItem("logKey", "");
+			localStorage.setItem("userName", "");
+			socket.emit("dbLogout");
+		};
+		document.getElementById("recoverButton").onclick = () => {
+			socket.emit("dbRecov", {
+				userMail: userEmailInput.value,
+			});
+			loginMessage.style.display = "block";
+			loginMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("createClanButton").onclick = () => {
+			socket.emit("dbClanCreate", {
+				clanName: (document.getElementById("clanNameInput") as HTMLInputElement).value,
+			});
+			clanDBMessage.style.display = "block";
+			clanDBMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("joinClanButton").onclick = () => {
+			socket.emit("dbClanJoin", {
+				clanKey: (document.getElementById("clanKeyInput") as HTMLInputElement).value,
+			});
+			clanDBMessage.style.display = "block";
+			clanDBMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("inviteClanButton").onclick = () => {
+			socket.emit("dbClanInvite", {
+				userName: clanInviteInput.value,
+			});
+			clanInvMessage.style.display = "block";
+			clanInvMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("kickClanButton").onclick = () => {
+			socket.emit("dbClanKick", {
+				userName: clanInviteInput.value,
+			});
+			clanInvMessage.style.display = "block";
+			clanInvMessage.textContent = "Please Wait...";
+		};
+		leaveClanButton.onclick = () => {
+			socket.emit("dbClanLeave");
+		};
+		document.getElementById("setChatClanButton").onclick = () => {
+			socket.emit("dbClanChatURL", {
+				chUrl: (document.getElementById("clanChatInput") as HTMLInputElement).value,
+			});
+			clanChtMessage.style.display = "inline-block";
+			clanChtMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("createServerButton").onclick = () => {
+			var modes = [];
+			for (let i = 0; i < 9; ++i) {
+				if ((document.getElementById(`serverMode${i}`) as HTMLInputElement).checked) {
+					modes.push(i);
+				}
+			}
+			socket.emit("cSrv", {
+				srvPlayers: (document.getElementById("serverPlayers") as HTMLInputElement).value,
+				srvHealthMult: (document.getElementById("serverHealthMult") as HTMLInputElement).value,
+				srvSpeedMult: (document.getElementById("serverSpeedMult") as HTMLInputElement).value,
+				srvPass: (document.getElementById("serverPass") as HTMLInputElement).value,
+				srvMap: customMap,
+				srvClnWr: (document.getElementById("clanWarEnabled") as HTMLInputElement).checked,
+				srvModes: modes,
+			});
+		};
+		document.getElementById("joinLobbyButton").onclick = () => {
+			if (changingLobby) return;
+			if (!lobbyInput.value.split("/")[0].trim()) {
+				lobbyMessage.style.display = "block";
+				lobbyMessage.textContent = "Please enter a valid IP";
+				return;
+			}
+			lobbyMessage.style.display = "block";
+			lobbyMessage.textContent = "Please wait...";
+			changingLobby = true;
+			const s = io(`http://${lobbyInput.value.split("/")[0]}:${port}`, {
+				reconnection: true,
+				forceNew: true,
+			});
+			s.once("connect", () => {
+				s.emit("create", {
+					room: lobbyInput.value.split("/")[1],
+					servPass: lobbyPass.value,
+					lgKey: logKey,
+					userName: userName,
+				});
+				s.once("lobbyRes", (a, d) => {
+					lobbyMessage.textContent = a.resp || a;
+					if (d) {
+						socket.removeListener("disconnect");
+						socket.once("disconnect", () => {
+							socket.close();
+							changingLobby = false;
+							socket = s;
+							st.socket = s;
+							setupSocket(socket);
+						});
+						socket.disconnect();
+					} else {
+						changingLobby = false;
+						s.disconnect();
+						s.close();
+					}
+				});
+			});
+			s.on("connect_error", (_) => {
+				lobbyMessage.textContent = "No Server Found.";
+				changingLobby = false;
+				s.close();
+			});
+		};
+	});
+}
+if (document.readyState === "complete") {
+	startup();
+} else {
+	document.addEventListener("DOMContentLoaded", startup);
+}
