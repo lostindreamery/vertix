@@ -685,6 +685,13 @@ function updateKeysUI() {
 }
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
+	if (event.repeat) {
+		console.log("ignoring repeat");
+		event.preventDefault();
+		return;
+	}
+	console.log("down", event);
+
 	if (keyToChange != null) {
 		event.preventDefault();
 		if (event.key) {
@@ -744,6 +751,7 @@ function keyDown(event: KeyboardEvent) {
 }
 mainCanvas.addEventListener("keyup", keyUp, false);
 function keyUp(event: KeyboardEvent) {
+	console.log("up", event);
 	event.preventDefault();
 	const normalizedKey = event.key.length === 1 ? event.key.toLowerCase() : event.key;
 	keyMap[normalizedKey] = event.type === "keydown";
