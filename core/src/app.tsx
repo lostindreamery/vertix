@@ -618,17 +618,17 @@ var keysList: {
 } = null;
 function inputReset(save: boolean) {
 	keysList = {
-		upKey: "w",
-		downKey: "s",
-		leftKey: "a",
-		rightKey: "d",
-		reloadKey: "r",
-		jumpKey: " ",
-		sprayKey: "f",
-		leaderboardKey: "Shift",
+		upKey: "KeyW",
+		downKey: "KeyS",
+		leftKey: "KeyA",
+		rightKey: "KeyD",
+		reloadKey: "KeyR",
+		jumpKey: "Space",
+		sprayKey: "KeyF",
+		leaderboardKey: "ShiftLeft",
 		chatToggleKey: "Enter",
-		incWeapKey: "e",
-		decWeapKey: "q",
+		incWeapKey: "KeyE",
+		decWeapKey: "KeyQ",
 	};
 	updateKeysUI();
 	if (save) {
@@ -686,7 +686,6 @@ function updateKeysUI() {
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
 	if (event.repeat) {
-		console.log("ignoring repeat");
 		event.preventDefault();
 		return;
 	}
@@ -694,9 +693,9 @@ function keyDown(event: KeyboardEvent) {
 
 	if (keyToChange != null) {
 		event.preventDefault();
-		if (event.key) {
-			keyChangeElement.textContent = event.key;
-			keysList[keyToChange] = event.key;
+		if (event.code) {
+			keyChangeElement.textContent = event.code;
+			keysList[keyToChange] = event.code;
 		} else {
 			keyChangeElement.textContent = previousKeyElementContent;
 		}
@@ -704,8 +703,8 @@ function keyDown(event: KeyboardEvent) {
 		saveKeysToCookie();
 	} else if (mainCanvas === document.activeElement) {
 		event.preventDefault();
-		keyMap[event.key.length === 1 ? event.key.toLowerCase() : event.key] = event.type === "keydown";
-		if (event.key === "Escape" && st.gameStart) {
+		keyMap[event.code] = event.type === "keydown";
+		if (event.code === "Escape" && st.gameStart) {
 			showESCMenu();
 		}
 		if (keyMap[keysList.upKey] && !keys.u) {
@@ -753,37 +752,36 @@ mainCanvas.addEventListener("keyup", keyUp, false);
 function keyUp(event: KeyboardEvent) {
 	console.log("up", event);
 	event.preventDefault();
-	const normalizedKey = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-	keyMap[normalizedKey] = event.type === "keydown";
-	if (normalizedKey === keysList.upKey) {
+	keyMap[event.code] = event.type === "keydown";
+	if (event.code === keysList.upKey) {
 		keys.u = false;
 	}
-	if (normalizedKey === keysList.downKey) {
+	if (event.code === keysList.downKey) {
 		keys.d = false;
 	}
-	if (normalizedKey === keysList.leftKey) {
+	if (event.code === keysList.leftKey) {
 		keys.l = false;
 	}
-	if (normalizedKey === keysList.rightKey) {
+	if (event.code === keysList.rightKey) {
 		keys.r = false;
 	}
-	if (normalizedKey === keysList.jumpKey) {
+	if (event.code === keysList.jumpKey) {
 		keys.s = false;
 	}
-	if (normalizedKey === keysList.reloadKey) {
+	if (event.code === keysList.reloadKey) {
 		keys.rl = false;
 	}
-	if (normalizedKey === keysList.incWeapKey) {
+	if (event.code === keysList.incWeapKey) {
 		playerSwapWeapon(findUserByIndex(st.player.index), 1);
 	}
-	if (normalizedKey === keysList.decWeapKey) {
+	if (event.code === keysList.decWeapKey) {
 		playerSwapWeapon(findUserByIndex(st.player.index), -1);
 	}
-	if (normalizedKey === keysList.sprayKey) {
+	if (event.code === keysList.sprayKey) {
 		sendSpray();
 	}
 	if (
-		normalizedKey === keysList.leaderboardKey &&
+		event.code === keysList.leaderboardKey &&
 		!!showingScoreBoard &&
 		!st.player.dead &&
 		!st.gameOver &&
