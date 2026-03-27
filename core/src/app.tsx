@@ -1355,9 +1355,9 @@ function setupSocket(sock: Socket) {
 		st.player = a.you;
 		e = findUserByIndex(a.you.index);
 		if (e != null) {
-			gameObjects[gameObjects.indexOf(e)] = a.you;
+			gameObjects[gameObjects.indexOf(e)] = st.player;
 		} else {
-			gameObjects.push(a.you);
+			gameObjects.push(st.player);
 		}
 		updateWeaponUI(st.player, true);
 		if (inMainMenu) {
@@ -2718,6 +2718,7 @@ function drawOverlay(ctx: CanvasRenderingContext2D, fadeUp: boolean, fadeDown: b
 }
 var drawMiniMapFPS = 4;
 var drawMiniMapCounter = 0;
+window.st = st;
 function doGame(delta: number) {
 	updateScreenShake(/*delta*/);
 	if (target != null) {
