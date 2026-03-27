@@ -689,7 +689,6 @@ function keyDown(event: KeyboardEvent) {
 		event.preventDefault();
 		return;
 	}
-	console.log("down", event);
 
 	if (keyToChange != null) {
 		event.preventDefault();
@@ -750,7 +749,6 @@ function keyDown(event: KeyboardEvent) {
 }
 mainCanvas.addEventListener("keyup", keyUp, false);
 function keyUp(event: KeyboardEvent) {
-	console.log("up", event);
 	event.preventDefault();
 	keyMap[event.code] = event.type === "keydown";
 	if (event.code === keysList.upKey) {
@@ -2718,7 +2716,6 @@ function drawOverlay(ctx: CanvasRenderingContext2D, fadeUp: boolean, fadeDown: b
 }
 var drawMiniMapFPS = 4;
 var drawMiniMapCounter = 0;
-window.st = st;
 function doGame(delta: number) {
 	updateScreenShake(/*delta*/);
 	if (target != null) {
