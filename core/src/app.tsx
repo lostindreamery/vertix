@@ -632,7 +632,7 @@ function inputReset(save: boolean) {
 	};
 	updateKeysUI();
 	if (save) {
-		localStorage.setItem("customControls", JSON.stringify(keysList));
+		localStorage.setItem("customControls2", JSON.stringify(keysList));
 	}
 }
 inputReset(false);
@@ -649,11 +649,11 @@ function inputChange(elem: HTMLElement, ktc: keyof typeof keysList) {
 	keyToChange = ktc;
 }
 function saveKeysToCookie() {
-	localStorage.setItem("customControls", JSON.stringify(keysList));
+	localStorage.setItem("customControls2", JSON.stringify(keysList));
 }
-if (localStorage.getItem("customControls")) {
+if (localStorage.getItem("customControls2")) {
 	try {
-		keysList = JSON.parse(localStorage.getItem("customControls"));
+		keysList = JSON.parse(localStorage.getItem("customControls2"));
 	} catch (e) {
 		console.error("Error in parsing custom control setting", e);
 	}
