@@ -1003,26 +1003,6 @@ document.getElementById("selectChat").addEventListener("click", function (this: 
 	document.getElementById("chatList").style.pointerEvents = selectChat ? "auto" : "none";
 });
 
-var targetFPS = 60;
-if (localStorage.getItem("targetFPS")) {
-	try {
-		targetFPS = Number.parseInt(localStorage.getItem("targetFPS"));
-	} catch (_) {
-		targetFPS = 60;
-	}
-	const fpsSelect = document.getElementById("fpsSelect") as HTMLSelectElement;
-	fpsSelect.value = targetFPS.toString();
-}
-
-document.getElementById("fpsSelect").addEventListener("change", function (this: HTMLSelectElement) {
-	try {
-		targetFPS = Number.parseInt(this.options[this.selectedIndex].value);
-	} catch (_) {
-		targetFPS = 60;
-	}
-	localStorage.setItem("targetFPS", targetFPS.toString());
-});
-
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>
 		elem.addEventListener("click", (event) => {
@@ -2487,14 +2467,20 @@ function hideUI(hideChatbox: boolean) {
 //   }
 //   tabbed = 1;
 // });
-var fpsUpdateUICounter = 0;
+let fpsUpdateDelta = 0;
+let fpsSamples: number[] = [];
 function updateGameLoop() {
 	delta = currentTime - oldTime;
-	fpsUpdateUICounter--;
-	if (fpsUpdateUICounter <= 0) {
-		currentFPS = Math.round(1000 / delta);
-		if (fpsText) fpsText.textContent = `FPS ${currentFPS}`;
-		fpsUpdateUICounter = targetFPS;
+
+	currentFPS = delta ? 1000 / delta : 0;
+	fpsSamples.push(currentFPS);
+
+	fpsUpdateDelta += delta;
+	if (fpsUpdateDelta >= 1000) {
+		const average = fpsSamples.reduce((a, b) => a + b) / fpsSamples.length;
+		fpsText.textContent = `FPS ${Math.round(average)}`;
+		fpsUpdateDelta = 0;
+		fpsSamples = [];
 	}
 	oldTime = currentTime;
 	let horizontalDT = 0;
@@ -4552,15 +4538,9 @@ function getCachedShadow(
 	return cachedShadows[sprite.index];
 }
 
-var then = Date.now();
-let elapsed: number | undefined;
 function callUpdate() {
 	requestAnimationFrame(callUpdate);
 	currentTime = Date.now();
-	elapsed = currentTime - then;
-	if (elapsed > 1000 / targetFPS) {
-		then = currentTime - (elapsed % (1000 / targetFPS));
-		updateGameLoop();
-	}
+	updateGameLoop();
 }
 callUpdate();
