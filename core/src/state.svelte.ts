@@ -48,4 +48,20 @@ export const st = $state({
 		},
 		JSON.parse(localStorage.getItem("settings") ?? "{}") as object,
 	),
+	keysList: Object.assign(
+		{
+			upKey: "KeyW",
+			downKey: "KeyS",
+			leftKey: "KeyA",
+			rightKey: "KeyD",
+			reloadKey: "KeyR",
+			jumpKey: "Space",
+			sprayKey: "KeyF",
+			leaderboardKey: "ShiftLeft",
+			chatToggleKey: "Enter",
+			incWeapKey: "KeyE",
+			decWeapKey: "KeyQ",
+		},
+		JSON.parse(localStorage.getItem("keysList") ?? "{}") as object,
+	),
 });

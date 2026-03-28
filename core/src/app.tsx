@@ -39,6 +39,7 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
+import Controls from "./components/controls.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
@@ -123,7 +124,7 @@ var userPassInput = document.getElementById("passwordInput") as HTMLInputElement
 var loginUserNm = "";
 var loginUserPs = "";
 var settings = document.getElementById("settings");
-var howTo = document.getElementById("instructions");
+var controls = document.getElementById("controls");
 var lobbyInput = document.getElementById("lobbyKey") as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass") as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage");
@@ -210,14 +211,14 @@ window.onload = async () => {
 			settings.style.maxHeight = "0px";
 		} else {
 			settings.style.maxHeight = "200px";
-			howTo.style.maxHeight = "0px";
+			controls.style.maxHeight = "0px";
 		}
 	};
 	document.getElementById("instructionButton").onclick = () => {
-		if (howTo.style.maxHeight === "200px") {
-			howTo.style.maxHeight = "0px";
+		if (controls.style.maxHeight === "200px") {
+			controls.style.maxHeight = "0px";
 		} else {
-			howTo.style.maxHeight = "200px";
+			controls.style.maxHeight = "200px";
 			settings.style.maxHeight = "0px";
 		}
 	};
@@ -602,143 +603,50 @@ mainCanvas.addEventListener("wheel", (event) => {
 });
 var keyMap: Record<string, boolean> = {};
 var showingScoreBoard = false;
-var keyToChange: keyof typeof keysList | null = null;
-var keyChangeElement: HTMLElement | null = null;
 
-var keysList: {
-	upKey: string;
-	downKey: string;
-	leftKey: string;
-	rightKey: string;
-	reloadKey: string;
-	jumpKey: string;
-	sprayKey: string;
-	leaderboardKey: string;
-	chatToggleKey: string;
-	incWeapKey: string;
-	decWeapKey: string;
-} = null;
-function inputReset(save: boolean) {
-	keysList = {
-		upKey: "KeyW",
-		downKey: "KeyS",
-		leftKey: "KeyA",
-		rightKey: "KeyD",
-		reloadKey: "KeyR",
-		jumpKey: "Space",
-		sprayKey: "KeyF",
-		leaderboardKey: "ShiftLeft",
-		chatToggleKey: "Enter",
-		incWeapKey: "KeyE",
-		decWeapKey: "KeyQ",
-	};
-	updateKeysUI();
-	if (save) {
-		localStorage.setItem("customControls2", JSON.stringify(keysList));
-	}
-}
-inputReset(false);
-var previousKeyElementContent: string | null = null;
-//@ts-ignore
-window.inputChange = inputChange;
-function inputChange(elem: HTMLElement, ktc: keyof typeof keysList) {
-	if (keyToChange != null && keyChangeElement != null) {
-		keyChangeElement.textContent = previousKeyElementContent;
-	}
-	previousKeyElementContent = elem.textContent;
-	elem.textContent = "Press any Key";
-	keyChangeElement = elem;
-	keyToChange = ktc;
-}
-function saveKeysToCookie() {
-	localStorage.setItem("customControls2", JSON.stringify(keysList));
-}
-if (localStorage.getItem("customControls2")) {
-	try {
-		keysList = JSON.parse(localStorage.getItem("customControls2"));
-	} catch (e) {
-		console.error("Error in parsing custom control setting", e);
-	}
-	if (keysList) {
-		updateKeysUI();
-	}
-}
-function updateKeysUI() {
-	document.getElementById("upKeyCh").textContent = keysList.upKey;
-	document.getElementById("downKeyCh").textContent = keysList.downKey;
-
-	document.getElementById("leftKeyCh").textContent = keysList.leftKey;
-
-	document.getElementById("rightKeyCh").textContent = keysList.rightKey;
-
-	document.getElementById("reloadKeyCh").textContent = keysList.reloadKey;
-
-	document.getElementById("jumpKeyCh").textContent = keysList.jumpKey;
-
-	document.getElementById("sprayKeyCh").textContent = keysList.sprayKey;
-
-	document.getElementById("leaderboardKeyCh").textContent = keysList.leaderboardKey;
-
-	document.getElementById("chatToggleKeyCh").textContent = keysList.chatToggleKey;
-
-	document.getElementById("incWeapKeyCh").textContent = keysList.incWeapKey;
-
-	document.getElementById("decWeapKeyCh").textContent = keysList.decWeapKey;
-}
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
 	if (event.repeat) {
 		event.preventDefault();
 		return;
 	}
-
-	if (keyToChange != null) {
-		event.preventDefault();
-		if (event.code) {
-			keyChangeElement.textContent = event.code;
-			keysList[keyToChange] = event.code;
-		} else {
-			keyChangeElement.textContent = previousKeyElementContent;
-		}
-		keyChangeElement = keyToChange = null;
-		saveKeysToCookie();
-	} else if (mainCanvas === document.activeElement) {
+	if (mainCanvas === document.activeElement) {
 		event.preventDefault();
 		keyMap[event.code] = event.type === "keydown";
 		if (event.code === "Escape" && st.gameStart) {
 			showESCMenu();
 		}
-		if (keyMap[keysList.upKey] && !keys.u) {
+		if (keyMap[st.keysList.upKey] && !keys.u) {
 			keys.u = true;
 			keys.d = false;
-			keyMap[keysList.downKey] = false;
+			keyMap[st.keysList.downKey] = false;
 		}
-		if (keyMap[keysList.downKey] && !keys.d) {
+		if (keyMap[st.keysList.downKey] && !keys.d) {
 			keys.d = true;
 			keys.u = false;
-			keyMap[keysList.upKey] = false;
+			keyMap[st.keysList.upKey] = false;
 		}
-		if (keyMap[keysList.leftKey] && !keys.l) {
+		if (keyMap[st.keysList.leftKey] && !keys.l) {
 			keys.l = true;
 			keys.r = false;
-			keyMap[keysList.rightKey] = false;
+			keyMap[st.keysList.rightKey] = false;
 		}
-		if (keyMap[keysList.rightKey] && !keys.r) {
+		if (keyMap[st.keysList.rightKey] && !keys.r) {
 			keys.r = true;
 			keys.l = false;
-			keyMap[keysList.leftKey] = false;
+			keyMap[st.keysList.leftKey] = false;
 		}
-		if (keyMap[keysList.jumpKey] && !keys.s) {
+		if (keyMap[st.keysList.jumpKey] && !keys.s) {
 			keys.s = true;
 		}
-		if (keyMap[keysList.reloadKey] && !keys.rl) {
+		if (keyMap[st.keysList.reloadKey] && !keys.rl) {
 			keys.rl = true;
 		}
-		if (keyMap[keysList.chatToggleKey]) {
+		if (keyMap[st.keysList.chatToggleKey]) {
 			document.getElementById("chatInput").focus();
 		}
 		if (
-			!!keyMap[keysList.leaderboardKey] &&
+			!!keyMap[st.keysList.leaderboardKey] &&
 			!!st.gameStart &&
 			!showingScoreBoard &&
 			!st.player.dead &&
@@ -753,35 +661,35 @@ mainCanvas.addEventListener("keyup", keyUp, false);
 function keyUp(event: KeyboardEvent) {
 	event.preventDefault();
 	keyMap[event.code] = event.type === "keydown";
-	if (event.code === keysList.upKey) {
+	if (event.code === st.keysList.upKey) {
 		keys.u = false;
 	}
-	if (event.code === keysList.downKey) {
+	if (event.code === st.keysList.downKey) {
 		keys.d = false;
 	}
-	if (event.code === keysList.leftKey) {
+	if (event.code === st.keysList.leftKey) {
 		keys.l = false;
 	}
-	if (event.code === keysList.rightKey) {
+	if (event.code === st.keysList.rightKey) {
 		keys.r = false;
 	}
-	if (event.code === keysList.jumpKey) {
+	if (event.code === st.keysList.jumpKey) {
 		keys.s = false;
 	}
-	if (event.code === keysList.reloadKey) {
+	if (event.code === st.keysList.reloadKey) {
 		keys.rl = false;
 	}
-	if (event.code === keysList.incWeapKey) {
+	if (event.code === st.keysList.incWeapKey) {
 		playerSwapWeapon(findUserByIndex(st.player.index), 1);
 	}
-	if (event.code === keysList.decWeapKey) {
+	if (event.code === st.keysList.decWeapKey) {
 		playerSwapWeapon(findUserByIndex(st.player.index), -1);
 	}
-	if (event.code === keysList.sprayKey) {
+	if (event.code === st.keysList.sprayKey) {
 		sendSpray();
 	}
 	if (
-		event.code === keysList.leaderboardKey &&
+		event.code === st.keysList.leaderboardKey &&
 		!!showingScoreBoard &&
 		!st.player.dead &&
 		!st.gameOver &&
@@ -828,6 +736,9 @@ mapContext.imageSmoothingEnabled = false;
 mount(Settings, {
 	target: document.getElementById("settings"),
 });
+mount(Controls, {
+	target: document.getElementById("controls")
+})
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>

@@ -8,6 +8,8 @@ export default {
 				runes: true,
 				hmr: true,
 				preserveComments: true,
+				// not ideal
+				warningFilter: (w) => !w.code.includes("a11y"),
 			},
 		}),
 	],

@@ -7,7 +7,7 @@ $effect(() => {
 </script>
 
 <!-- could be better organized, but this is a start -->
-<h2 class="settingHeader">GRAPHICS:</h2>
+<h2>GRAPHICS:</h2>
 <label>
     <input bind:checked={st.settings.showParticles} type="checkbox" />
     Particles
@@ -32,7 +32,7 @@ $effect(() => {
     <input bind:checked={st.settings.showNames} type="checkbox" />
     Names
 </label>
-<h2 class="settingHeader">OTHER:</h2>
+<h2>OTHER:</h2>
 <label>
     <input bind:checked={st.settings.showUI} type="checkbox" />
     Show UI
@@ -66,14 +66,14 @@ $effect(() => {
     <input bind:checked={st.settings.showSprays} type="checkbox" />
     Sprays
 </label>
-<h2 class="settingHeader">SECRET:</h2>
+<h2>SECRET:</h2>
 <label>
     <input bind:checked={st.settings.showTrippy} type="checkbox" />
     Migraine
 </label>
 
 <style>
-    .settingHeader {
+    h2 {
         font-size: 14px;
         color: rgba(0, 0, 0, 0.6);
         margin-bottom: 5px;
