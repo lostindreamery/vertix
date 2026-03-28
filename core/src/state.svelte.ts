@@ -30,5 +30,22 @@ export const st = $state({
 	gameOver: false,
 	mobile: false,
 	socket: null as Socket | null,
+	settings: Object.assign(
+		{
+			showNames: true,
+			showParticles: true,
+			showTrippy: false,
+			showSprays: true,
+			showFade: true,
+			showShadows: true,
+			showGlows: true,
+			showBTrails: true,
+			showChat: true,
+			showUI: true,
+			showPINGFPS: true,
+			showLeader: true,
+			selectChat: false,
+		},
+		JSON.parse(localStorage.getItem("settings") ?? "{}") as object,
+	),
 });
-

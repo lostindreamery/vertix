@@ -19,7 +19,6 @@ body {
 }
 
 * {
-	/* biome-ignore lint/a11y/useGenericFontNames: don't need a fallback here */
 	font-family: "mainFont";
 	font-size: 12px;
 	image-rendering: pixelated;

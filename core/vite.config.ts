@@ -2,7 +2,12 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import type { UserConfig } from "vite";
 
 export default {
-	plugins: [svelte()],
+	plugins: [svelte({
+		compilerOptions: {
+			runes: true,
+			hmr: true
+		}
+	})],
 	build: {
 		target: "esnext",
 	},
