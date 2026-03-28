@@ -826,7 +826,7 @@ mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
 
 mount(Settings, {
-	target: document.getElementById("settings")
+	target: document.getElementById("settings"),
 });
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(

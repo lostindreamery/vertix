@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { st } from "../state.svelte.ts";
+import { st } from "../state.svelte.ts";
 
-    $effect(() => {
-        localStorage.setItem("settings", JSON.stringify(st.settings));
-    });
+$effect(() => {
+	localStorage.setItem("settings", JSON.stringify(st.settings));
+});
 </script>
 
 <!-- could be better organized, but this is a start -->
