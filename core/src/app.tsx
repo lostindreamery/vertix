@@ -737,8 +737,8 @@ mount(Settings, {
 	target: document.getElementById("settings"),
 });
 mount(Controls, {
-	target: document.getElementById("controls")
-})
+	target: document.getElementById("controls"),
+});
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>

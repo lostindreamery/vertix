@@ -1,40 +1,40 @@
 <script lang="ts">
-    import { st } from "../state.svelte.ts";
+import { st } from "../state.svelte.ts";
 
-    $effect(() => {
-        // don't save if the user is in the middle of selecting a new keybind
-        if (Object.values(st.keysList).includes(null)) return;
+$effect(() => {
+	// don't save if the user is in the middle of selecting a new keybind
+	if (Object.values(st.keysList).includes(null)) return;
 
-        localStorage.setItem("keysList", JSON.stringify(st.keysList));
-    });
+	localStorage.setItem("keysList", JSON.stringify(st.keysList));
+});
 
-    function inputReset() {
-        st.keysList = {
-            upKey: "KeyW",
-            downKey: "KeyS",
-            leftKey: "KeyA",
-            rightKey: "KeyD",
-            reloadKey: "KeyR",
-            jumpKey: "Space",
-            sprayKey: "KeyF",
-            leaderboardKey: "ShiftLeft",
-            chatToggleKey: "Enter",
-            incWeapKey: "KeyE",
-            decWeapKey: "KeyQ",
-        };
-    }
+function inputReset() {
+	st.keysList = {
+		upKey: "KeyW",
+		downKey: "KeyS",
+		leftKey: "KeyA",
+		rightKey: "KeyD",
+		reloadKey: "KeyR",
+		jumpKey: "Space",
+		sprayKey: "KeyF",
+		leaderboardKey: "ShiftLeft",
+		chatToggleKey: "Enter",
+		incWeapKey: "KeyE",
+		decWeapKey: "KeyQ",
+	};
+}
 
-    function getKeyInput(control: keyof typeof st.keysList) {
-        st.keysList[control] = null;
-        document.addEventListener(
-            "keydown",
-            (event) => {
-                event.preventDefault();
-                st.keysList[control] = event.code;
-            },
-            { once: true },
-        );
-    }
+function getKeyInput(control: keyof typeof st.keysList) {
+	st.keysList[control] = null;
+	document.addEventListener(
+		"keydown",
+		(event) => {
+			event.preventDefault();
+			st.keysList[control] = event.code;
+		},
+		{ once: true },
+	);
+}
 </script>
 
 <!-- could be better organized, but this is a start -->
