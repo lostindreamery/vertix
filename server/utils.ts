@@ -1,5 +1,5 @@
 import { gameModes } from "core/src/gamemodes.ts";
-import type { weapons } from "core/src/loadouts.ts";
+import { characterClasses, weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
 import type {
 	Account,
@@ -10,8 +10,20 @@ import type {
 	Player,
 	Tile,
 } from "core/src/types.ts";
-import { getDistance, setupMap } from "core/src/utils.ts";
+import {
+	shootNextBullet,
+	getNextBullet,
+	wallCol,
+	getCurrentWeapon,
+	roundNumber,
+	getDistance,
+	setupMap,
+} from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
+import type { Server, Socket } from "socket.io";
+import { hats, camos, shirts } from "core/src/skins.ts";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 export class Room {
 	id = 0;
@@ -29,12 +41,13 @@ export class Room {
 	nextAvailableSid = 0;
 	scoreZone: any;
 
-	constructor() {
+	constructor(io: Server) {
 		this.gameMode = gameModes[2];
 		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[1]]);
 		for (let i = 0; i < 100; i++) {
 			this.bullets.push(new Projectile());
 		}
+		new RoomSocket(io, this);
 	}
 
 	newPlayer(playerWeps: typeof weapons) {
@@ -130,5 +143,390 @@ export class Room {
 			}
 		}
 		return spawn;
+	}
+}
+
+class RoomSocket {
+	io
+	room
+	constructor(io: Server, room: Room) {
+		this.io = io;
+		this.room = room;
+		this.handleSocket();
+	}
+	handleSocket() {
+		this.io.on("connection", (socket: Socket) => {
+			console.log("con", socket.id);
+
+			const playerWeps = structuredClone(weapons);
+			let player = this.room.newPlayer(playerWeps);
+
+			socket.emit(
+				"welcome",
+				{
+					id: player.id,
+					room: player.room,
+					name: player.name,
+					classIndex: player.classIndex,
+				},
+				true,
+			);
+			socket.emit(
+				"updCmo",
+				camos.length,
+				weapons.map(() =>
+					camos
+						.filter((h) => !h.hide)
+						.map((p) => ({
+							id: p.id,
+							name: p.name,
+							chance: p.chance,
+							count: 0,
+						}))
+						.toSorted((a, b) => a.chance - b.chance),
+				),
+			);
+			socket.on("cCamo", (data) => {
+				playerWeps[data.weaponID].camo = data.camoID - 1;
+			});
+
+			const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
+			const hatData = hats
+				.filter((h) => !h.hide)
+				.map((h) => ({
+					id: h.id,
+					name: h.name,
+					desc: h.desc,
+					chance: h.chance,
+					count: 0,
+					creator: h.creator,
+					left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
+					up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
+				}))
+				.toSorted((a, b) => a.chance - b.chance);
+			socket.emit("updHt", hats.length, hatData);
+
+			socket.on("cHat", (id) => {
+				player.account.hat = hats[id - 1];
+			});
+
+			const shirtPathBase = join(
+				import.meta.dirname,
+				"../core/public/images/shirts",
+			);
+			const shirtData = shirts
+				.filter((h) => !h.hide)
+				.map((s) => ({
+					id: s.id,
+					name: s.name,
+					desc: s.desc,
+					chance: s.chance,
+					count: 0,
+					left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
+					up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
+				}))
+				.toSorted((a, b) => a.chance - b.chance);
+			socket.emit("updShrt", shirts.length, shirtData);
+
+			socket.on("cShirt", (id) => {
+				player.account.shirt = shirts[id - 1];
+			});
+			socket.on("gotit", (client, init, currentTime) => {
+				console.log("gotit", client, init, currentTime);
+				player.name = client.name ? client.name : player.name;
+				player.classIndex = client.classIndex ? client.classIndex : 0;
+				const currentClass = characterClasses[player.classIndex];
+				player.weapons = currentClass.weaponIndexes.map((i) => playerWeps[i]);
+				player.health = player.maxHealth = currentClass.maxHealth;
+				player.height = currentClass.height;
+				player.width = currentClass.width;
+				player.speed = currentClass.speed;
+				if (init) return;
+
+				player.onScreen = true;
+				player.angle = 0;
+				const spawn = this.room.getSpawn();
+				player.x = spawn.x;
+				player.y = spawn.y;
+				player.dead = false;
+
+				const gameSetup = {
+					mapData: this.room.mapData,
+
+					maxScreenWidth: 1920,
+					maxScreenHeight: 1080,
+					viewMult: 1,
+					tileScale: this.room.tileScale,
+
+					usersInRoom: this.room.players,
+					you: player,
+				};
+
+				socket.emit("gameSetup", JSON.stringify(gameSetup), true, true);
+
+				this.io.emit("add", JSON.stringify(player));
+				this.updatePlayers();
+				this.updateLeaderboard();
+			});
+			socket.on("respawn", () => {
+				socket.emit(
+					"welcome",
+					{
+						id: player.id,
+						room: player.room,
+						name: player.name,
+						classIndex: player.classIndex,
+					},
+					false,
+				);
+			});
+			socket.on("disconnect", () => {
+				this.io.emit("rem", player.index);
+				this.room.players.splice(this.room.players.indexOf(player), 1);
+			});
+			socket.on("sw", (currentWeapon) => {
+				player.currentWeapon = currentWeapon;
+				this.io.emit("upd", { i: player.index, wi: player.currentWeapon });
+			});
+			socket.on("r", () => {
+				const currentWeapon = getCurrentWeapon(player);
+				const swappedWeapon = player.currentWeapon;
+				setTimeout(() => {
+					socket.emit("r", swappedWeapon);
+				}, currentWeapon.reloadSpeed ?? 0);
+			});
+			socket.on("0", (targetF) => {
+				player.targetF = targetF;
+			});
+			socket.on("1", (x, y, jumpY, targetF, targetD, currentTime) => {
+				const currentWeapon = getCurrentWeapon(player);
+				if (!currentWeapon) return;
+				currentWeapon.spreadIndex++;
+				if (currentWeapon.spreadIndex >= currentWeapon.spread.length) {
+					currentWeapon.spreadIndex = 0;
+				}
+				var d = currentWeapon.spread[currentWeapon.spreadIndex];
+				d = roundNumber(targetF + Math.PI + d, 2);
+				var e = currentWeapon.holdDist + currentWeapon.bDist;
+				var f = Math.round(x + e * Math.cos(d));
+				e = Math.round(y - currentWeapon.yOffset - jumpY + e * Math.sin(d));
+				this.io.emit("2", {
+					i: player.index,
+					x: f,
+					y: e,
+					d: d,
+					si: -1,
+				});
+				for (let i = 0; i < currentWeapon.bulletsPerShot; i++) {
+					const bullet = getNextBullet(this.room.bullets);
+					shootNextBullet(
+						{
+							i: player.index,
+							x: f,
+							y: e,
+							d: d,
+							si: -1,
+						},
+						player,
+						targetD,
+						currentTime,
+						bullet,
+					);
+					this.updateBullet(bullet, player, d, currentTime);
+				}
+			});
+			socket.on("4", (data) => {
+				let horizontalDT = data.hdt;
+				let verticalDT = data.vdt;
+				//let currentTime = data.ts;
+				let inputNumber = data.isn;
+				let space = data.s;
+				player.delta = data.delta;
+				let delta = data.delta;
+				var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
+				if (e !== 0) {
+					horizontalDT /= e;
+					verticalDT /= e;
+				}
+				player.oldX = player.x;
+				player.oldY = player.y;
+				player.x += horizontalDT * player.speed * delta;
+				player.y += verticalDT * player.speed * delta;
+				player.angle =
+					((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
+				if (space === 1) {
+					this.io.emit("jum", player.index);
+				}
+				wallCol(player, this.room.tiles, this.room.clutter);
+				player.x = Math.round(player.x);
+				player.y = Math.round(player.y);
+				// TODO: gamemode objectve
+				if (this.room.gameMode.code == "hp") {
+					if (this.room.scoreZone.x < player.x && player.x < this.room.scoreZone.x2 && this.room.scoreZone.y < player.y && player.y < this.room.scoreZone.y2) {
+						if (player.scoreCountdown <= 0) {
+							player.scoreCountdown = 1000;
+							socket.emit("tprt", { indx: player.index, scor: 6 })
+						} else {
+							player.scoreCountdown -= delta;
+						}
+					}
+				}
+				this.io.emit(
+					"rsd",
+					this.room.players.flatMap((pl) => [6, pl.index, pl.x, pl.y, pl.angle, inputNumber]),
+				);
+			});
+			socket.on("cht", (msg, type) => {
+				if (msg.includes("!sync")) {
+					this.updatePlayers();
+					socket.emit("cht", [-1, "synced"]);
+					return;
+				}
+				this.io.emit("cht", [player.index, msg]);
+			});
+			socket.on("ping1", () => {
+				socket.emit("pong1");
+			});
+			socket.on("create", (lobby) => { });
+		})
+	}
+
+	updatePlayers() {
+		this.io.emit(
+			"rsd",
+			this.room.players.flatMap((pl) => [
+				5,
+				pl.index,
+				pl.x,
+				pl.y,
+				pl.angle,
+			]),
+		);
+	}
+
+	updateLeaderboard() {
+		this.io.emit(
+			"lb",
+			this.room.players.toSorted((a, b) => b.score - a.score).flatMap((pl) => [pl.index]),
+		);
+		this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
+	}
+
+	updateBullet(bullet: Projectile, player: Player, dir: number, currentTime: number) {
+		const tick = () => {
+			if (bullet.lastHit.length > 0) {
+				for (const i of bullet.lastHit) {
+					this.updateHit(player, this.room.players[i], -bullet.dmg, dir);
+				}
+			} else if (!bullet.active && bullet.explodeOnDeath) {
+				this.io.emit("ex", bullet.x, bullet.y, 3);
+				for (const pl of this.room.players) {
+					const left = pl.x - pl.width / 2;
+					const right = pl.x + pl.width / 2;
+					const top = pl.y - pl.height;
+					const bottom = pl.y;
+					const dist = getDistance(
+						bullet.x,
+						bullet.y,
+						Math.max(left, Math.min(right, bullet.x)),
+						Math.max(top, Math.min(bottom, bullet.y)),
+					);
+					if (bullet.blastRadius > dist) {
+						const dmg =
+							-bullet.blastRadius + Math.round(dist) < -bullet.dmg
+								? -bullet.dmg
+								: -bullet.blastRadius + Math.round(dist);
+						this.updateHit(player, pl, dmg, dir);
+					}
+				}
+			} else {
+				bullet.update(
+					player.delta,
+					currentTime,
+					this.room.clutter,
+					this.room.tiles,
+					this.room.players,
+				);
+				setTimeout(tick, player.delta);
+				return;
+			}
+			bullet.deactivate();
+		};
+		tick();
+	}
+
+	updateHit(source: Player, dest: Player, dmg: number, dir: number) {
+		if (dest?.dead) return;
+		dest.health += dmg;
+		this.io.emit("1", {
+			dID: source.index,
+			gID: dest.index,
+			dir: dir,
+			amount: dmg,
+			bi: -1,
+			h: dest.health, //undefined sometimes
+		});
+		const dead = dest.health <= 0;
+		if (!dead) return;
+		dest.dead = true;
+		dest.onScreen = false;
+		this.io.emit("3", {
+			dID: source.index,
+			gID: dest.index,
+			sS: 100,
+		});
+		source.score += 100;
+		source.kills += 1;
+		this.io.emit("upd", {
+			i: source.index,
+			s: source.score,
+			kil: source.kills,
+		});
+		dest.deaths += 1;
+		this.io.emit("upd", {
+			i: dest.index,
+			dea: dest.deaths,
+		});
+		let score = 100 / (this.room.gameMode.score / 100);
+		source.team === "red"
+			? (this.room.scoreRed += score)
+			: (this.room.scoreBlue += score);
+
+		this.updateLeaderboard();
+		if (this.room.scoreRed >= 100 || this.room.scoreBlue >= 100) {
+			this.io.emit(
+				"7",
+				this.room.scoreRed > this.room.scoreBlue ? "red" : "blue",
+				this.room.players,
+				{},
+				false,
+			);
+			let timeLeft = 15;
+			let timer = setInterval(() => {
+				if (timeLeft >= 0) {
+					this.io.emit("8", timeLeft--);
+				} else {
+					this.room.scoreRed = 0;
+					this.room.scoreBlue = 0;
+					for (const pl of this.room.players) {
+						pl.score = 0;
+						pl.kills = 0;
+						pl.deaths = 0;
+						this.io.emit(
+							"welcome",
+							{
+								id: pl.id,
+								room: pl.room,
+								name: pl.name,
+								classIndex: pl.classIndex,
+							},
+							true,
+						);
+					}
+					this.updateLeaderboard();
+					clearInterval(timer);
+				}
+			}, 1000);
+		}
 	}
 }
