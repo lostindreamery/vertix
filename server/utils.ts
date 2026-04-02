@@ -27,10 +27,11 @@ export class Room {
 	scoreBlue = 0;
 	bullets: Projectile[] = [];
 	nextAvailableSid = 0;
+	scoreZone: any;
 
 	constructor() {
-		this.gameMode = gameModes[1];
-		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
+		this.gameMode = gameModes[2];
+		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[1]]);
 		for (let i = 0; i < 100; i++) {
 			this.bullets.push(new Projectile());
 		}
@@ -59,6 +60,7 @@ export class Room {
 			gravityStrength: 0.0058,
 			jumpCountdown: 0,
 			frameCountdown: 0,
+			scoreCountdown: 0,
 			kills: 0,
 			deaths: 0,
 			score: 0,
@@ -85,6 +87,7 @@ export class Room {
 		this.tiles = [];
 		this.clutter = [];
 		this.pickups = [];
+		let flags = [] as any[];
 		let tmpMap = {
 			gameMode: this.gameMode,
 			genData: genData,
@@ -94,7 +97,13 @@ export class Room {
 			width: (genData.width - 4) * this.tileScale,
 			height: (genData.height - 4) * this.tileScale,
 		};
-		setupMap(tmpMap, this.tileScale);
+		setupMap(tmpMap, this.tileScale, flags);
+		this.scoreZone = {
+			x: flags[0].x - 40,
+			y: flags[0].y - 40,
+			x2: flags[3].x + 70,
+			y2: flags[3].y + 70
+		}
 		return tmpMap;
 	}
 

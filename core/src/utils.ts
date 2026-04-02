@@ -60,7 +60,7 @@ export function shootNextBullet(
 	}
 	bullet = null;
 }
-export function setupMap(a: any, mapTileScale: number) {
+export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 	var b = a.genData;
 	var d = -(mapTileScale * 2);
 	var e = -(mapTileScale * 2);
@@ -195,7 +195,6 @@ export function setupMap(a: any, mapTileScale: number) {
 		if (a.tiles[b].edgeTile) {
 			a.tiles[b].hasCollision = false;
 		} else if (!a.tiles[b].wall && a.tiles[b].hardPoint) {
-			/*
 			if (
 				canPlaceFlag(a.tiles[b - h], true) &&
 				canPlaceFlag(a.tiles[b - 1], false)
@@ -256,7 +255,6 @@ export function setupMap(a: any, mapTileScale: number) {
 					ac: 0,
 				});
 			}
-            */
 		}
 	}
 }
@@ -382,7 +380,6 @@ export function linearInterpolate(current: number, target: number, step: number)
 export function isImageOk(img: HTMLImageElement) {
 	return img.complete && img.naturalWidth !== 0;
 }
-
 export function canSee(x: number, y: number, width: number, height: number) {
 	return x + width > 0 && y + height > 0 && x < st.maxScreenWidth && y < st.maxScreenHeight;
 }

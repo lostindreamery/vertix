@@ -1050,7 +1050,7 @@ function setupSocket(sock: Socket) {
 				clt.type = "clutter";
 				gameObjects.push(clt);
 			}
-			setupMap(st.gameMap, mapTileScale);
+			setupMap(st.gameMap, mapTileScale, gameObjects);
 			cachedMiniMap = null;
 			deactivateSprays();
 			for (let i = 0; i < 100; i++) {

@@ -400,7 +400,16 @@ io.on("connection", (socket: Socket) => {
 		player.x = Math.round(player.x);
 		player.y = Math.round(player.y);
 		// TODO: gamemode objectve
-		//socket.emit("tprt", { indx: 0, newX: 0, newY: 0 })
+		if (room.gameMode.code == "hp") {
+			if (room.scoreZone.x < player.x && player.x < room.scoreZone.x2 && room.scoreZone.y < player.y && player.y < room.scoreZone.y2) {
+				if (player.scoreCountdown <= 0) {
+					player.scoreCountdown = 1000;
+					socket.emit("tprt", { indx: player.index, scor: 6 })
+				} else {
+					player.scoreCountdown -= delta;
+				}
+			}
+		}
 		io.emit(
 			"rsd",
 			players.flatMap((pl) => [6, pl.index, pl.x, pl.y, pl.angle, inputNumber]),
