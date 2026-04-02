@@ -195,10 +195,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 		if (a.tiles[b].edgeTile) {
 			a.tiles[b].hasCollision = false;
 		} else if (!a.tiles[b].wall && a.tiles[b].hardPoint) {
-			if (
-				canPlaceFlag(a.tiles[b - h], true) &&
-				canPlaceFlag(a.tiles[b - 1], false)
-			) {
+			if (canPlaceFlag(a.tiles[b - h], true) && canPlaceFlag(a.tiles[b - 1], false)) {
 				gameObjects.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
@@ -210,10 +207,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 					ac: 0,
 				});
 			}
-			if (
-				canPlaceFlag(a.tiles[b + h], true) &&
-				canPlaceFlag(a.tiles[b - 1], false)
-			) {
+			if (canPlaceFlag(a.tiles[b + h], true) && canPlaceFlag(a.tiles[b - 1], false)) {
 				gameObjects.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
@@ -225,10 +219,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 					ac: 0,
 				});
 			}
-			if (
-				canPlaceFlag(a.tiles[b + h], true) &&
-				canPlaceFlag(a.tiles[b + 1], false)
-			) {
+			if (canPlaceFlag(a.tiles[b + h], true) && canPlaceFlag(a.tiles[b + 1], false)) {
 				gameObjects.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
@@ -240,10 +231,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 					ac: 0,
 				});
 			}
-			if (
-				canPlaceFlag(a.tiles[b - h], true) &&
-				canPlaceFlag(a.tiles[b + 1], false)
-			) {
+			if (canPlaceFlag(a.tiles[b - h], true) && canPlaceFlag(a.tiles[b + 1], false)) {
 				gameObjects.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,

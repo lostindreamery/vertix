@@ -115,8 +115,8 @@ export class Room {
 			x: flags[0].x - 40,
 			y: flags[0].y - 40,
 			x2: flags[3].x + 70,
-			y2: flags[3].y + 70
-		}
+			y2: flags[3].y + 70,
+		};
 		return tmpMap;
 	}
 
@@ -147,8 +147,8 @@ export class Room {
 }
 
 class RoomSocket {
-	io
-	room
+	io;
+	room;
 	constructor(io: Server, room: Room) {
 		this.io = io;
 		this.room = room;
@@ -190,7 +190,10 @@ class RoomSocket {
 				playerWeps[data.weaponID].camo = data.camoID - 1;
 			});
 
-			const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
+			const hatPathBase = join(
+				import.meta.dirname,
+				"../core/public/images/hats",
+			);
 			const hatData = hats
 				.filter((h) => !h.hide)
 				.map((h) => ({
@@ -343,7 +346,9 @@ class RoomSocket {
 				let space = data.s;
 				player.delta = data.delta;
 				let delta = data.delta;
-				var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
+				var e = Math.sqrt(
+					horizontalDT * horizontalDT + verticalDT * verticalDT,
+				);
 				if (e !== 0) {
 					horizontalDT /= e;
 					verticalDT /= e;
@@ -353,7 +358,8 @@ class RoomSocket {
 				player.x += horizontalDT * player.speed * delta;
 				player.y += verticalDT * player.speed * delta;
 				player.angle =
-					((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
+					((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) +
+					90;
 				if (space === 1) {
 					this.io.emit("jum", player.index);
 				}
@@ -362,10 +368,15 @@ class RoomSocket {
 				player.y = Math.round(player.y);
 				// TODO: gamemode objectve
 				if (this.room.gameMode.code == "hp") {
-					if (this.room.scoreZone.x < player.x && player.x < this.room.scoreZone.x2 && this.room.scoreZone.y < player.y && player.y < this.room.scoreZone.y2) {
+					if (
+						this.room.scoreZone.x < player.x &&
+						player.x < this.room.scoreZone.x2 &&
+						this.room.scoreZone.y < player.y &&
+						player.y < this.room.scoreZone.y2
+					) {
 						if (player.scoreCountdown <= 0) {
 							player.scoreCountdown = 1000;
-							socket.emit("tprt", { indx: player.index, scor: 6 })
+							socket.emit("tprt", { indx: player.index, scor: 6 });
 						} else {
 							player.scoreCountdown -= delta;
 						}
@@ -373,7 +384,14 @@ class RoomSocket {
 				}
 				this.io.emit(
 					"rsd",
-					this.room.players.flatMap((pl) => [6, pl.index, pl.x, pl.y, pl.angle, inputNumber]),
+					this.room.players.flatMap((pl) => [
+						6,
+						pl.index,
+						pl.x,
+						pl.y,
+						pl.angle,
+						inputNumber,
+					]),
 				);
 			});
 			socket.on("cht", (msg, type) => {
@@ -387,32 +405,33 @@ class RoomSocket {
 			socket.on("ping1", () => {
 				socket.emit("pong1");
 			});
-			socket.on("create", (lobby) => { });
-		})
+			socket.on("create", (lobby) => {});
+		});
 	}
 
 	updatePlayers() {
 		this.io.emit(
 			"rsd",
-			this.room.players.flatMap((pl) => [
-				5,
-				pl.index,
-				pl.x,
-				pl.y,
-				pl.angle,
-			]),
+			this.room.players.flatMap((pl) => [5, pl.index, pl.x, pl.y, pl.angle]),
 		);
 	}
 
 	updateLeaderboard() {
 		this.io.emit(
 			"lb",
-			this.room.players.toSorted((a, b) => b.score - a.score).flatMap((pl) => [pl.index]),
+			this.room.players
+				.toSorted((a, b) => b.score - a.score)
+				.flatMap((pl) => [pl.index]),
 		);
 		this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
 	}
 
-	updateBullet(bullet: Projectile, player: Player, dir: number, currentTime: number) {
+	updateBullet(
+		bullet: Projectile,
+		player: Player,
+		dir: number,
+		currentTime: number,
+	) {
 		const tick = () => {
 			if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
