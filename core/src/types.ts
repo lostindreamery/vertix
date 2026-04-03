@@ -171,8 +171,9 @@ export type MapObject = {
 	w?: number;
 	h?: number;
 	hc?: boolean; //?
+	tp?: number; //?
 	//PICKUPS
-	scale?: 64;
+	scale?: number;
 	type?: string;
 };
 

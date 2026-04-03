@@ -49,6 +49,8 @@ export class Room {
 	constructor(io: Server) {
 		this.gameMode = gameModes[1];
 		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
+		this.genClutter();
+		this.genPickups();
 		for (let i = 0; i < 100; i++) {
 			this.bullets.push(new Projectile());
 		}
@@ -150,6 +152,39 @@ export class Room {
 			}
 		}
 		return spawn;
+	}
+
+	genClutter() {
+		for (const tl of this.tiles) {
+			if (tl.spriteIndex === 2) {
+				this.clutter.push({
+					x: tl.x,
+					y: tl.y,
+					active: true,
+					type: "clutter",
+					i: 1,
+					w: 48,
+					h: 84,
+					hc: true,
+					tp: 1,
+				});
+			}
+		}
+	}
+
+	genPickups() {
+		let mid = this.tileScale / 2;
+		for (const tl of this.tiles) {
+			if (tl.spriteIndex === 2) {
+				this.pickups.push({
+					x: tl.x + mid,
+					y: tl.y + mid,
+					active: true,
+					scale: 64,
+					type: "healthpack",
+				});
+			}
+		}
 	}
 }
 
@@ -334,13 +369,35 @@ class RoomSocket {
 				wallCol(player, this.room.tiles, this.room.clutter);
 				player.x = Math.round(player.x);
 				player.y = Math.round(player.y);
+				for (const [i, p] of this.room.pickups.entries()) {
+					if (
+						p.active &&
+						player.health < player.maxHealth &&
+						playerInSquare(player.x, player.y, p.x, p.x + 64, p.y, p.y + 64)
+					) {
+						p.active = false;
+						this.io.emit("upd", {
+							i: player.index,
+							hea: (player.health += 20),
+						});
+						this.io.emit("4", p, i, 0);
+						this.io.emit("1", {
+							gID: player.index,
+							h: player.health,
+						});
+					}
+				}
 				// TODO: gamemode objectve
 				if (this.room.gameMode.code == "hp") {
 					if (
-						this.room.scoreZone.x < player.x &&
-						player.x < this.room.scoreZone.x2 &&
-						this.room.scoreZone.y < player.y &&
-						player.y < this.room.scoreZone.y2
+						playerInSquare(
+							player.x,
+							player.y,
+							this.room.scoreZone.x,
+							this.room.scoreZone.x2,
+							this.room.scoreZone.y,
+							this.room.scoreZone.y2,
+						)
 					) {
 						if (player.scoreCountdown <= 0) {
 							player.scoreCountdown = 1000;
@@ -582,4 +639,15 @@ class RoomSocket {
 			}))
 			.toSorted((a, b) => a.chance - b.chance);
 	}
+}
+
+function playerInSquare(
+	x: number,
+	y: number,
+	left: number,
+	right: number,
+	bottom: number,
+	top: number,
+) {
+	return left < x && x < right && bottom < y && y < top;
 }
