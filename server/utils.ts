@@ -184,7 +184,11 @@ class RoomSocket {
 			);
 			socket.emit("updHt", hats.length, this.cosmetics.hats);
 			socket.emit("updShrt", shirts.length, this.cosmetics.shirts);
-			socket.emit("updCmo", camos.length, weapons.map(() => this.cosmetics.camos));
+			socket.emit(
+				"updCmo",
+				camos.length,
+				weapons.map(() => this.cosmetics.camos),
+			);
 
 			socket.on("cHat", (id) => {
 				player.account.hat = hats[id - 1];
@@ -344,7 +348,7 @@ class RoomSocket {
 						}
 					}
 				}
-				this.io.emit(
+				socket.emit(
 					"rsd",
 					this.room.players.flatMap((pl) => [
 						6,
@@ -352,7 +356,7 @@ class RoomSocket {
 						pl.x,
 						pl.y,
 						pl.angle,
-						inputNumber,
+						pl.index === player.index ? inputNumber : pl.nameYOffset,
 					]),
 				);
 			});
@@ -366,6 +370,12 @@ class RoomSocket {
 			});
 			socket.on("ping1", () => {
 				socket.emit("pong1");
+			});
+			//TODO
+			socket.on("cSrv", (data) => {
+				if (data.srvMap) {
+					this.room.mapData = this.room.newMap(data.srvMap);
+				}
 			});
 			socket.on("create", (lobby) => {});
 		});
@@ -493,6 +503,7 @@ class RoomSocket {
 						pl.score = 0;
 						pl.kills = 0;
 						pl.deaths = 0;
+						//TODO
 						this.io.emit(
 							"welcome",
 							{
@@ -512,10 +523,7 @@ class RoomSocket {
 	}
 
 	sortCosmetics() {
-		const hatPathBase = join(
-			import.meta.dirname,
-			"../core/public/images/hats",
-		);
+		const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
 		this.cosmetics.hats = hats
 			.filter((h) => !h.hide)
 			.map((h) => ({

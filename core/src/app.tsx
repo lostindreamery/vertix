@@ -1787,10 +1787,9 @@ function receiveServerData(data: number[]) {
 						getCurrentWeapon(tmpUser).front = true;
 					}
 				}
-				//TODO: nameYOffset for other players
-				//if (b > 5) {
-				//  tmpUser.nameYOffset = a[5 + d];
-				//}
+				if (b > 5) {
+					tmpUser.nameYOffset = data[5 + d];
+				}
 				tmpUser.onScreen = true;
 			} else {
 				fetchUserWithIndex(data[1 + d]);
