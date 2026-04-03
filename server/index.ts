@@ -1,21 +1,8 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { Server, type Socket } from "socket.io";
-import {
-	shootNextBullet,
-	getNextBullet,
-	wallCol,
-	getCurrentWeapon,
-	roundNumber,
-	getDistance,
-} from "core/src/utils.ts";
+import { Server } from "socket.io";
 import { Room } from "./utils.ts";
-import { characterClasses, weapons } from "core/src/loadouts.ts";
-import type { Player } from "core/src/types.ts";
-import { hats, camos, shirts } from "core/src/skins.ts";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 
 const app = new Hono();
 app.use(

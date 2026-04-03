@@ -39,7 +39,12 @@ export class Room {
 	scoreBlue = 0;
 	bullets: Projectile[] = [];
 	nextAvailableSid = 0;
-	scoreZone: any;
+	scoreZone = {
+		x: 0,
+		y: 0,
+		x2: 0,
+		y2: 0,
+	};
 
 	constructor(io: Server) {
 		this.gameMode = gameModes[2];
@@ -149,9 +154,15 @@ export class Room {
 class RoomSocket {
 	io;
 	room;
+	cosmetics = {
+		hats,
+		shirts,
+		camos,
+	};
 	constructor(io: Server, room: Room) {
 		this.io = io;
 		this.room = room;
+		this.sortCosmetics();
 		this.handleSocket();
 	}
 	handleSocket() {
@@ -171,69 +182,20 @@ class RoomSocket {
 				},
 				true,
 			);
-			socket.emit(
-				"updCmo",
-				camos.length,
-				weapons.map(() =>
-					camos
-						.filter((h) => !h.hide)
-						.map((p) => ({
-							id: p.id,
-							name: p.name,
-							chance: p.chance,
-							count: 0,
-						}))
-						.toSorted((a, b) => a.chance - b.chance),
-				),
-			);
-			socket.on("cCamo", (data) => {
-				playerWeps[data.weaponID].camo = data.camoID - 1;
-			});
-
-			const hatPathBase = join(
-				import.meta.dirname,
-				"../core/public/images/hats",
-			);
-			const hatData = hats
-				.filter((h) => !h.hide)
-				.map((h) => ({
-					id: h.id,
-					name: h.name,
-					desc: h.desc,
-					chance: h.chance,
-					count: 0,
-					creator: h.creator,
-					left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
-					up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
-				}))
-				.toSorted((a, b) => a.chance - b.chance);
-			socket.emit("updHt", hats.length, hatData);
+			socket.emit("updHt", hats.length, this.cosmetics.hats);
+			socket.emit("updShrt", shirts.length, this.cosmetics.shirts);
+			socket.emit("updCmo", camos.length, weapons.map(() => this.cosmetics.camos));
 
 			socket.on("cHat", (id) => {
 				player.account.hat = hats[id - 1];
 			});
-
-			const shirtPathBase = join(
-				import.meta.dirname,
-				"../core/public/images/shirts",
-			);
-			const shirtData = shirts
-				.filter((h) => !h.hide)
-				.map((s) => ({
-					id: s.id,
-					name: s.name,
-					desc: s.desc,
-					chance: s.chance,
-					count: 0,
-					left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
-					up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
-				}))
-				.toSorted((a, b) => a.chance - b.chance);
-			socket.emit("updShrt", shirts.length, shirtData);
-
 			socket.on("cShirt", (id) => {
 				player.account.shirt = shirts[id - 1];
 			});
+			socket.on("cCamo", (data) => {
+				playerWeps[data.weaponID].camo = data.camoID - 1;
+			});
+
 			socket.on("gotit", (client, init, currentTime) => {
 				console.log("gotit", client, init, currentTime);
 				player.name = client.name ? client.name : player.name;
@@ -376,7 +338,7 @@ class RoomSocket {
 					) {
 						if (player.scoreCountdown <= 0) {
 							player.scoreCountdown = 1000;
-							socket.emit("tprt", { indx: player.index, scor: 6 });
+							socket.emit("tprt", { indx: player.index, scor: 10 });
 						} else {
 							player.scoreCountdown -= delta;
 						}
@@ -547,5 +509,52 @@ class RoomSocket {
 				}
 			}, 1000);
 		}
+	}
+
+	sortCosmetics() {
+		const hatPathBase = join(
+			import.meta.dirname,
+			"../core/public/images/hats",
+		);
+		this.cosmetics.hats = hats
+			.filter((h) => !h.hide)
+			.map((h) => ({
+				id: h.id,
+				name: h.name,
+				desc: h.desc,
+				chance: h.chance,
+				count: 0,
+				creator: h.creator,
+				left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
+				up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
+			}))
+			.toSorted((a, b) => a.chance - b.chance);
+
+		const shirtPathBase = join(
+			import.meta.dirname,
+			"../core/public/images/shirts",
+		);
+		this.cosmetics.shirts = shirts
+			.filter((h) => !h.hide)
+			.map((s) => ({
+				id: s.id,
+				name: s.name,
+				desc: s.desc,
+				chance: s.chance,
+				count: 0,
+				left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
+				up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
+			}))
+			.toSorted((a, b) => a.chance - b.chance);
+
+		this.cosmetics.camos = camos
+			.filter((h) => !h.hide)
+			.map((p) => ({
+				id: p.id,
+				name: p.name,
+				chance: p.chance,
+				count: 0,
+			}))
+			.toSorted((a, b) => a.chance - b.chance);
 	}
 }
