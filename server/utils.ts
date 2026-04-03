@@ -47,8 +47,8 @@ export class Room {
 	};
 
 	constructor(io: Server) {
-		this.gameMode = gameModes[2];
-		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[1]]);
+		this.gameMode = gameModes[1];
+		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
 		for (let i = 0; i < 100; i++) {
 			this.bullets.push(new Projectile());
 		}
@@ -116,12 +116,14 @@ export class Room {
 			height: (genData.height - 4) * this.tileScale,
 		};
 		setupMap(tmpMap, this.tileScale, flags);
-		this.scoreZone = {
-			x: flags[0].x - 40,
-			y: flags[0].y - 40,
-			x2: flags[3].x + 70,
-			y2: flags[3].y + 70,
-		};
+		if (this.gameMode.code === "hp") {
+			this.scoreZone = {
+				x: flags[0].x - 40,
+				y: flags[0].y - 40,
+				x2: flags[3].x + 70,
+				y2: flags[3].y + 70,
+			};
+		}
 		return tmpMap;
 	}
 
@@ -343,6 +345,17 @@ class RoomSocket {
 						if (player.scoreCountdown <= 0) {
 							player.scoreCountdown = 1000;
 							socket.emit("tprt", { indx: player.index, scor: 10 });
+							player.score += 10;
+							this.io.emit("upd", {
+								i: player.index,
+								s: player.score,
+							});
+							let score = 10 / (this.room.gameMode.score / 100);
+							player.team === "red"
+								? (this.room.scoreRed += score)
+								: (this.room.scoreBlue += score);
+							this.updateLeaderboard();
+							this.checkGameEnd();
 						} else {
 							player.scoreCountdown -= delta;
 						}
@@ -484,6 +497,10 @@ class RoomSocket {
 			: (this.room.scoreBlue += score);
 
 		this.updateLeaderboard();
+		this.checkGameEnd();
+	}
+
+	checkGameEnd() {
 		if (this.room.scoreRed >= 100 || this.room.scoreBlue >= 100) {
 			this.io.emit(
 				"7",

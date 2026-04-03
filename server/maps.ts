@@ -6,7 +6,9 @@ import sharp from "sharp";
 export const defaultGenData: GenData[] = [];
 
 const dir = join(import.meta.dirname, "./maps");
-const files = (await readdir(dir)).filter((f) => f.endsWith(".png")).toSorted();
+const files = (await readdir(dir))
+	.filter((f) => f.endsWith(".png"))
+	.toSorted((a, b) => parseInt(a, 10) - parseInt(b, 10));
 
 for (const file of files) {
 	const { data, info } = await sharp(join(dir, file))
