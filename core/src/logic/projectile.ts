@@ -1,7 +1,7 @@
 import { playSound } from "../sound.ts";
 import { st } from "../state.svelte.ts";
 import type { Player, Tile } from "../types.ts";
-import { getDistance, randomInt } from "../utils.ts";
+import { getDistance, randomInt, dotInRect } from "../utils.ts";
 import { createLiquid, particleCone, stillDustParticle } from "../visual/particle.ts";
 
 export class Projectile {
@@ -281,15 +281,12 @@ export class Projectile {
 		}
 		return true;
 	}
-	dotInRect(a: number, b: number, d: number, e: number, f: number, h: number) {
-		return a >= d && a <= d + f && b >= e && b <= e + h;
-	}
 	adjustOnCollision(a: number, b: number, d: number, e: number) {
 		let h = this.cEndX,
 			g = this.cEndY;
 		for (let f = 100; f > 0; ) {
 			f--;
-			if (this.dotInRect(h, g, a, b, d, e)) {
+			if (dotInRect(h, g, a, b, d, e)) {
 				f = 0;
 			} else {
 				h += Math.cos(this.dir + Math.PI) * 2;
@@ -298,7 +295,7 @@ export class Projectile {
 		}
 		for (let f = 100; f > 0; ) {
 			f--;
-			if (this.dotInRect(h, g, a, b, d, e)) {
+			if (dotInRect(h, g, a, b, d, e)) {
 				h += Math.cos(this.dir + Math.PI) * 2;
 				g += Math.sin(this.dir + Math.PI) * 2;
 			} else {

@@ -375,3 +375,6 @@ export function isImageOk(img: HTMLImageElement) {
 export function canSee(x: number, y: number, width: number, height: number) {
 	return x + width > 0 && y + height > 0 && x < st.maxScreenWidth && y < st.maxScreenHeight;
 }
+export function dotInRect(dotX: number, dotY: number, x: number, y: number, w: number, h: number) {
+	return x <= dotX && dotX <= x + w && y <= dotY && dotY <= y + h;
+}

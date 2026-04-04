@@ -18,6 +18,7 @@ import {
 	roundNumber,
 	getDistance,
 	setupMap,
+	dotInRect,
 } from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
 import type { Server, Socket } from "socket.io";
@@ -39,12 +40,7 @@ export class Room {
 	scoreBlue = 0;
 	bullets: Projectile[] = [];
 	nextAvailableSid = 0;
-	scoreZone = {
-		x: 0,
-		y: 0,
-		x2: 0,
-		y2: 0,
-	};
+	scoreTiles: Tile[] = [];
 
 	constructor(io: Server) {
 		this.gameMode = gameModes[0];
@@ -125,12 +121,11 @@ export class Room {
 		};
 		setupMap(tmpMap, this.tileScale, flags);
 		if (this.gameMode.code === "hp") {
-			this.scoreZone = {
-				x: flags[0].x - 40,
-				y: flags[0].y - 40,
-				x2: flags[3].x + 70,
-				y2: flags[3].y + 70,
-			};
+			for (const tl of this.tiles) {
+				if (tl.hardPoint) {
+					this.scoreTiles.push(tl);
+				}
+			}
 		}
 		return tmpMap;
 	}
@@ -382,53 +377,9 @@ class RoomSocket {
 					this.io.emit("jum", player.index);
 				}
 				wallCol(player, this.room.tiles, this.room.clutter);
+				this.checkSpecialTiles(player);
 				player.x = Math.round(player.x);
 				player.y = Math.round(player.y);
-				for (const [i, p] of this.room.pickups.entries()) {
-					if (
-						p.active &&
-						player.health < player.maxHealth &&
-						playerInSquare(player.x, player.y, p.x, p.x + 64, p.y, p.y + 64)
-					) {
-						p.active = false;
-						this.io.emit("upd", {
-							i: player.index,
-							hea: (player.totalHealing += player.maxHealth - player.health),
-						});
-						this.io.emit("4", p, i, 0);
-						this.io.emit("1", {
-							gID: player.index,
-							h: (player.health += player.maxHealth - player.health),
-						});
-					}
-				}
-				// TODO: gamemode objectve
-				if (this.room.gameMode.code == "hp") {
-					if (
-						playerInSquare(
-							player.x,
-							player.y,
-							this.room.scoreZone.x,
-							this.room.scoreZone.x2,
-							this.room.scoreZone.y,
-							this.room.scoreZone.y2,
-						)
-					) {
-						if (player.scoreCountdown <= 0) {
-							player.scoreCountdown = 1000;
-							socket.emit("tprt", { indx: player.index, scor: 10 });
-							player.score += 10;
-							this.io.emit("upd", {
-								i: player.index,
-								s: player.score,
-							});
-							this.updateScore(10, player);
-						}
-					}
-					if (player.scoreCountdown >= 0) {
-						player.scoreCountdown -= delta;
-					}
-				}
 				socket.emit(
 					"rsd",
 					this.room.players.flatMap((pl) => [
@@ -605,6 +556,63 @@ class RoomSocket {
 		this.updateScore(100, source);
 	}
 
+	checkSpecialTiles(player: Player) {
+		for (const [i, p] of this.room.pickups.entries()) {
+			if (
+				p.active &&
+				player.health < player.maxHealth &&
+				dotInRect(
+					player.x,
+					player.y,
+					p.x,
+					p.y,
+					64,
+					64,
+				)
+			) {
+				p.active = false;
+				this.io.emit("upd", {
+					i: player.index,
+					hea: (player.totalHealing += player.maxHealth - player.health),
+				});
+				this.io.emit("4", p, i, 0);
+				this.io.emit("1", {
+					gID: player.index,
+					h: (player.health += player.maxHealth - player.health),
+				});
+			}
+		}
+		// TODO: gamemode objectve
+		if (this.room.gameMode.code == "hp") {
+			for (const tl of this.room.scoreTiles) {
+				if (
+					dotInRect(
+						player.x,
+						player.y,
+						tl.x,
+						tl.y,
+						tl.scale,
+						tl.scale,
+					)
+				) {
+					if (player.scoreCountdown <= 0) {
+						player.scoreCountdown = 1000;
+						this.io.emit("tprt", { indx: player.index, scor: 10 });
+						player.score += 10;
+						this.io.emit("upd", {
+							i: player.index,
+							s: player.score,
+						});
+						this.updateScore(10, player);
+					}
+				}
+			}
+			if (player.scoreCountdown >= 0) {
+				player.scoreCountdown -= player.delta;
+			}
+		}
+	}
+
 	sortCosmetics() {
 		const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
 		this.cosmetics.hats = hats
@@ -648,15 +656,4 @@ class RoomSocket {
 			}))
 			.toSorted((a, b) => a.chance - b.chance);
 	}
-}
-
-function playerInSquare(
-	x: number,
-	y: number,
-	left: number,
-	right: number,
-	bottom: number,
-	top: number,
-) {
-	return left < x && x < right && bottom < y && y < top;
 }

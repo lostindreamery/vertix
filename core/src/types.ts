@@ -18,6 +18,7 @@ export type Player = {
 	gravityStrength: number;
 	jumpCountdown: number;
 	frameCountdown: number;
+	scoreCountdown: number;
 	kills: number;
 	deaths: number;
 	score: number;
