@@ -184,6 +184,10 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 					} else {
 						n.spriteIndex = 1;
 					}
+				} else if (p === "255 0 0" && a.gameMode.teams) {
+					n.objTeam = "red";
+				} else if (p === "0 0 255" && a.gameMode.teams) {
+					n.objTeam = "blue";
 				}
 			}
 			a.tiles.push(n);

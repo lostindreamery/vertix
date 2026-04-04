@@ -47,7 +47,7 @@ export class Room {
 	};
 
 	constructor(io: Server) {
-		this.gameMode = gameModes[1];
+		this.gameMode = gameModes[0];
 		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
 		this.genClutter();
 		this.genPickups();
@@ -60,6 +60,10 @@ export class Room {
 	newPlayer(playerWeps: typeof weapons) {
 		let sid = this.nextAvailableSid;
 		this.nextAvailableSid++;
+		let team = `${this.players.length}`;
+		if (this.gameMode.teams) {
+			team = this.players.length % 2 === 0 ? "blue" : "red";
+		}
 		let tmpPlayer = {
 			id: this.id,
 			room: this.room,
@@ -89,6 +93,8 @@ export class Room {
 			y: 0,
 			oldX: 0,
 			oldY: 0,
+			totalDamage: 0,
+			totalHealing: 0,
 			spawnProtection: 0,
 			nameYOffset: 0,
 			dead: true,
@@ -97,7 +103,7 @@ export class Room {
 			delta: 0,
 			targetF: 0,
 			animIndex: 0,
-			team: this.players.length % 2 === 0 ? "blue" : "red",
+			team: team,
 		};
 		this.players.push(tmpPlayer);
 		return tmpPlayer;
@@ -129,11 +135,19 @@ export class Room {
 		return tmpMap;
 	}
 
-	getSpawn() {
-		let mid = this.tileScale / 2;
+	getSpawn(player: Player) {
+		const mid = this.tileScale / 2;
 		let spawn = { x: 0, y: 0 };
 		for (const tl of this.tiles) {
-			if (tl.spriteIndex === 2) {
+			if (this.gameMode.teams) {
+				if (tl.objTeam === player.team && !tl.hardPoint) {
+					spawn = {
+						x: tl.x + mid,
+						y: tl.y + mid,
+					};
+					continue;
+				}
+			} else if (tl.spriteIndex === 2) {
 				let valid = this.players.every((pl: Player) => {
 					const dist = getDistance(
 						pl.x,
@@ -148,6 +162,7 @@ export class Room {
 						x: tl.x + mid,
 						y: tl.y + mid,
 					};
+					continue;
 				}
 			}
 		}
@@ -251,7 +266,7 @@ class RoomSocket {
 
 				player.onScreen = true;
 				player.angle = 0;
-				const spawn = this.room.getSpawn();
+				const spawn = this.room.getSpawn(player);
 				player.x = spawn.x;
 				player.y = spawn.y;
 				player.dead = false;
@@ -272,7 +287,7 @@ class RoomSocket {
 
 				this.io.emit("add", JSON.stringify(player));
 				this.updatePlayers();
-				this.updateLeaderboard();
+				this.updateScore(0, player);
 			});
 			socket.on("respawn", () => {
 				socket.emit(
@@ -378,12 +393,12 @@ class RoomSocket {
 						p.active = false;
 						this.io.emit("upd", {
 							i: player.index,
-							hea: (player.health += 20),
+							hea: (player.totalHealing += player.maxHealth - player.health),
 						});
 						this.io.emit("4", p, i, 0);
 						this.io.emit("1", {
 							gID: player.index,
-							h: player.health,
+							h: (player.health += player.maxHealth - player.health),
 						});
 					}
 				}
@@ -407,15 +422,11 @@ class RoomSocket {
 								i: player.index,
 								s: player.score,
 							});
-							let score = 10 / (this.room.gameMode.score / 100);
-							player.team === "red"
-								? (this.room.scoreRed += score)
-								: (this.room.scoreBlue += score);
-							this.updateLeaderboard();
-							this.checkGameEnd();
-						} else {
-							player.scoreCountdown -= delta;
+							this.updateScore(10, player);
 						}
+					}
+					if (player.scoreCountdown >= 0) {
+						player.scoreCountdown -= delta;
 					}
 				}
 				socket.emit(
@@ -458,14 +469,53 @@ class RoomSocket {
 		);
 	}
 
-	updateLeaderboard() {
+	updateScore(scored: number, source: Player) {
 		this.io.emit(
 			"lb",
 			this.room.players
 				.toSorted((a, b) => b.score - a.score)
 				.flatMap((pl) => [pl.index]),
 		);
-		this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
+		let leaderboardScore = scored / (this.room.gameMode.score / 100);
+		if (source.team === "red") {
+			leaderboardScore = this.room.scoreRed += leaderboardScore;
+			this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
+		} else if (source.team === "blue") {
+			leaderboardScore = this.room.scoreBlue += leaderboardScore;
+			this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
+		} else {
+			leaderboardScore = source.score / (this.room.gameMode.score / 100);
+			this.io.emit("ts");
+		}
+		if (leaderboardScore >= 100) {
+			this.io.emit("7", source.team, this.room.players, {}, false);
+			let timeLeft = 15;
+			let timer = setInterval(() => {
+				if (timeLeft >= 0) {
+					this.io.emit("8", timeLeft--);
+				} else {
+					this.room.scoreRed = 0;
+					this.room.scoreBlue = 0;
+					for (const pl of this.room.players) {
+						pl.score = 0;
+						pl.kills = 0;
+						pl.deaths = 0;
+						//TODO
+						this.io.emit(
+							"welcome",
+							{
+								id: pl.id,
+								room: pl.room,
+								name: pl.name,
+								classIndex: pl.classIndex,
+							},
+							true,
+						);
+					}
+					clearInterval(timer);
+				}
+			}, 1000);
+		}
 	}
 
 	updateBullet(
@@ -527,6 +577,10 @@ class RoomSocket {
 			bi: -1,
 			h: dest.health, //undefined sometimes
 		});
+		this.io.emit("upd", {
+			i: source.index,
+			dmg: (source.totalDamage += -dmg),
+		});
 		const dead = dest.health <= 0;
 		if (!dead) return;
 		dest.dead = true;
@@ -548,52 +602,7 @@ class RoomSocket {
 			i: dest.index,
 			dea: dest.deaths,
 		});
-		let score = 100 / (this.room.gameMode.score / 100);
-		source.team === "red"
-			? (this.room.scoreRed += score)
-			: (this.room.scoreBlue += score);
-
-		this.updateLeaderboard();
-		this.checkGameEnd();
-	}
-
-	checkGameEnd() {
-		if (this.room.scoreRed >= 100 || this.room.scoreBlue >= 100) {
-			this.io.emit(
-				"7",
-				this.room.scoreRed > this.room.scoreBlue ? "red" : "blue",
-				this.room.players,
-				{},
-				false,
-			);
-			let timeLeft = 15;
-			let timer = setInterval(() => {
-				if (timeLeft >= 0) {
-					this.io.emit("8", timeLeft--);
-				} else {
-					this.room.scoreRed = 0;
-					this.room.scoreBlue = 0;
-					for (const pl of this.room.players) {
-						pl.score = 0;
-						pl.kills = 0;
-						pl.deaths = 0;
-						//TODO
-						this.io.emit(
-							"welcome",
-							{
-								id: pl.id,
-								room: pl.room,
-								name: pl.name,
-								classIndex: pl.classIndex,
-							},
-							true,
-						);
-					}
-					this.updateLeaderboard();
-					clearInterval(timer);
-				}
-			}, 1000);
-		}
+		this.updateScore(100, source);
 	}
 
 	sortCosmetics() {

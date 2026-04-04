@@ -2151,7 +2151,8 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 			blueProgress.style.width = `${scoreBlue}%`;
 		}
 	} else {
-		scoreBlue = Math.round((st.player.score / scoreRed) * 100);
+		//scoreBlue = Math.round((st.player.score / scoreRed) * 100);
+		scoreBlue = (st.player.score / gameMode.score) * 100;
 		blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
 		blueProgress.style.width = `${scoreBlue}%`;
 		blueText.textContent = "YOU";

@@ -37,8 +37,8 @@ export type Player = {
 	team: string;
 	loggedIn?: boolean;
 	likes?: number;
-	totalDamage?: number;
-	totalHealing?: number;
+	totalDamage: number;
+	totalHealing: number;
 	xSpeed?: number;
 	ySpeed?: number;
 	isn?: number;

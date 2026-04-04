@@ -7,7 +7,7 @@ export const gameModes: GameMode[] = [
 		name: "Free For All",
 		desc1: "Free For All",
 		desc2: "",
-		maps: [5, 3, 8, 9, 16, 18],
+		maps: [0, 5, 3, 8, 9, 16, 18],
 		teams: false,
 		killScoreMult: 1,
 	},
