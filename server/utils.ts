@@ -61,7 +61,7 @@ export class Room {
 			team = this.players.length % 2 === 0 ? "blue" : "red";
 		}
 		let tmpPlayer = {
-			id: this.id,
+			id: sid,
 			room: this.room,
 			index: sid,
 			name: `Guest_${sid}`,
@@ -120,7 +120,7 @@ export class Room {
 			height: (genData.height - 4) * this.tileScale,
 		};
 		setupMap(tmpMap, this.tileScale, flags);
-		if (this.gameMode.code === "hp") {
+		if (this.gameMode.code === "hp" || this.gameMode.code === "zmtch") {
 			for (const tl of this.tiles) {
 				if (tl.hardPoint) {
 					this.scoreTiles.push(tl);
@@ -213,10 +213,10 @@ class RoomSocket {
 		this.handleSocket();
 	}
 	handleSocket() {
+		const playerWeps = structuredClone(weapons);
 		this.io.on("connection", (socket: Socket) => {
 			console.log("con", socket.id);
 
-			const playerWeps = structuredClone(weapons);
 			let player = this.room.newPlayer(playerWeps);
 
 			socket.emit(
@@ -281,7 +281,10 @@ class RoomSocket {
 				socket.emit("gameSetup", JSON.stringify(gameSetup), true, true);
 
 				this.io.emit("add", JSON.stringify(player));
-				this.updatePlayers();
+				this.io.emit(
+					"rsd",
+					this.room.players.flatMap((pl) => [5, pl.index, pl.x, pl.y, pl.angle]),
+				);
 				this.updateScore(0, player);
 			});
 			socket.on("respawn", () => {
@@ -321,50 +324,46 @@ class RoomSocket {
 				if (currentWeapon.spreadIndex >= currentWeapon.spread.length) {
 					currentWeapon.spreadIndex = 0;
 				}
-				var d = currentWeapon.spread[currentWeapon.spreadIndex];
-				d = roundNumber(targetF + Math.PI + d, 2);
-				var e = currentWeapon.holdDist + currentWeapon.bDist;
-				var f = Math.round(x + e * Math.cos(d));
-				e = Math.round(y - currentWeapon.yOffset - jumpY + e * Math.sin(d));
-				this.io.emit("2", {
+				const spread = currentWeapon.spread[currentWeapon.spreadIndex];
+				const dir = roundNumber(targetF + Math.PI + spread, 2);
+				const origin = currentWeapon.holdDist + currentWeapon.bDist;
+				const newX = Math.round(x + origin * Math.cos(dir));
+				const newY = Math.round(y - currentWeapon.yOffset - jumpY + origin * Math.sin(dir));
+				let bulletData = {
 					i: player.index,
-					x: f,
-					y: e,
-					d: d,
+					x: newX,
+					y: newY,
+					d: dir,
 					si: -1,
-				});
+				};
+				this.io.emit("2", bulletData);
 				for (let i = 0; i < currentWeapon.bulletsPerShot; i++) {
 					const bullet = getNextBullet(this.room.bullets);
 					shootNextBullet(
-						{
-							i: player.index,
-							x: f,
-							y: e,
-							d: d,
-							si: -1,
-						},
+						bulletData,
 						player,
 						targetD,
 						currentTime,
 						bullet,
 					);
-					this.updateBullet(bullet, player, d, currentTime);
+					this.updateBullet(bullet, player, dir, currentTime);
 				}
 			});
 			socket.on("4", (data) => {
+				if (player.dead) return;
 				let horizontalDT = data.hdt;
 				let verticalDT = data.vdt;
 				//let currentTime = data.ts;
-				let inputNumber = data.isn;
-				let space = data.s;
+				const inputNumber = data.isn;
+				const space = data.s;
 				player.delta = data.delta;
-				let delta = data.delta;
-				var e = Math.sqrt(
+				const delta = data.delta;
+				const lengthDT = Math.sqrt(
 					horizontalDT * horizontalDT + verticalDT * verticalDT,
 				);
-				if (e !== 0) {
-					horizontalDT /= e;
-					verticalDT /= e;
+				if (lengthDT !== 0) {
+					horizontalDT /= lengthDT;
+					verticalDT /= lengthDT;
 				}
 				player.oldX = player.x;
 				player.oldY = player.y;
@@ -394,7 +393,10 @@ class RoomSocket {
 			});
 			socket.on("cht", (msg, type) => {
 				if (msg.includes("!sync")) {
-					this.updatePlayers();
+					this.io.emit(
+						"rsd",
+						this.room.players.flatMap((pl) => [5, pl.index, pl.x, pl.y, pl.angle]),
+					);
 					socket.emit("cht", [-1, "synced"]);
 					return;
 				}
@@ -411,13 +413,6 @@ class RoomSocket {
 			});
 			socket.on("create", (lobby) => {});
 		});
-	}
-
-	updatePlayers() {
-		this.io.emit(
-			"rsd",
-			this.room.players.flatMap((pl) => [5, pl.index, pl.x, pl.y, pl.angle]),
-		);
 	}
 
 	updateScore(scored: number, source: Player) {
@@ -526,7 +521,7 @@ class RoomSocket {
 			dir: dir,
 			amount: dmg,
 			bi: -1,
-			h: dest.health, //undefined sometimes
+			h: dest.health,
 		});
 		this.io.emit("upd", {
 			i: source.index,
@@ -557,33 +552,36 @@ class RoomSocket {
 	}
 
 	checkSpecialTiles(player: Player) {
-		for (const [i, p] of this.room.pickups.entries()) {
+		for (const [i, pkup] of this.room.pickups.entries()) {
 			if (
-				p.active &&
+				pkup.active &&
 				player.health < player.maxHealth &&
 				dotInRect(
 					player.x,
 					player.y,
-					p.x,
-					p.y,
+					pkup.x,
+					pkup.y,
 					64,
 					64,
 				)
 			) {
-				p.active = false;
+				pkup.active = false;
 				this.io.emit("upd", {
 					i: player.index,
 					hea: (player.totalHealing += player.maxHealth - player.health),
 				});
-				this.io.emit("4", p, i, 0);
+				this.io.emit("4", pkup, i, 0);
 				this.io.emit("1", {
 					gID: player.index,
 					h: (player.health += player.maxHealth - player.health),
 				});
+				setTimeout(() => {
+					pkup.active = true;
+					this.io.emit("4", pkup, i, 0);
+				}, 15000)
 			}
 		}
-		// TODO: gamemode objectve
-		if (this.room.gameMode.code == "hp") {
+		if (this.room.gameMode.code == "hp" || this.room.gameMode.code == "zmtch") {
 			for (const tl of this.room.scoreTiles) {
 				if (
 					dotInRect(
@@ -593,7 +591,7 @@ class RoomSocket {
 						tl.y,
 						tl.scale,
 						tl.scale,
-					)
+					) && tl.objTeam !== player.team
 				) {
 					if (player.scoreCountdown <= 0) {
 						player.scoreCountdown = 1000;

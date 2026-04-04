@@ -132,37 +132,36 @@ export class Projectile {
 						this.active &&
 						(typeof window === "undefined" || this.owner.index == st.player.index)
 					) {
-						for (let i = 0; i < players.length; i++) {
-							let tmpPlayer = players[i];
+						for (const [i, pl] of players.entries()) {
 							if (
-								tmpPlayer.index === this.owner.index ||
-								this.lastHit.includes(tmpPlayer.index) ||
-								tmpPlayer.team === this.owner.team ||
-								tmpPlayer.type !== "player" ||
-								!tmpPlayer.onScreen ||
-								tmpPlayer.dead
+								pl.index === this.owner.index ||
+								this.lastHit.includes(pl.index) ||
+								pl.team === this.owner.team ||
+								pl.type !== "player" ||
+								!pl.onScreen ||
+								pl.dead
 							) {
 								continue;
 							}
 							if (
 								this.lineInRect(
-									tmpPlayer.x - tmpPlayer.width / 2,
-									tmpPlayer.y - tmpPlayer.height - tmpPlayer.jumpY,
-									tmpPlayer.width,
-									tmpPlayer.height,
+									pl.x - pl.width / 2,
+									pl.y - pl.height - pl.jumpY,
+									pl.width,
+									pl.height,
 									this.pierceCount <= 1,
 								) &&
-								tmpPlayer.spawnProtection <= 0
+								pl.spawnProtection <= 0
 							) {
 								if (this.explodeOnDeath) {
 									this.active = false;
 								} else if (this.dmg > 0) {
-									this.lastHit.push(tmpPlayer.index);
+									this.lastHit.push(i);
 									if (this.spriteIndex !== 2 && typeof window !== "undefined") {
 										particleCone(
 											12,
-											tmpPlayer.x,
-											tmpPlayer.y - tmpPlayer.height / 2 - tmpPlayer.jumpY,
+											pl.x,
+											pl.y - pl.height / 2 - pl.jumpY,
 											this.dir + Math.PI,
 											Math.PI / randomInt(5, 7),
 											0.5,
@@ -170,7 +169,7 @@ export class Projectile {
 											0,
 											true,
 										);
-										createLiquid(tmpPlayer.x, tmpPlayer.y, this.dir, 4);
+										createLiquid(pl.x, pl.y, this.dir, 4);
 									}
 									if (this.pierceCount > 0) this.pierceCount--;
 									if (this.pierceCount <= 0) this.active = false;
