@@ -153,11 +153,13 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 				}
 				*/
 			} else {
-				let rand = randomInt(0, 10);
 				n.spriteIndex = 0;
+				/*
+				let rand = randomInt(0, 10);
 				if (rand <= 0) {
 					n.spriteIndex = 1;
 				}
+				*/
 				n.wall = false;
 				tmpTile = a.tiles[f - h];
 				if (tmpTile?.wall) {

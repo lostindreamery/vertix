@@ -192,16 +192,21 @@ export class Room {
 	}
 
 	genPickups() {
-		let mid = this.tileScale / 2;
+		const mid = this.tileScale / 2;
 		for (const tl of this.tiles) {
+			let pkup = {
+				x: tl.x + mid,
+				y: tl.y + mid,
+				active: true,
+				scale: 64,
+				type: "",
+			}
 			if (tl.spriteIndex === 2) {
-				this.pickups.push({
-					x: tl.x + mid,
-					y: tl.y + mid,
-					active: true,
-					scale: 64,
-					type: "healthpack",
-				});
+				pkup.type = "healthpack";
+				this.pickups.push(pkup);
+			} else if (tl.spriteIndex === 1 && this.gameMode.code === "lc") {
+				pkup.type = "lootcrate";
+				this.pickups.push(pkup);
 			}
 		}
 	}
@@ -261,6 +266,13 @@ class RoomSocket {
 				console.log("gotit", client, init, currentTime);
 				player.name = client.name ? client.name : player.name;
 				player.classIndex = client.classIndex ? client.classIndex : 0;
+				if (this.room.gameMode.code === "snipe") {
+					player.classIndex = 2;
+				} else if (this.room.gameMode.code === "rckt") {
+					player.classIndex = 5;
+				} else if (this.room.gameMode.code === "pyro") {
+					player.classIndex = 7;
+				}
 				const currentClass = characterClasses[player.classIndex];
 				player.weapons = currentClass.weaponIndexes.map((i) => playerWeps[i]);
 				player.health = player.maxHealth = currentClass.maxHealth;
@@ -568,7 +580,6 @@ class RoomSocket {
 		for (const [i, pkup] of this.room.pickups.entries()) {
 			if (
 				pkup.active &&
-				player.health < player.maxHealth &&
 				dotInRect(
 					player.x,
 					player.y,
@@ -578,16 +589,26 @@ class RoomSocket {
 					64,
 				)
 			) {
+				if (pkup.type === "healthpack" && player.health < player.maxHealth) {
+					this.io.emit("upd", {
+						i: player.index,
+						hea: (player.totalHealing += player.maxHealth - player.health),
+					});
+					this.io.emit("1", {
+						gID: player.index,
+						h: (player.health += player.maxHealth - player.health),
+					});
+				} else if (pkup.type === "lootcrate" && this.room.gameMode.code === "lc") {
+					this.io.emit("upd", {
+						i: player.index,
+						s: player.score += 50,
+					});
+					this.updateScore(50, player)
+				} else {
+					return;
+				}
 				pkup.active = false;
-				this.io.emit("upd", {
-					i: player.index,
-					hea: (player.totalHealing += player.maxHealth - player.health),
-				});
 				this.io.emit("4", pkup, i, 0);
-				this.io.emit("1", {
-					gID: player.index,
-					h: (player.health += player.maxHealth - player.health),
-				});
 				setTimeout(() => {
 					pkup.active = true;
 					this.io.emit("4", pkup, i, 0);
