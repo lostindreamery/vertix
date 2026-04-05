@@ -202,3 +202,10 @@ export type ShootEvent = {
 	d: number;
 	si: number;
 };
+
+export type ZoneEvent = {
+	indx: number;
+	scor: number;
+	newX?: number;
+	newY?: number;
+};

@@ -1777,7 +1777,7 @@ function receiveServerData(data: number[]) {
 				if (b > 4) {
 					tmpUser.angle = data[4 + d];
 				}
-				if (getCurrentWeapon(tmpUser) !== undefined) {
+				if (getCurrentWeapon(tmpUser)) {
 					const wepAngle = Math.round((tmpUser.angle % 360) / 90) * 90;
 					if (wepAngle === 0 || wepAngle === 360) {
 						getCurrentWeapon(tmpUser).front = true;
@@ -2265,7 +2265,7 @@ function updateGameLoop() {
 				tmpObj.x = Math.round(tmpObj.x);
 				tmpObj.y = Math.round(tmpObj.y);
 				tmpObj.angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
-				if (getCurrentWeapon(tmpObj) !== undefined) {
+				if (getCurrentWeapon(tmpObj)) {
 					let f = Math.round((tmpObj.angle % 360) / 90) * 90;
 					if (f === 0 || f === 360) {
 						getCurrentWeapon(tmpObj).front = true;

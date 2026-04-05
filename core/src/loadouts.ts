@@ -104,7 +104,7 @@ export let characterClasses = [
 		height: 100,
 		width: 50,
 		speed: 0.5,
-		weaponIndexes: [9],
+		weaponIndexes: [],
 		pWeapon: "Jump",
 		sWeapon: "None",
 		folderName: "boss2",

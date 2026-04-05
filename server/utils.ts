@@ -9,6 +9,7 @@ import type {
 	MapObject,
 	Player,
 	Tile,
+	ZoneEvent,
 } from "core/src/types.ts";
 import {
 	shootNextBullet,
@@ -252,7 +253,8 @@ class RoomSocket {
 				player.account.shirt = shirts[id - 1];
 			});
 			socket.on("cCamo", (data) => {
-				playerWeps[data.weaponID].camo = data.camoID - 1;
+				const wep = playerWeps[data.weaponID]
+				if (wep) wep.camo = data.camoID - 1;
 			});
 
 			socket.on("gotit", (client, init, currentTime) => {
@@ -547,7 +549,7 @@ class RoomSocket {
 			gID: dest.index,
 			sS: 100,
 		});
-		source.score += 100;
+		source.score += 100 * this.room.gameMode.killScoreMult;
 		source.kills += 1;
 		this.io.emit("upd", {
 			i: source.index,
@@ -606,13 +608,20 @@ class RoomSocket {
 				) {
 					if (player.scoreCountdown <= 0) {
 						player.scoreCountdown = 1000;
-						this.io.emit("tprt", { indx: player.index, scor: 10 });
-						player.score += 10;
+						const scored = this.room.gameMode.code === "hp" ? 10 : 100;
+						let tprt: ZoneEvent = { indx: player.index, scor: scored };
+						if (this.room.gameMode.code == "zmtch") {
+							const spawn = this.room.getSpawn(player);
+							player.x = tprt.newX = spawn.x
+							player.y = tprt.newY = spawn.y
+						}
+						this.io.emit("tprt", tprt);
+						player.score += scored;
 						this.io.emit("upd", {
 							i: player.index,
 							s: player.score,
 						});
-						this.updateScore(10, player);
+						this.updateScore(scored, player);
 					}
 				}
 			}
