@@ -108,12 +108,12 @@ export class Room {
 			team: team,
 			isBoss: false,
 			spray: {
-    		src: "/assets/sprays/1.png",
-    		info: {
-      		scale: 64,
-      		alpha: 1,
-      		resolution: 128
-    		}
+				src: "/assets/sprays/1.png",
+				info: {
+					scale: 64,
+					alpha: 1,
+					resolution: 128,
+				},
 			},
 		};
 		this.players.push(tmpPlayer);
@@ -206,7 +206,7 @@ export class Room {
 				active: true,
 				scale: 64,
 				type: "",
-			}
+			};
 			if (tl.spriteIndex === 2) {
 				pkup.type = "healthpack";
 				this.pickups.push(pkup);
@@ -264,7 +264,7 @@ class RoomSocket {
 				player.account.shirt = shirts[id - 1];
 			});
 			socket.on("cCamo", (data) => {
-				const wep = playerWeps[data.weaponID]
+				const wep = playerWeps[data.weaponID];
 				if (wep) wep.camo = data.camoID - 1;
 			});
 
@@ -278,7 +278,10 @@ class RoomSocket {
 					player.classIndex = 5;
 				} else if (this.room.gameMode.code === "pyro") {
 					player.classIndex = 7;
-				} else if (this.room.gameMode.code === "boss" && player.team === "blue") {
+				} else if (
+					this.room.gameMode.code === "boss" &&
+					player.team === "blue"
+				) {
 					player.classIndex = 10;
 					player.isBoss = true;
 					this.room.hasBoss = true;
@@ -315,7 +318,13 @@ class RoomSocket {
 				this.io.emit("add", JSON.stringify(player));
 				this.io.emit(
 					"rsd",
-					this.room.players.flatMap((pl) => [5, pl.index, pl.x, pl.y, pl.angle]),
+					this.room.players.flatMap((pl) => [
+						5,
+						pl.index,
+						pl.x,
+						pl.y,
+						pl.angle,
+					]),
 				);
 				this.updateScore(0, player);
 			});
@@ -360,7 +369,9 @@ class RoomSocket {
 				const dir = roundNumber(targetF + Math.PI + spread, 2);
 				const origin = currentWeapon.holdDist + currentWeapon.bDist;
 				const newX = Math.round(x + origin * Math.cos(dir));
-				const newY = Math.round(y - currentWeapon.yOffset - jumpY + origin * Math.sin(dir));
+				const newY = Math.round(
+					y - currentWeapon.yOffset - jumpY + origin * Math.sin(dir),
+				);
 				let bulletData = {
 					i: player.index,
 					x: newX,
@@ -371,13 +382,7 @@ class RoomSocket {
 				this.io.emit("2", bulletData);
 				for (let i = 0; i < currentWeapon.bulletsPerShot; i++) {
 					const bullet = getNextBullet(this.room.bullets);
-					shootNextBullet(
-						bulletData,
-						player,
-						targetD,
-						currentTime,
-						bullet,
-					);
+					shootNextBullet(bulletData, player, targetD, currentTime, bullet);
 					this.updateBullet(bullet, player, dir, currentTime);
 				}
 			});
@@ -427,7 +432,13 @@ class RoomSocket {
 				if (msg.includes("!sync")) {
 					this.io.emit(
 						"rsd",
-						this.room.players.flatMap((pl) => [5, pl.index, pl.x, pl.y, pl.angle]),
+						this.room.players.flatMap((pl) => [
+							5,
+							pl.index,
+							pl.x,
+							pl.y,
+							pl.angle,
+						]),
 					);
 					socket.emit("cht", [-1, "synced"]);
 					return;
@@ -444,7 +455,7 @@ class RoomSocket {
 				}
 			});
 			socket.on("crtSpr", () => {
-				this.io.emit("crtSpr", player.index, player.x, player.y)
+				this.io.emit("crtSpr", player.index, player.x, player.y);
 			});
 			socket.on("create", (lobby) => {});
 		});
@@ -566,7 +577,7 @@ class RoomSocket {
 		if (!dead) return;
 		dest.dead = true;
 		dest.onScreen = false;
-		const scored = dest.isBoss ? 2000 : 100
+		const scored = dest.isBoss ? 2000 : 100;
 		this.io.emit("3", {
 			dID: source.index,
 			gID: dest.index,
@@ -592,14 +603,7 @@ class RoomSocket {
 		for (const [i, pkup] of this.room.pickups.entries()) {
 			if (
 				pkup.active &&
-				dotInRect(
-					player.x,
-					player.y,
-					pkup.x,
-					pkup.y,
-					64,
-					64,
-				)
+				dotInRect(player.x, player.y, pkup.x, pkup.y, 64, 64)
 			) {
 				if (pkup.type === "healthpack" && player.health < player.maxHealth) {
 					this.io.emit("upd", {
@@ -610,12 +614,15 @@ class RoomSocket {
 						gID: player.index,
 						h: (player.health += player.maxHealth - player.health),
 					});
-				} else if (pkup.type === "lootcrate" && this.room.gameMode.code === "lc") {
+				} else if (
+					pkup.type === "lootcrate" &&
+					this.room.gameMode.code === "lc"
+				) {
 					this.io.emit("upd", {
 						i: player.index,
-						s: player.score += 50,
+						s: (player.score += 50),
 					});
-					this.updateScore(50, player)
+					this.updateScore(50, player);
 				} else {
 					return;
 				}
@@ -624,20 +631,14 @@ class RoomSocket {
 				setTimeout(() => {
 					pkup.active = true;
 					this.io.emit("4", pkup, i, 0);
-				}, 15000)
+				}, 15000);
 			}
 		}
 		if (this.room.gameMode.code == "hp" || this.room.gameMode.code == "zmtch") {
 			for (const tl of this.room.scoreTiles) {
 				if (
-					dotInRect(
-						player.x,
-						player.y,
-						tl.x,
-						tl.y,
-						tl.scale,
-						tl.scale,
-					) && tl.objTeam !== player.team
+					dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) &&
+					tl.objTeam !== player.team
 				) {
 					if (player.scoreCountdown <= 0) {
 						player.scoreCountdown = 1000;
@@ -645,8 +646,8 @@ class RoomSocket {
 						let tprt: ZoneEvent = { indx: player.index, scor: scored };
 						if (this.room.gameMode.code == "zmtch") {
 							const spawn = this.room.getSpawn(player);
-							player.x = tprt.newX = spawn.x
-							player.y = tprt.newY = spawn.y
+							player.x = tprt.newX = spawn.x;
+							player.y = tprt.newY = spawn.y;
 						}
 						this.io.emit("tprt", tprt);
 						player.score += scored;
