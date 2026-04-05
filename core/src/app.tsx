@@ -2697,7 +2697,7 @@ function deactivateSprays() {
 	});
 }
 function cacheSpray(img: Sprite) {
-	const tmpIndex = img.src;
+	const tmpIndex = `${img.src}`;
 	let tmpSpray = cachedSprays[tmpIndex];
 	if (tmpSpray || img.width === 0) return;
 

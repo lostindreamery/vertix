@@ -100,6 +100,14 @@ export class Room {
 			targetF: 0,
 			animIndex: 0,
 			team: team,
+			spray: {
+    		src: "/assets/sprays/1.png",
+    		info: {
+      		scale: 64,
+      		alpha: 1,
+      		resolution: 128
+    		}
+			},
 		};
 		this.players.push(tmpPlayer);
 		return tmpPlayer;
@@ -410,6 +418,9 @@ class RoomSocket {
 				if (data.srvMap) {
 					this.room.mapData = this.room.newMap(data.srvMap);
 				}
+			});
+			socket.on("crtSpr", () => {
+				this.io.emit("crtSpr", player.index, player.x, player.y)
 			});
 			socket.on("create", (lobby) => {});
 		});
