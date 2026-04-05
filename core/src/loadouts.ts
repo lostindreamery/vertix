@@ -122,6 +122,18 @@ export let characterClasses = [
 		folderName: "demo",
 		hasDown: false,
 	},
+	{
+		classN: "???",
+		pWeapon: "???",
+		sWeapon: "???",
+		folderName: "boss1",
+		maxHealth: 2000,
+		height: 100,
+		width: 50,
+		speed: 0.5,
+		weaponIndexes: [],
+		hasDown: true,
+	},
 ];
 export function setCharacterClasses(newArr: typeof characterClasses) {
 	characterClasses = newArr;

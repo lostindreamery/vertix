@@ -2975,10 +2975,11 @@ var characterWepnDisplay = document.getElementById("charWpn");
 var characterWepnDisplay2 = document.getElementById("charWpn2");
 function createClassList() {
 	let res: Node[] = [];
-	for (let i = 0; i < characterClasses.length; ++i) {
+	for (const [i, cl] of characterClasses.entries()) {
+		if (cl.classN === "???") continue;
 		res.push(
 			<div class="hatSelectItem" id={`classItem${i}`} onClick={() => pickedCharacter(i)}>
-				{characterClasses[i].classN}
+				{cl.classN}
 			</div>,
 		);
 	}

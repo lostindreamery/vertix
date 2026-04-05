@@ -36,6 +36,7 @@ export type Player = {
 	targetF: number;
 	animIndex: number;
 	team: string;
+	isBoss: boolean;
 	loggedIn?: boolean;
 	likes?: number;
 	totalDamage: number;

@@ -39,6 +39,7 @@ export class Room {
 	gameMode: GameMode;
 	scoreRed = 0;
 	scoreBlue = 0;
+	hasBoss = false;
 	bullets: Projectile[] = [];
 	nextAvailableSid = 0;
 	scoreTiles: Tile[] = [];
@@ -59,9 +60,13 @@ export class Room {
 		this.nextAvailableSid++;
 		let team = `${this.players.length}`;
 		if (this.gameMode.teams) {
-			team = this.players.length % 2 === 0 ? "blue" : "red";
+			if (this.gameMode.code === "boss") {
+				team = this.hasBoss ? "red" : "blue";
+			} else {
+				team = this.players.length % 2 === 0 ? "blue" : "red";
+			}
 		}
-		let tmpPlayer = {
+		let tmpPlayer: Account = {
 			id: sid,
 			room: this.room,
 			index: sid,
@@ -101,6 +106,7 @@ export class Room {
 			targetF: 0,
 			animIndex: 0,
 			team: team,
+			isBoss: false,
 			spray: {
     		src: "/assets/sprays/1.png",
     		info: {
@@ -272,6 +278,10 @@ class RoomSocket {
 					player.classIndex = 5;
 				} else if (this.room.gameMode.code === "pyro") {
 					player.classIndex = 7;
+				} else if (this.room.gameMode.code === "boss" && player.team === "blue") {
+					player.classIndex = 10;
+					player.isBoss = true;
+					this.room.hasBoss = true;
 				}
 				const currentClass = characterClasses[player.classIndex];
 				player.weapons = currentClass.weaponIndexes.map((i) => playerWeps[i]);
@@ -556,12 +566,14 @@ class RoomSocket {
 		if (!dead) return;
 		dest.dead = true;
 		dest.onScreen = false;
+		const scored = dest.isBoss ? 2000 : 100
 		this.io.emit("3", {
 			dID: source.index,
 			gID: dest.index,
-			sS: 100,
+			sS: scored,
+			kB: dest.isBoss,
 		});
-		source.score += 100 * this.room.gameMode.killScoreMult;
+		source.score += scored * this.room.gameMode.killScoreMult;
 		source.kills += 1;
 		this.io.emit("upd", {
 			i: source.index,
@@ -573,7 +585,7 @@ class RoomSocket {
 			i: dest.index,
 			dea: dest.deaths,
 		});
-		this.updateScore(100, source);
+		this.updateScore(scored, source);
 	}
 
 	checkSpecialTiles(player: Player) {
