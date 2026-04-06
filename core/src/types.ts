@@ -41,14 +41,13 @@ export type Player = {
 	likes?: number;
 	totalDamage: number;
 	totalHealing: number;
+	totalGoals: number;
+	lastModeVote?: number;
 	xSpeed?: number;
 	ySpeed?: number;
 	isn?: number;
 	firstReceive?: boolean; // unused?
 	spray?: any; // todo
-
-	// properties for removed gamemodes?
-	totalGoals?: number;
 	lastItem?: any;
 };
 

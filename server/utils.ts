@@ -45,6 +45,10 @@ export class Room {
 	nextAvailableSid = 0;
 	spawnTiles: Tile[] = [];
 	scoreTiles: Tile[] = [];
+	modeVotes = gameModes.map((mode) => ({
+		name: mode.name,
+		votes: 0,
+	}));
 
 	constructor(io: Server) {
 		this.gameMode = gameModes[0];
@@ -68,7 +72,7 @@ export class Room {
 				team = this.players.length % 2 === 0 ? "blue" : "red";
 			}
 		}
-		let tmpPlayer: Account = {
+		let tmpPlayer: Player = {
 			id: sid,
 			room: this.room,
 			index: sid,
@@ -99,6 +103,7 @@ export class Room {
 			oldY: 0,
 			totalDamage: 0,
 			totalHealing: 0,
+			totalGoals: 0,
 			spawnProtection: 0,
 			nameYOffset: 0,
 			dead: true,
@@ -465,6 +470,26 @@ class RoomSocket {
 				}
 				this.io.emit("cht", [player.index, msg]);
 			});
+			socket.on("modeVote", (i) => {
+				let vote = this.room.modeVotes[i];
+				if (player.lastModeVote !== undefined) {
+					let lastVote = this.room.modeVotes[player.lastModeVote];
+					lastVote.votes -= 1;
+					this.io.emit("vt", {
+						i: player.lastModeVote,
+						n: lastVote.name,
+						v: lastVote.votes,
+					});
+				}
+				player.lastModeVote = i;
+
+				vote.votes += 1;
+				this.io.emit("vt", {
+					i: i,
+					n: vote.name,
+					v: vote.votes,
+				});
+			});
 			socket.on("ping1", () => {
 				socket.emit("pong1");
 			});
@@ -500,7 +525,13 @@ class RoomSocket {
 			this.io.emit("ts");
 		}
 		if (leaderboardScore >= 100) {
-			this.io.emit("7", source.team, this.room.players, {}, false);
+			this.io.emit(
+				"7",
+				source.team,
+				this.room.players,
+				this.room.modeVotes,
+				false,
+			);
 			let timeLeft = 15;
 			let timer = setInterval(() => {
 				if (timeLeft >= 0) {
@@ -508,10 +539,24 @@ class RoomSocket {
 				} else {
 					this.room.scoreRed = 0;
 					this.room.scoreBlue = 0;
+					//TODO
+					let sorted = this.room.modeVotes.toSorted((a, b) => b.votes - a.votes);
+					let voted = gameModes.find(gm => gm.name === sorted[0].name);
+					this.room.gameMode = voted ? voted : gameModes[0]
+					this.room.mapData = this.room.newMap(defaultGenData[this.room.gameMode.maps[0]]);
+					this.room.genClutter();
+					this.room.genPickups();
+					for (const m of this.room.modeVotes) {
+						m.votes = 0;
+					}
 					for (const pl of this.room.players) {
 						pl.score = 0;
 						pl.kills = 0;
 						pl.deaths = 0;
+						pl.totalDamage = 0;
+						pl.totalHealing = 0;
+						pl.totalGoals = 0;
+						pl.lastModeVote = undefined;
 						//TODO
 						this.io.emit(
 							"welcome",
@@ -668,12 +713,14 @@ class RoomSocket {
 							const spawn = this.room.getSpawn(player);
 							player.x = tprt.newX = spawn.x;
 							player.y = tprt.newY = spawn.y;
+							player.totalGoals += 1;
 						}
 						this.io.emit("tprt", tprt);
 						player.score += scored;
 						this.io.emit("upd", {
 							i: player.index,
 							s: player.score,
+							goa: player.totalGoals,
 						});
 						this.updateScore(scored, player);
 					}

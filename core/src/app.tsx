@@ -1343,7 +1343,7 @@ function showStatTable(
 					document.getElementById("voteModeContainer").appendChild(modeVoteBtn);
 					modeVoteBtn.onclick = () => {
 						mainCanvas.focus();
-						socket.emit("modeVote", modeVoteData[i].indx);
+						socket.emit("modeVote", i);
 						for (let j = 0; j < modeVoteData.length; ++j) {
 							if (
 								i === j &&
@@ -1721,6 +1721,10 @@ function updateUserValue(data: any) {
 	}
 	if (data.hea != undefined) {
 		tmpUser.totalHealing = data.hea;
+		updated = true;
+	}
+	if (data.goa != undefined) {
+		tmpUser.totalGoals = data.goa;
 		updated = true;
 	}
 	if (tmpUser.index == st.player.index) {
