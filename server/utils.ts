@@ -20,6 +20,7 @@ import {
 	getDistance,
 	setupMap,
 	dotInRect,
+	randomInt,
 } from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
 import type { Server, Socket } from "socket.io";
@@ -42,6 +43,7 @@ export class Room {
 	hasBoss = false;
 	bullets: Projectile[] = [];
 	nextAvailableSid = 0;
+	spawnTiles: Tile[] = [];
 	scoreTiles: Tile[] = [];
 
 	constructor(io: Server) {
@@ -112,7 +114,7 @@ export class Room {
 				info: {
 					scale: 64,
 					alpha: 1,
-					resolution: 128,
+					resolution: 30,
 				},
 			},
 		};
@@ -135,11 +137,14 @@ export class Room {
 			height: (genData.height - 4) * this.tileScale,
 		};
 		setupMap(tmpMap, this.tileScale, flags);
-		if (this.gameMode.code === "hp" || this.gameMode.code === "zmtch") {
-			for (const tl of this.tiles) {
-				if (tl.hardPoint) {
-					this.scoreTiles.push(tl);
-				}
+		for (const tl of this.tiles) {
+			if (tl.spriteIndex === 2) {
+				this.spawnTiles.push(tl);
+			} else if (
+				tl.hardPoint &&
+				(this.gameMode.code === "hp" || this.gameMode.code === "zmtch")
+			) {
+				this.scoreTiles.push(tl);
 			}
 		}
 		return tmpMap;
@@ -148,7 +153,7 @@ export class Room {
 	getSpawn(player: Player) {
 		const mid = this.tileScale / 2;
 		let spawn = { x: 0, y: 0 };
-		for (const tl of this.tiles) {
+		for (const tl of this.spawnTiles) {
 			if (this.gameMode.teams) {
 				if (tl.objTeam === player.team && !tl.hardPoint) {
 					spawn = {
@@ -157,7 +162,7 @@ export class Room {
 					};
 					continue;
 				}
-			} else if (tl.spriteIndex === 2) {
+			} else {
 				let valid = this.players.every((pl: Player) => {
 					const dist = getDistance(
 						pl.x,
@@ -181,8 +186,10 @@ export class Room {
 
 	genClutter() {
 		for (const tl of this.tiles) {
-			if (tl.spriteIndex === 2) {
-				this.clutter.push({
+			if (tl.spriteIndex === 0 && !tl.wall) {
+				const rand = randomInt(0, 10);
+				if (rand > 0) continue;
+				let clt = {
 					x: tl.x,
 					y: tl.y,
 					active: true,
@@ -192,7 +199,20 @@ export class Room {
 					h: 84,
 					hc: true,
 					tp: 1,
-				});
+				};
+				const randY = randomInt(tl.scale / 4, (tl.scale / 4) * 3);
+				if (tl.left) {
+					clt.y += randY;
+				} else if (tl.right) {
+					clt.x += tl.scale - clt.w;
+					clt.y += randY;
+				} else if (tl.bottom || tl.top) {
+					continue;
+				} else {
+					clt.x += tl.scale / 2;
+					clt.y += tl.scale / 2;
+				}
+				this.clutter.push(clt);
 			}
 		}
 	}

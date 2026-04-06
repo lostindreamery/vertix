@@ -60,28 +60,18 @@ export class Projectile {
 					}
 					this.cEndX = this.x + ((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
 					this.cEndY = this.y + ((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (let i = 0; i < clutter.length; ++i) {
-						let tmpClutter = clutter[i];
+					for (const clt of clutter) {
 						if (
 							this.active &&
-							tmpClutter.type === "clutter" &&
-							tmpClutter.active &&
-							tmpClutter.hc &&
-							this.canSeeObject(tmpClutter, tmpClutter.h) &&
-							tmpClutter.h * tmpClutter.tp >= this.yOffset &&
-							this.lineInRect(
-								tmpClutter.x,
-								tmpClutter.y - tmpClutter.h,
-								tmpClutter.w,
-								tmpClutter.h - this.yOffset,
-								true,
-							)
+							clt.type === "clutter" &&
+							clt.active &&
+							clt.hc &&
+							this.canSeeObject(clt, clt.h) &&
+							clt.h * clt.tp >= this.yOffset &&
+							this.lineInRect(clt.x, clt.y - clt.h, clt.w, clt.h - this.yOffset, true)
 						) {
 							if (this.bounce) {
-								this.bounceDir(
-									this.cEndY <= tmpClutter.y - tmpClutter.h ||
-										this.cEndY >= tmpClutter.y - this.yOffset,
-								);
+								this.bounceDir(this.cEndY <= clt.y - clt.h || this.cEndY >= clt.y - this.yOffset);
 							} else {
 								this.active = false;
 								this.hitSomething(false, 2);
@@ -89,24 +79,19 @@ export class Projectile {
 						}
 					}
 					if (this.active) {
-						for (let i = 0; i < tiles.length; ++i) {
+						for (const tl of tiles) {
 							if (this.active) {
-								let tmpTile = tiles[i];
-								if (
-									tmpTile.wall &&
-									tmpTile.hasCollision &&
-									this.canSeeObject(tmpTile, tmpTile.scale)
-								) {
-									if (tmpTile.bottom) {
-										if (this.lineInRect(tmpTile.x, tmpTile.y, tmpTile.scale, tmpTile.scale, true)) {
+								if (tl.wall && tl.hasCollision && this.canSeeObject(tl, tl.scale)) {
+									if (tl.bottom) {
+										if (this.lineInRect(tl.x, tl.y, tl.scale, tl.scale, true)) {
 											this.active = false;
 										}
 									} else if (
 										this.lineInRect(
-											tmpTile.x,
-											tmpTile.y,
-											tmpTile.scale,
-											tmpTile.scale - this.owner.height - this.jumpY,
+											tl.x,
+											tl.y,
+											tl.scale,
+											tl.scale - this.owner.height - this.jumpY,
 											true,
 										)
 									) {
@@ -114,12 +99,10 @@ export class Projectile {
 									}
 									if (!this.active) {
 										if (this.bounce) {
-											this.bounceDir(
-												!(this.cEndX <= tmpTile.x) && !(this.cEndX >= tmpTile.x + tmpTile.scale),
-											);
+											this.bounceDir(!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale));
 										} else {
 											this.hitSomething(
-												!(this.cEndX <= tmpTile.x) && !(this.cEndX >= tmpTile.x + tmpTile.scale),
+												!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale),
 												2,
 											);
 										}
@@ -283,22 +266,22 @@ export class Projectile {
 	adjustOnCollision(a: number, b: number, d: number, e: number) {
 		let h = this.cEndX,
 			g = this.cEndY;
-		for (let f = 100; f > 0; ) {
-			f--;
+		for (let i = 100; i > 0; ) {
+			i--;
 			if (dotInRect(h, g, a, b, d, e)) {
-				f = 0;
+				i = 0;
 			} else {
 				h += Math.cos(this.dir + Math.PI) * 2;
 				g += Math.sin(this.dir + Math.PI) * 2;
 			}
 		}
-		for (let f = 100; f > 0; ) {
-			f--;
+		for (let i = 100; i > 0; ) {
+			i--;
 			if (dotInRect(h, g, a, b, d, e)) {
 				h += Math.cos(this.dir + Math.PI) * 2;
 				g += Math.sin(this.dir + Math.PI) * 2;
 			} else {
-				f = 0;
+				i = 0;
 			}
 		}
 		this.cEndX = h;
