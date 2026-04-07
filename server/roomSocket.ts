@@ -84,8 +84,8 @@ export class RoomSocket {
 				) {
 					player.classIndex = 10;
 					player.isBoss = true;
-					this.room.hasBoss = true;
 				}
+				player.currentWeapon = 0;
 				const currentClass = characterClasses[player.classIndex];
 				player.weapons = currentClass.weaponIndexes.map((i) => this.room.weapons[i]);
 				player.health = player.maxHealth = currentClass.maxHealth;
@@ -116,7 +116,7 @@ export class RoomSocket {
 				socket.emit("gameSetup", JSON.stringify(gameSetup), true, true);
 
 				this.io.emit("add", JSON.stringify(player));
-				this.io.emit(
+				socket.emit(
 					"rsd",
 					this.room.players.flatMap((pl) => [
 						5,
@@ -126,7 +126,17 @@ export class RoomSocket {
 						pl.angle,
 					]),
 				);
-				this.updateScore(0, player);
+				if (this.room.gameEnded) {
+					socket.emit(
+						"7",
+						player.team,
+						this.room.players,
+						this.room.modeVotes,
+						false,
+					);
+				} else {
+					this.updateScore(0, player);
+				}
 			});
 			socket.on("respawn", () => {
 				socket.emit(
@@ -299,7 +309,7 @@ export class RoomSocket {
 			leaderboardScore = source.score / (this.room.gameMode.score / 100);
 			this.io.emit("ts");
 		}
-		if (scored >= 100 && !this.room.gameEnded) {
+		if (leaderboardScore >= 100 && !this.room.gameEnded) {
 			this.room.gameEnded = true;
 			this.io.emit(
 				"7",

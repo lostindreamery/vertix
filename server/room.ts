@@ -36,7 +36,6 @@ export class Room {
 	nextSid = 0;
 	scoreRed = 0;
 	scoreBlue = 0;
-	hasBoss = false;
 	modeVotes = gameModes.map((m, i) => ({
 		name: m.name,
 		indx: i,
@@ -54,14 +53,6 @@ export class Room {
 	newPlayer() {
 		let sid = this.nextSid;
 		this.nextSid++;
-		let team = `${this.players.length}`;
-		if (this.gameMode.teams) {
-			if (this.gameMode.code === "boss") {
-				team = this.hasBoss ? "red" : "blue";
-			} else {
-				team = this.players.length % 2 === 0 ? "blue" : "red";
-			}
-		}
 		let tmpPlayer: Player = {
 			id: sid,
 			room: this.room,
@@ -102,7 +93,7 @@ export class Room {
 			delta: 0,
 			targetF: 0,
 			animIndex: 0,
-			team: team,
+			team: this.getTeam(sid),
 			isBoss: false,
 			spray: {
 				src: "/assets/sprays/1.png",
@@ -115,6 +106,26 @@ export class Room {
 		};
 		this.players.push(tmpPlayer);
 		return tmpPlayer;
+	}
+
+	getTeam(sid: number) {
+		let team = ""
+		if (this.gameMode.teams) {
+			const red = this.players.filter(pl =>
+    		pl.team === "red"
+			).length;
+			const blue = this.players.filter(pl =>
+    		pl.team === "blue"
+			).length;
+			if (this.gameMode.code === "boss") {
+				team = blue > 0 ? "red" : "blue";
+			} else {
+				team = red >= blue ? "blue" : "red";
+			}
+		} else {
+			team = `${sid}`;
+		}
+		return team;
 	}
 
 	newMap(genData: GenData) {
@@ -237,31 +248,26 @@ export class Room {
 		this.bullets = [];
 		this.scoreRed = 0;
 		this.scoreBlue = 0;
-		this.hasBoss = false;
 		let sorted = this.modeVotes.toSorted((a, b) => b.votes - a.votes);
 		this.gameMode = gameModes[sorted[0].indx]
 		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
 		for (const m of this.modeVotes) {
 			m.votes = 0;
 		}
-		for (const [i, pl] of this.players.entries()) {
+		for (const pl of this.players) {
+			pl.x = 0;
+			pl.y = 0;
 			pl.score = 0;
 			pl.kills = 0;
 			pl.deaths = 0;
 			pl.totalDamage = 0;
 			pl.totalHealing = 0;
 			pl.totalGoals = 0;
-			//TODO make this better
-			pl.lastModeVote = undefined;
-			let team = `${i}`;
-			if (this.gameMode.teams) {
-				if (this.gameMode.code === "boss") {
-					team = this.hasBoss ? "red" : "blue";
-				} else {
-					team = i % 2 === 0 ? "blue" : "red";
-				}
-			}
-			pl.team = team;
+			pl.isBoss = false;
+			pl.onScreen = false;
+			pl.dead = true;
+			pl.lastModeVote = undefined; //TODO
+			pl.team = this.getTeam(pl.index);
 		}
 		this.genClutter();
 		this.genPickups();
