@@ -137,13 +137,17 @@ export class Room {
 		};
 		setupMap(tmpMap, this.tileScale, []);
 		for (const tl of this.tiles) {
-			if (tl.spriteIndex === 2) {
+			if (this.gameMode.teams) {
+				if (!tl.hardPoint && (tl.objTeam === "red" || tl.objTeam === "blue")) {
+					this.spawnTiles.push(tl);
+				} else if (
+					tl.hardPoint &&
+					(this.gameMode.code === "hp" || this.gameMode.code === "zmtch")
+				) {
+					this.scoreTiles.push(tl);
+				}
+			} else if (tl.spriteIndex === 2) {
 				this.spawnTiles.push(tl);
-			} else if (
-				tl.hardPoint &&
-				(this.gameMode.code === "hp" || this.gameMode.code === "zmtch")
-			) {
-				this.scoreTiles.push(tl);
 			}
 		}
 		return tmpMap;
@@ -154,7 +158,7 @@ export class Room {
 		let spawn = { x: 0, y: 0 };
 		for (const tl of this.spawnTiles) {
 			if (this.gameMode.teams) {
-				if (tl.objTeam === player.team && !tl.hardPoint) {
+				if (tl.objTeam === player.team) {
 					spawn = {
 						x: tl.x + mid,
 						y: tl.y + mid,
@@ -259,6 +263,7 @@ export class Room {
 			pl.onScreen = false;
 			pl.dead = true;
 			pl.lastModeVote = undefined; //TODO
+			pl.team = "";
 			pl.team = this.getTeam(pl.index);
 		}
 		this.genClutter();

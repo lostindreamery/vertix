@@ -188,10 +188,8 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 						n.spriteIndex = 1;
 					}
 				} else if (p === "255 0 0" && a.gameMode.teams) {
-					n.spriteIndex = 2;
 					n.objTeam = "red";
 				} else if (p === "0 0 255" && a.gameMode.teams) {
-					n.spriteIndex = 2;
 					n.objTeam = "blue";
 				}
 			}
@@ -300,7 +298,7 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 		if (tmpObj.type !== "clutter" || !tmpObj.active) continue;
 		if (
 			tmpObj.hc &&
-			//canSee(b.x - startX, b.y - startY, b.w, b.h) &&
+			//canSee(tmpObj.x - st.startX, tmpObj.y - st.startY, tmpObj.w, tmpObj.h) &&
 			player.x + player.width / 2 >= tmpObj.x &&
 			player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
 			player.y >= tmpObj.y - tmpObj.h * tmpObj.tp &&
