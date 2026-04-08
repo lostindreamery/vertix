@@ -1,20 +1,20 @@
-import { characterClasses } from "core/src/loadouts.ts";
-import { Projectile } from "core/src/logic/projectile.ts";
-import type { Player, ZoneEvent } from "core/src/types.ts";
-import {
-	shootNextBullet,
-	getNextBullet,
-	wallCol,
-	getCurrentWeapon,
-	roundNumber,
-	getDistance,
-	dotInRect,
-} from "core/src/utils.ts";
-import { Socket, type Server } from "socket.io";
-import { hats, camos, shirts } from "core/src/skins.ts";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { Room } from "./room.ts";
+import type { Server, Socket } from "socket.io";
+import { characterClasses } from "core/src/loadouts.ts";
+import type { Projectile } from "core/src/logic/projectile.ts";
+import { camos, hats, shirts } from "core/src/skins.ts";
+import type { Player, ZoneEvent } from "core/src/types.ts";
+import {
+	dotInRect,
+	getCurrentWeapon,
+	getDistance,
+	getNextBullet,
+	roundNumber,
+	shootNextBullet,
+	wallCol,
+} from "core/src/utils.ts";
+import type { Room } from "./room.ts";
 
 export class RoomSocket {
 	io;

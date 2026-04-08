@@ -2,6 +2,7 @@ import * as zip from "@zip.js/zip.js";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { mount } from "svelte";
+import Controls from "./components/controls.svelte";
 import Settings from "./components/settings.svelte";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
@@ -39,7 +40,6 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
-import Controls from "./components/controls.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
@@ -532,7 +532,7 @@ var target = {
 	dOffset: 0,
 };
 var gameObjects: any[] = []; // todo
-//@ts-ignore
+//@ts-expect-error
 window.gameObjects = gameObjects;
 var bullets: Projectile[] = [];
 
@@ -573,7 +573,7 @@ function gameInput(event: MouseEvent) {
 	lastAngle = target.f;
 	lastDist = target.d;
 	target.d = Math.sqrt(
-		Math.pow(mouseY - (screenHeight / 2 - b / 2), 2) + Math.pow(mouseX - screenWidth / 2, 2),
+		(mouseY - (screenHeight / 2 - b / 2)) ** 2 + (mouseX - screenWidth / 2) ** 2,
 	);
 	target.d *= Math.min(st.maxScreenWidth / screenWidth, st.maxScreenHeight / screenHeight);
 	target.f = Math.atan2(screenHeight / 2 - b / 2 - mouseY, screenWidth / 2 - mouseX);
@@ -795,14 +795,14 @@ function showLobbySelector() {
 	shirtSelector.style.display = "none";
 	lobbySelector.style.display = "block";
 }
-//@ts-ignore
+//@ts-expect-error
 window.showLobbySelector = showLobbySelector;
 function hideLobbySelector() {
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	lobbySelector.style.display = "none";
 }
-//@ts-ignore
+//@ts-expect-error
 window.hideLobbySelector = hideLobbySelector;
 function showLobbyCSelector() {
 	charSelectorCont.style.display = "none";
@@ -813,14 +813,14 @@ function showLobbyCSelector() {
 	shirtSelector.style.display = "none";
 	lobbyCSelector.style.display = "block";
 }
-//@ts-ignore
+//@ts-expect-error
 window.showLobbyCSelector = showLobbyCSelector;
 function hideLobbyCSelector() {
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	lobbyCSelector.style.display = "none";
 }
-//@ts-ignore
+//@ts-expect-error
 window.hideLobbyCSelector = hideLobbyCSelector;
 var timeOutCheck = null;
 var tmpPingTimer = null;
@@ -1910,7 +1910,7 @@ function showHatselector() {
 	spraySelector.style.display = "none";
 	hatSelector.style.display = "block";
 }
-//@ts-ignore
+//@ts-expect-error
 window.changeHat = changeHat;
 function changeHat(a: number) {
 	if (!socket) return;
@@ -1989,7 +1989,7 @@ function showShirtselector() {
 	hatSelector.style.display = "none";
 	shirtSelector.style.display = "block";
 }
-//@ts-ignore
+//@ts-expect-error
 window.changeShirt = changeShirt;
 function changeShirt(shirtId: number) {
 	if (!socket) return;
@@ -2072,7 +2072,7 @@ function changeSpray(dir: number, sprayId: number) {
 	lobbySelector.style.display = "none";
 	lobbyCSelector.style.display = "none";
 }
-//@ts-ignore
+//@ts-expect-error
 window.changeSpray = changeSpray;
 function findUserByIndex(index: number): Player {
 	return gameObjects.find((obj) => obj.index === index) ?? null;
@@ -3269,7 +3269,7 @@ function setModInfoText(info: string) {
 		modInfo.innerHTML = info;
 	}
 }
-//@ts-ignore
+//@ts-expect-error
 window.loadModPack = loadModPack;
 async function loadModPack(url: string, isBaseAssets: boolean) {
 	try {

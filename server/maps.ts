@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { GenData } from "core/src/types.ts";
 import sharp from "sharp";
+import type { GenData } from "core/src/types.ts";
 
 export const defaultGenData: GenData[] = [];
 

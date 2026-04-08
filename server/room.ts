@@ -1,18 +1,18 @@
+import type { Server } from "socket.io";
 import { gameModes } from "core/src/gamemodes.ts";
 import { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
 import type {
 	Account,
+	GameMode,
 	GenData,
+	MapData,
 	MapObject,
 	Player,
 	Tile,
-	GameMode,
-	MapData,
 } from "core/src/types.ts";
-import { getDistance, setupMap, randomInt } from "core/src/utils.ts";
+import { getDistance, randomInt, setupMap } from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
-import type { Server } from "socket.io";
 import { RoomSocket } from "./roomSocket.ts";
 
 export class Room {
@@ -163,7 +163,6 @@ export class Room {
 						x: tl.x + mid,
 						y: tl.y + mid,
 					};
-					continue;
 				}
 			} else {
 				let valid = this.players.every((pl: Player) => {
@@ -180,7 +179,6 @@ export class Room {
 						x: tl.x + mid,
 						y: tl.y + mid,
 					};
-					continue;
 				}
 			}
 		}

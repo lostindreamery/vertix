@@ -1,7 +1,7 @@
 import { playSound } from "../sound.ts";
 import { st } from "../state.svelte.ts";
 import type { Player, Tile } from "../types.ts";
-import { getDistance, randomInt, dotInRect } from "../utils.ts";
+import { dotInRect, getDistance, randomInt } from "../utils.ts";
 import { createLiquid, particleCone, stillDustParticle } from "../visual/particle.ts";
 
 export class Projectile {

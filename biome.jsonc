@@ -13,7 +13,23 @@
 		"enabled": true,
 		"indentStyle": "tab"
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							":NODE:",
+							[":PACKAGE:", "!core/**"],
+							"core/**",
+							":PATH:"
+						]
+					}
+				}
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
