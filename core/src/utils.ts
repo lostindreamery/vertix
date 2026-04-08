@@ -34,7 +34,7 @@ export function shootNextBullet(
 			let rand = randomFloat(randScale[0], randScale[1]);
 			bullet.width *= rand;
 			bullet.height *= rand;
-			bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
+			//bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
 		}
 		bullet.trailWidth = bullet.width * 0.7;
 		bullet.trailMaxLength = Math.round(bullet.height * 5);
@@ -56,6 +56,7 @@ export function shootNextBullet(
 		bullet.explodeOnDeath = weapon.explodeOnDeath;
 		bullet.pierceCount = weapon.pierce;
 		bullet.blastRadius = weapon.blastRadius;
+		bullet.selfDamage = weapon.selfDamage;
 		bullet.activate();
 	}
 	bullet = null;

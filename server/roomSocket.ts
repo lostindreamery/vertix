@@ -1,9 +1,6 @@
 import { characterClasses } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
-import type {
-	Player,
-	ZoneEvent,
-} from "core/src/types.ts";
+import type { Player, ZoneEvent } from "core/src/types.ts";
 import {
 	shootNextBullet,
 	getNextBullet,
@@ -87,7 +84,9 @@ export class RoomSocket {
 				}
 				player.currentWeapon = 0;
 				const currentClass = characterClasses[player.classIndex];
-				player.weapons = currentClass.weaponIndexes.map((i) => this.room.weapons[i]);
+				player.weapons = currentClass.weaponIndexes.map(
+					(i) => this.room.weapons[i],
+				);
 				player.health = player.maxHealth = currentClass.maxHealth;
 				player.height = currentClass.height;
 				player.width = currentClass.width;
@@ -171,26 +170,26 @@ export class RoomSocket {
 			socket.on("1", (x, y, jumpY, targetF, targetD, currentTime) => {
 				const currentWeapon = getCurrentWeapon(player);
 				if (!currentWeapon) return;
-				currentWeapon.spreadIndex++;
-				if (currentWeapon.spreadIndex >= currentWeapon.spread.length) {
-					currentWeapon.spreadIndex = 0;
-				}
-				const spread = currentWeapon.spread[currentWeapon.spreadIndex];
-				const dir = roundNumber(targetF + Math.PI + spread, 2);
-				const origin = currentWeapon.holdDist + currentWeapon.bDist;
-				const newX = Math.round(x + origin * Math.cos(dir));
-				const newY = Math.round(
-					y - currentWeapon.yOffset - jumpY + origin * Math.sin(dir),
-				);
-				let bulletData = {
-					i: player.index,
-					x: newX,
-					y: newY,
-					d: dir,
-					si: -1,
-				};
-				this.io.emit("2", bulletData);
 				for (let i = 0; i < currentWeapon.bulletsPerShot; i++) {
+					currentWeapon.spreadIndex++;
+					if (currentWeapon.spreadIndex >= currentWeapon.spread.length) {
+						currentWeapon.spreadIndex = 0;
+					}
+					const spread = currentWeapon.spread[currentWeapon.spreadIndex];
+					const dir = roundNumber(targetF + Math.PI + spread, 2);
+					const origin = currentWeapon.holdDist + currentWeapon.bDist;
+					const newX = Math.round(x + origin * Math.cos(dir));
+					const newY = Math.round(
+						y - currentWeapon.yOffset - jumpY + origin * Math.sin(dir),
+					);
+					let bulletData = {
+						i: player.index,
+						x: newX,
+						y: newY,
+						d: dir,
+						si: -1,
+					};
+					this.io.emit("2", bulletData);
 					const bullet = getNextBullet(this.room.bullets);
 					shootNextBullet(bulletData, player, targetD, currentTime, bullet);
 					this.updateBullet(bullet, player, dir, currentTime);
@@ -219,8 +218,38 @@ export class RoomSocket {
 				player.angle =
 					((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) +
 					90;
+				//TODO
 				if (space === 1) {
 					this.io.emit("jum", player.index);
+					if (player.jumpY <= 0) {
+						player.jumpDelta = player.jumpStrength;
+						player.jumpY = player.jumpDelta;
+					}
+				}
+				if (player.jumpCountdown > 0) {
+					player.jumpCountdown -= delta;
+				}
+				if (player.jumpY > 0) {
+					player.jumpDelta -= player.gravityStrength * delta;
+					player.jumpY += player.jumpDelta * delta;
+					if (player.jumpY <= 0) {
+						player.jumpY = 0;
+						player.jumpDelta = 0;
+						player.jumpCountdown = 250;
+						if (player.classIndex === 8) {
+							const dir = roundNumber(player.targetF + Math.PI, 2);
+							this.doExplosion(
+								player,
+								player.x,
+								player.y,
+								100,
+								100,
+								dir,
+								false,
+							);
+						}
+					}
+					player.jumpY = Math.round(player.jumpY);
 				}
 				wallCol(player, this.room.tiles, this.room.clutter);
 				this.checkSpecialTiles(player);
@@ -351,29 +380,18 @@ export class RoomSocket {
 		const tick = () => {
 			if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
-					this.updateHit(player, this.room.players[i], -bullet.dmg, dir);
+					this.handleHit(player, this.room.players[i], -bullet.dmg, dir, -1);
 				}
 			} else if (!bullet.active && bullet.explodeOnDeath) {
-				this.io.emit("ex", bullet.x, bullet.y, 3);
-				for (const pl of this.room.players) {
-					const left = pl.x - pl.width / 2;
-					const right = pl.x + pl.width / 2;
-					const top = pl.y - pl.height;
-					const bottom = pl.y;
-					const dist = getDistance(
-						bullet.x,
-						bullet.y,
-						Math.max(left, Math.min(right, bullet.x)),
-						Math.max(top, Math.min(bottom, bullet.y)),
-					);
-					if (bullet.blastRadius > dist) {
-						const dmg =
-							-bullet.blastRadius + Math.round(dist) < -bullet.dmg
-								? -bullet.dmg
-								: -bullet.blastRadius + Math.round(dist);
-						this.updateHit(player, pl, dmg, dir);
-					}
-				}
+				this.doExplosion(
+					player,
+					bullet.x,
+					bullet.y,
+					bullet.blastRadius,
+					bullet.dmg,
+					dir,
+					bullet.selfDamage,
+				);
 			} else {
 				bullet.update(
 					player.delta,
@@ -390,7 +408,13 @@ export class RoomSocket {
 		tick();
 	}
 
-	updateHit(source: Player, dest: Player, dmg: number, dir: number) {
+	handleHit(
+		source: Player,
+		dest: Player,
+		dmg: number,
+		dir: number,
+		bi?: number,
+	) {
 		if (dest?.dead) return;
 		dest.health += dmg;
 		this.io.emit("1", {
@@ -398,7 +422,7 @@ export class RoomSocket {
 			gID: dest.index,
 			dir: dir,
 			amount: dmg,
-			bi: -1,
+			bi: bi ? bi : null,
 			h: dest.health,
 		});
 		this.io.emit("upd", {
@@ -431,13 +455,49 @@ export class RoomSocket {
 		this.updateScore(scored, source);
 	}
 
+	doExplosion(
+		source: Player,
+		x: number,
+		y: number,
+		radius: number,
+		maxDmg: number,
+		dir: number,
+		selfDamage: boolean,
+	) {
+		this.io.emit("ex", x, y, 3);
+		for (const pl of this.room.players) {
+			if (!selfDamage && pl.index === source.index) continue;
+			const left = pl.x - pl.width / 2;
+			const right = pl.x + pl.width / 2;
+			const top = pl.y - pl.height;
+			const bottom = pl.y;
+			const dist = getDistance(
+				x,
+				y,
+				Math.max(left, Math.min(right, x)),
+				Math.max(top, Math.min(bottom, y)),
+			);
+			if (radius > dist) {
+				const dmg =
+					-radius + Math.round(dist) < -maxDmg
+						? -maxDmg
+						: -radius + Math.round(dist);
+				this.handleHit(source, pl, dmg, dir);
+			}
+		}
+	}
+
 	checkSpecialTiles(player: Player) {
 		for (const [i, pkup] of this.room.pickups.entries()) {
 			if (
 				pkup.active &&
 				dotInRect(player.x, player.y, pkup.x, pkup.y, 64, 64)
 			) {
-				if (pkup.type === "healthpack" && player.health < player.maxHealth) {
+				if (
+					pkup.type === "healthpack" &&
+					player.health < player.maxHealth &&
+					!player.isBoss
+				) {
 					this.io.emit("upd", {
 						i: player.index,
 						hea: (player.totalHealing += player.maxHealth - player.health),

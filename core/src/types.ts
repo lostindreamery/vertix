@@ -84,6 +84,7 @@ export type Weapon = {
 	glowWidth: number;
 	glowHeight: number;
 	shake: number;
+	selfDamage?: boolean;
 
 	reloadTime: number;
 	spreadIndex: number;

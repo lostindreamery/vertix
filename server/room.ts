@@ -10,11 +10,7 @@ import type {
 	GameMode,
 	MapData,
 } from "core/src/types.ts";
-import {
-	getDistance,
-	setupMap,
-	randomInt,
-} from "core/src/utils.ts";
+import { getDistance, setupMap, randomInt } from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
 import type { Server } from "socket.io";
 import { RoomSocket } from "./roomSocket.ts";
@@ -109,14 +105,10 @@ export class Room {
 	}
 
 	getTeam(sid: number) {
-		let team = ""
+		let team = "";
 		if (this.gameMode.teams) {
-			const red = this.players.filter(pl =>
-    		pl.team === "red"
-			).length;
-			const blue = this.players.filter(pl =>
-    		pl.team === "blue"
-			).length;
+			const red = this.players.filter((pl) => pl.team === "red").length;
+			const blue = this.players.filter((pl) => pl.team === "blue").length;
 			if (this.gameMode.code === "boss") {
 				team = blue > 0 ? "red" : "blue";
 			} else {
@@ -249,7 +241,7 @@ export class Room {
 		this.scoreRed = 0;
 		this.scoreBlue = 0;
 		let sorted = this.modeVotes.toSorted((a, b) => b.votes - a.votes);
-		this.gameMode = gameModes[sorted[0].indx]
+		this.gameMode = gameModes[sorted[0].indx];
 		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
 		for (const m of this.modeVotes) {
 			m.votes = 0;
