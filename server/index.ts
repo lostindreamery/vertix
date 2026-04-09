@@ -2,7 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
-import { Room } from "./room.ts";
+import { Room } from "./roomSocket.ts";
 
 const app = new Hono();
 app.use(
@@ -26,7 +26,8 @@ const io = new Server({
 	},
 });
 
-new Room(io);
+let room = new Room(io);
+room.handleSocket();
 
 io.listen(1119);
 

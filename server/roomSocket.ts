@@ -14,27 +14,26 @@ import {
 	shootNextBullet,
 	wallCol,
 } from "core/src/utils.ts";
-import type { Room } from "./room.ts";
+import { Game }  from "./room.ts";
 
-export class RoomSocket {
+export class Room {
 	io;
-	room;
+	game;
 	cosmetics = {
 		hats,
 		shirts,
 		camos,
 	};
-	constructor(io: Server, room: Room) {
+	constructor(io: Server) {
 		this.io = io;
-		this.room = room;
+		this.game = new Game();
 		this.sortCosmetics();
-		this.handleSocket();
 	}
 	handleSocket() {
 		this.io.on("connection", (socket: Socket) => {
 			console.log("con", socket.id);
 
-			let player = this.room.newPlayer();
+			let player = this.game.newPlayer();
 
 			socket.emit(
 				"welcome",
@@ -51,7 +50,7 @@ export class RoomSocket {
 			socket.emit(
 				"updCmo",
 				camos.length,
-				this.room.weapons.map(() => this.cosmetics.camos),
+				this.game.weapons.map(() => this.cosmetics.camos),
 			);
 
 			socket.on("cHat", (id) => {
@@ -61,7 +60,7 @@ export class RoomSocket {
 				player.account.shirt = shirts[id - 1];
 			});
 			socket.on("cCamo", (data) => {
-				const wep = this.room.weapons[data.weaponID];
+				const wep = this.game.weapons[data.weaponID];
 				if (wep) wep.camo = data.camoID - 1;
 			});
 
@@ -69,14 +68,14 @@ export class RoomSocket {
 				console.log("gotit", client, init, currentTime);
 				player.name = client.name ? client.name : player.name;
 				player.classIndex = client.classIndex ? client.classIndex : 0;
-				if (this.room.gameMode.code === "snipe") {
+				if (this.game.mode.code === "snipe") {
 					player.classIndex = 2;
-				} else if (this.room.gameMode.code === "rckt") {
+				} else if (this.game.mode.code === "rckt") {
 					player.classIndex = 5;
-				} else if (this.room.gameMode.code === "pyro") {
+				} else if (this.game.mode.code === "pyro") {
 					player.classIndex = 7;
 				} else if (
-					this.room.gameMode.code === "boss" &&
+					this.game.mode.code === "boss" &&
 					player.team === "blue"
 				) {
 					player.classIndex = 10;
@@ -85,7 +84,7 @@ export class RoomSocket {
 				player.currentWeapon = 0;
 				const currentClass = characterClasses[player.classIndex];
 				player.weapons = currentClass.weaponIndexes.map(
-					(i) => this.room.weapons[i],
+					(i) => this.game.weapons[i],
 				);
 				player.health = player.maxHealth = currentClass.maxHealth;
 				player.height = currentClass.height;
@@ -95,20 +94,20 @@ export class RoomSocket {
 
 				player.onScreen = true;
 				player.angle = 0;
-				const spawn = this.room.getSpawn(player);
+				const spawn = this.game.getSpawn(player);
 				player.x = spawn.x;
 				player.y = spawn.y;
 				player.dead = false;
 
 				const gameSetup = {
-					mapData: this.room.mapData,
+					mapData: this.game.mapData,
 
 					maxScreenWidth: 1920,
 					maxScreenHeight: 1080,
 					viewMult: 1,
-					tileScale: this.room.tileScale,
+					tileScale: this.game.tileScale,
 
-					usersInRoom: this.room.players,
+					usersInRoom: this.game.players,
 					you: player,
 				};
 
@@ -117,7 +116,7 @@ export class RoomSocket {
 				this.io.emit("add", JSON.stringify(player));
 				socket.emit(
 					"rsd",
-					this.room.players.flatMap((pl) => [
+					this.game.players.flatMap((pl) => [
 						5,
 						pl.index,
 						pl.x,
@@ -125,12 +124,12 @@ export class RoomSocket {
 						pl.angle,
 					]),
 				);
-				if (this.room.gameEnded) {
+				if (this.game.roundEnd) {
 					socket.emit(
 						"7",
 						player.team,
-						this.room.players,
-						this.room.modeVotes,
+						this.game.players,
+						this.game.modeVotes,
 						false,
 					);
 				} else {
@@ -151,7 +150,7 @@ export class RoomSocket {
 			});
 			socket.on("disconnect", () => {
 				this.io.emit("rem", player.index);
-				this.room.players.splice(this.room.players.indexOf(player), 1);
+				this.game.players.splice(this.game.players.indexOf(player), 1);
 			});
 			socket.on("sw", (currentWeapon) => {
 				player.currentWeapon = currentWeapon;
@@ -190,7 +189,7 @@ export class RoomSocket {
 						si: -1,
 					};
 					this.io.emit("2", bulletData);
-					const bullet = getNextBullet(this.room.bullets);
+					const bullet = getNextBullet(this.game.bullets);
 					shootNextBullet(bulletData, player, targetD, currentTime, bullet);
 					this.updateBullet(bullet, player, dir, currentTime);
 				}
@@ -251,13 +250,13 @@ export class RoomSocket {
 					}
 					player.jumpY = Math.round(player.jumpY);
 				}
-				wallCol(player, this.room.tiles, this.room.clutter);
+				wallCol(player, this.game.tiles, this.game.clutter);
 				this.checkSpecialTiles(player);
 				player.x = Math.round(player.x);
 				player.y = Math.round(player.y);
 				socket.emit(
 					"rsd",
-					this.room.players.flatMap((pl) => [
+					this.game.players.flatMap((pl) => [
 						6,
 						pl.index,
 						pl.x,
@@ -271,7 +270,7 @@ export class RoomSocket {
 				if (msg.includes("!sync")) {
 					this.io.emit(
 						"rsd",
-						this.room.players.flatMap((pl) => [
+						this.game.players.flatMap((pl) => [
 							5,
 							pl.index,
 							pl.x,
@@ -285,9 +284,9 @@ export class RoomSocket {
 				this.io.emit("cht", [player.index, msg]);
 			});
 			socket.on("modeVote", (i) => {
-				let vote = this.room.modeVotes[i];
+				let vote = this.game.modeVotes[i];
 				if (player.lastModeVote !== undefined) {
-					let lastVote = this.room.modeVotes[player.lastModeVote];
+					let lastVote = this.game.modeVotes[player.lastModeVote];
 					lastVote.votes -= 1;
 					this.io.emit("vt", {
 						i: player.lastModeVote,
@@ -310,7 +309,7 @@ export class RoomSocket {
 			//TODO
 			socket.on("cSrv", (data) => {
 				if (data.srvMap) {
-					this.room.mapData = this.room.newMap(data.srvMap);
+					this.game.mapData = this.game.newMap(data.srvMap);
 				}
 			});
 			socket.on("crtSpr", () => {
@@ -323,28 +322,28 @@ export class RoomSocket {
 	updateScore(scored: number, source: Player) {
 		this.io.emit(
 			"lb",
-			this.room.players
+			this.game.players
 				.toSorted((a, b) => b.score - a.score)
 				.flatMap((pl) => [pl.index]),
 		);
-		let leaderboardScore = scored / (this.room.gameMode.score / 100);
+		let leaderboardScore = scored / (this.game.mode.score / 100);
 		if (source.team === "red") {
-			leaderboardScore = this.room.scoreRed += leaderboardScore;
-			this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
+			leaderboardScore = this.game.scoreRed += leaderboardScore;
+			this.io.emit("ts", this.game.scoreRed, this.game.scoreBlue);
 		} else if (source.team === "blue") {
-			leaderboardScore = this.room.scoreBlue += leaderboardScore;
-			this.io.emit("ts", this.room.scoreRed, this.room.scoreBlue);
+			leaderboardScore = this.game.scoreBlue += leaderboardScore;
+			this.io.emit("ts", this.game.scoreRed, this.game.scoreBlue);
 		} else {
-			leaderboardScore = source.score / (this.room.gameMode.score / 100);
+			leaderboardScore = source.score / (this.game.mode.score / 100);
 			this.io.emit("ts");
 		}
-		if (leaderboardScore >= 100 && !this.room.gameEnded) {
-			this.room.gameEnded = true;
+		if (leaderboardScore >= 100 && !this.game.roundEnd) {
+			this.game.roundEnd = true;
 			this.io.emit(
 				"7",
 				source.team,
-				this.room.players,
-				this.room.modeVotes,
+				this.game.players,
+				this.game.modeVotes,
 				false,
 			);
 			let timeLeft = 15;
@@ -352,8 +351,8 @@ export class RoomSocket {
 				if (timeLeft >= 0) {
 					this.io.emit("8", timeLeft--);
 				} else {
-					this.room.newGame();
-					for (const pl of this.room.players) {
+					this.game.newRound();
+					for (const pl of this.game.players) {
 						this.io.emit(
 							"welcome",
 							{
@@ -380,7 +379,7 @@ export class RoomSocket {
 		const tick = () => {
 			if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
-					this.handleHit(player, this.room.players[i], -bullet.dmg, dir, -1);
+					this.handleHit(player, this.game.players[i], -bullet.dmg, dir, -1);
 				}
 			} else if (!bullet.active && bullet.explodeOnDeath) {
 				this.doExplosion(
@@ -396,9 +395,9 @@ export class RoomSocket {
 				bullet.update(
 					player.delta,
 					currentTime,
-					this.room.clutter,
-					this.room.tiles,
-					this.room.players,
+					this.game.clutter,
+					this.game.tiles,
+					this.game.players,
 				);
 				setTimeout(tick, player.delta);
 				return;
@@ -440,7 +439,7 @@ export class RoomSocket {
 			sS: scored,
 			kB: dest.isBoss,
 		});
-		source.score += scored * this.room.gameMode.killScoreMult;
+		source.score += scored * this.game.mode.killScoreMult;
 		source.kills += 1;
 		this.io.emit("upd", {
 			i: source.index,
@@ -465,7 +464,7 @@ export class RoomSocket {
 		selfDamage: boolean,
 	) {
 		this.io.emit("ex", x, y, 3);
-		for (const pl of this.room.players) {
+		for (const pl of this.game.players) {
 			if (!selfDamage && pl.index === source.index) continue;
 			const left = pl.x - pl.width / 2;
 			const right = pl.x + pl.width / 2;
@@ -488,7 +487,7 @@ export class RoomSocket {
 	}
 
 	checkSpecialTiles(player: Player) {
-		for (const [i, pkup] of this.room.pickups.entries()) {
+		for (const [i, pkup] of this.game.pickups.entries()) {
 			if (
 				pkup.active &&
 				dotInRect(player.x, player.y, pkup.x, pkup.y, 64, 64)
@@ -508,7 +507,7 @@ export class RoomSocket {
 					});
 				} else if (
 					pkup.type === "lootcrate" &&
-					this.room.gameMode.code === "lc"
+					this.game.mode.code === "lc"
 				) {
 					this.io.emit("upd", {
 						i: player.index,
@@ -526,18 +525,18 @@ export class RoomSocket {
 				}, 15000);
 			}
 		}
-		if (this.room.gameMode.code == "hp" || this.room.gameMode.code == "zmtch") {
-			for (const tl of this.room.scoreTiles) {
+		if (this.game.mode.code == "hp" || this.game.mode.code == "zmtch") {
+			for (const tl of this.game.scoreTiles) {
 				if (
 					dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) &&
 					tl.objTeam !== player.team
 				) {
 					if (player.scoreCountdown <= 0) {
 						player.scoreCountdown = 1000;
-						const scored = this.room.gameMode.code === "hp" ? 10 : 100;
+						const scored = this.game.mode.code === "hp" ? 10 : 100;
 						let tprt: ZoneEvent = { indx: player.index, scor: scored };
-						if (this.room.gameMode.code == "zmtch") {
-							const spawn = this.room.getSpawn(player);
+						if (this.game.mode.code == "zmtch") {
+							const spawn = this.game.getSpawn(player);
 							player.x = tprt.newX = spawn.x;
 							player.y = tprt.newY = spawn.y;
 							player.totalGoals += 1;

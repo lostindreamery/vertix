@@ -1,4 +1,3 @@
-import type { Server } from "socket.io";
 import { gameModes } from "core/src/gamemodes.ts";
 import { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
@@ -13,13 +12,12 @@ import type {
 } from "core/src/types.ts";
 import { getDistance, randomInt, setupMap } from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
-import { RoomSocket } from "./roomSocket.ts";
 
-export class Room {
+export class Game {
 	id = 0;
 	room = "DEV";
 	players: Player[] = [];
-	gameMode: GameMode;
+	mode: GameMode;
 	mapData: MapData;
 	tileScale = 256;
 	tiles: Tile[] = [];
@@ -37,13 +35,12 @@ export class Room {
 		indx: i,
 		votes: 0,
 	}));
-	gameEnded = false;
+	roundEnd = false;
 
-	constructor(io: Server) {
-		this.gameMode = gameModes[0];
-		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
-		this.newGame();
-		new RoomSocket(io, this);
+	constructor() {
+		this.mode = gameModes[0];
+		this.mapData = this.newMap(defaultGenData[this.mode.maps[0]]);
+		this.newRound();
 	}
 
 	newPlayer() {
@@ -106,10 +103,10 @@ export class Room {
 
 	getTeam(sid: number) {
 		let team = "";
-		if (this.gameMode.teams) {
+		if (this.mode.teams) {
 			const red = this.players.filter((pl) => pl.team === "red").length;
 			const blue = this.players.filter((pl) => pl.team === "blue").length;
-			if (this.gameMode.code === "boss") {
+			if (this.mode.code === "boss") {
 				team = blue > 0 ? "red" : "blue";
 			} else {
 				team = red >= blue ? "blue" : "red";
@@ -127,7 +124,7 @@ export class Room {
 		this.spawnTiles = [];
 		this.scoreTiles = [];
 		let tmpMap = {
-			gameMode: this.gameMode,
+			gameMode: this.mode,
 			genData: genData,
 			tiles: this.tiles,
 			clutter: this.clutter,
@@ -137,12 +134,12 @@ export class Room {
 		};
 		setupMap(tmpMap, this.tileScale, []);
 		for (const tl of this.tiles) {
-			if (this.gameMode.teams) {
+			if (this.mode.teams) {
 				if (!tl.hardPoint && (tl.objTeam === "red" || tl.objTeam === "blue")) {
 					this.spawnTiles.push(tl);
 				} else if (
 					tl.hardPoint &&
-					(this.gameMode.code === "hp" || this.gameMode.code === "zmtch")
+					(this.mode.code === "hp" || this.mode.code === "zmtch")
 				) {
 					this.scoreTiles.push(tl);
 				}
@@ -157,7 +154,7 @@ export class Room {
 		const mid = this.tileScale / 2;
 		let spawn = { x: 0, y: 0 };
 		for (const tl of this.spawnTiles) {
-			if (this.gameMode.teams) {
+			if (this.mode.teams) {
 				if (tl.objTeam === player.team) {
 					spawn = {
 						x: tl.x + mid,
@@ -231,20 +228,20 @@ export class Room {
 			if (tl.spriteIndex === 2) {
 				pkup.type = "healthpack";
 				this.pickups.push(pkup);
-			} else if (tl.spriteIndex === 1 && this.gameMode.code === "lc") {
+			} else if (tl.spriteIndex === 1 && this.mode.code === "lc") {
 				pkup.type = "lootcrate";
 				this.pickups.push(pkup);
 			}
 		}
 	}
 
-	newGame() {
+	newRound() {
 		this.bullets = [];
 		this.scoreRed = 0;
 		this.scoreBlue = 0;
 		let sorted = this.modeVotes.toSorted((a, b) => b.votes - a.votes);
-		this.gameMode = gameModes[sorted[0].indx];
-		this.mapData = this.newMap(defaultGenData[this.gameMode.maps[0]]);
+		this.mode = gameModes[sorted[0].indx];
+		this.mapData = this.newMap(defaultGenData[this.mode.maps[0]]);
 		for (const m of this.modeVotes) {
 			m.votes = 0;
 		}
@@ -269,6 +266,6 @@ export class Room {
 		for (let i = 0; i < 100; i++) {
 			this.bullets.push(new Projectile());
 		}
-		this.gameEnded = false;
+		this.roundEnd = false;
 	}
 }
