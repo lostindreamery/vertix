@@ -230,10 +230,11 @@ window.onload = async () => {
 	resize();
 	$("#loadingWrapper").fadeOut(200, () => {});
 
-	const resp = await fetch("http://localhost:1118/getIP");
-	const { ip, port } = await resp.json();
+	const roomName = window.location.pathname.split("/")[1] || "";
+	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
+	const { ip, port, room } = await resp.json();
 	if (!socket) {
-		socket = io(`http://${devTest ? "localhost" : ip}:${port}`, {
+		socket = io(`http://${devTest ? "localhost" : ip}:${port}/${room}`, {
 			reconnection: true,
 			transports: ["websocket"],
 			forceNew: false,

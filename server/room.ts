@@ -17,6 +17,7 @@ import {
 import { Game }  from "./game.ts";
 
 export class Room {
+	name;
 	io;
 	game;
 	cosmetics = {
@@ -24,9 +25,10 @@ export class Room {
 		shirts,
 		camos,
 	};
-	constructor(io: Server) {
-		this.io = io;
-		this.game = new Game();
+	constructor(io: Server, name: string) {
+		this.io = io.of(`/${name}`);
+		this.name = name;
+		this.game = new Game(this.name);
 		this.sortCosmetics();
 	}
 	handleSocket() {
@@ -35,6 +37,7 @@ export class Room {
 
 			let player = this.game.newPlayer();
 
+			socket.emit("yourRoom", `${this.name}`, `${this.name}`);
 			socket.emit(
 				"welcome",
 				{

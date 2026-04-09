@@ -14,8 +14,7 @@ import { getDistance, randomInt, setupMap } from "core/src/utils.ts";
 import { defaultGenData } from "./maps.ts";
 
 export class Game {
-	id = 0;
-	room = "DEV";
+	roomName = "";
 	players: Player[] = [];
 	mode: GameMode;
 	mapData: MapData;
@@ -37,7 +36,8 @@ export class Game {
 	}));
 	roundEnd = false;
 
-	constructor() {
+	constructor(name: string) {
+		this.roomName = name;
 		this.mode = gameModes[0];
 		this.mapData = this.newMap(defaultGenData[this.mode.maps[0]]);
 		this.newRound();
@@ -48,7 +48,7 @@ export class Game {
 		this.nextSid++;
 		let tmpPlayer: Player = {
 			id: sid,
-			room: this.room,
+			room: this.roomName,
 			index: sid,
 			name: `Guest_${sid}`,
 			account: { clan: "DEV" } as Account,
