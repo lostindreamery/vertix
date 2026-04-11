@@ -1225,19 +1225,16 @@ function setupSocket(sock: Socket) {
 			if (st.gameMap != null && a.active != undefined) {
 				st.gameMap.pickups[d].active = a.active;
 			}
-		} else {
-			for (const clt of clutter) {
-				if (clt.indx === d) {
-					if (a.active != undefined) {
-						clt.active = a.active;
-					}
-					if (a.x != undefined) {
-						clt.x = a.x;
-					}
-					if (a.y != undefined) {
-						clt.y = a.y;
-					}
-				}
+		} else if (clutter[d]) {
+			let clt = clutter[d];
+			if (a.active != undefined) {
+				clt.active = a.active;
+			}
+			if (a.x != undefined) {
+				clt.x = a.x;
+			}
+			if (a.y != undefined) {
+				clt.y = a.y;
 			}
 		}
 	});

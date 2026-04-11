@@ -391,12 +391,13 @@ export class Room {
 					bullet.selfDamage,
 				);
 				if (bullet.lastHit.length > 0) {
-					const clt = this.game.clutter[bullet.lastHit[0]];
+					const i = bullet.lastHit[0]
+					const clt = this.game.clutter[i];
 					clt.active = false;
-					this.io.emit("4", clt, clt.indx, 1);
+					this.io.emit("4", clt, i, 1);
 					setTimeout(() => {
 						clt.active = true;
-						this.io.emit("4", clt, clt.indx, 1);
+						this.io.emit("4", clt, i, 1);
 					}, 15000);
 				}
 			} else if (bullet.lastHit.length > 0) {
