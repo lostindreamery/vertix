@@ -31,7 +31,6 @@ export type Player = {
 	nameYOffset: number;
 	dead: boolean;
 	onScreen: boolean;
-	type: string;
 	delta: number;
 	targetF: number;
 	animIndex: number;
@@ -49,6 +48,7 @@ export type Player = {
 	firstReceive?: boolean; // unused?
 	spray?: any; // todo
 	lastItem?: any;
+	hitFlash?: any;
 };
 
 export type Weapon = {
@@ -173,6 +173,7 @@ export type MapObject = {
 	i?: number;
 	w?: number;
 	h?: number;
+	s?: boolean; //?
 	hc?: boolean; //?
 	tp?: number; //?
 	//PICKUPS

@@ -61,7 +61,7 @@ export function shootNextBullet(
 	}
 	bullet = null;
 }
-export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
+export function setupMap(a: any, mapTileScale: number, flags: any) {
 	var b = a.genData;
 	var d = -(mapTileScale * 2);
 	var e = -(mapTileScale * 2);
@@ -203,7 +203,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 			a.tiles[b].hasCollision = false;
 		} else if (!a.tiles[b].wall && a.tiles[b].hardPoint) {
 			if (canPlaceFlag(a.tiles[b - h], true) && canPlaceFlag(a.tiles[b - 1], false)) {
-				gameObjects.push({
+				flags.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
 					x: a.tiles[b].x + 40,
@@ -215,7 +215,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 				});
 			}
 			if (canPlaceFlag(a.tiles[b + h], true) && canPlaceFlag(a.tiles[b - 1], false)) {
-				gameObjects.push({
+				flags.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
 					x: a.tiles[b].x + mapTileScale - 30 - 40,
@@ -227,7 +227,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 				});
 			}
 			if (canPlaceFlag(a.tiles[b + h], true) && canPlaceFlag(a.tiles[b + 1], false)) {
-				gameObjects.push({
+				flags.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
 					x: a.tiles[b].x + mapTileScale - 30 - 40,
@@ -239,7 +239,7 @@ export function setupMap(a: any, mapTileScale: number, gameObjects: any) {
 				});
 			}
 			if (canPlaceFlag(a.tiles[b - h], true) && canPlaceFlag(a.tiles[b + 1], false)) {
-				gameObjects.push({
+				flags.push({
 					type: "flag",
 					team: a.tiles[b].objTeam,
 					x: a.tiles[b].x + 40,
@@ -295,7 +295,7 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 		}
 	}
 	for (const tmpObj of gameObjects) {
-		if (tmpObj.type !== "clutter" || !tmpObj.active) continue;
+		if (!tmpObj.active) continue;
 		if (
 			tmpObj.hc &&
 			//canSee(tmpObj.x - st.startX, tmpObj.y - st.startY, tmpObj.w, tmpObj.h) &&

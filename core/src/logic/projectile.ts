@@ -64,7 +64,6 @@ export class Projectile {
 					for (const [i, clt] of clutter.entries()) {
 						if (
 							this.active &&
-							clt.type === "clutter" &&
 							clt.active &&
 							clt.hc &&
 							this.canSeeObject(clt, clt.h) &&
@@ -128,7 +127,6 @@ export class Projectile {
 								pl.index === this.owner.index ||
 								this.lastHit.includes(pl.index) ||
 								pl.team === this.owner.team ||
-								pl.type !== "player" ||
 								!pl.onScreen ||
 								pl.dead
 							) {
