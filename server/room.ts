@@ -26,8 +26,8 @@ export class Room {
 		camos,
 	};
 	constructor(io: Server, name: string) {
-		this.io = io.of(`/${name}`);
 		this.name = name;
+		this.io = io.of(this.name);
 		this.game = new Game(this.name);
 		this.sortCosmetics();
 	}
@@ -380,11 +380,7 @@ export class Room {
 		currentTime: number,
 	) {
 		const tick = () => {
-			if (bullet.lastHit.length > 0) {
-				for (const i of bullet.lastHit) {
-					this.handleHit(player, this.game.players[i], -bullet.dmg, dir, -1);
-				}
-			} else if (!bullet.active && bullet.explodeOnDeath) {
+			if (!bullet.active && bullet.explodeOnDeath) {
 				this.doExplosion(
 					player,
 					bullet.x,
@@ -394,6 +390,19 @@ export class Room {
 					dir,
 					bullet.selfDamage,
 				);
+				if (bullet.lastHit.length > 0) {
+					const clt = this.game.clutter[bullet.lastHit[0]];
+					clt.active = false;
+					this.io.emit("4", clt, clt.indx, 1);
+					setTimeout(() => {
+						clt.active = true;
+						this.io.emit("4", clt, clt.indx, 1);
+					}, 15000);
+				}
+			} else if (bullet.lastHit.length > 0) {
+				for (const i of bullet.lastHit) {
+					this.handleHit(player, this.game.players[i], -bullet.dmg, dir, -1);
+				}
 			} else {
 				bullet.update(
 					player.delta,

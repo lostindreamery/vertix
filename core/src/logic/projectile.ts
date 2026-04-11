@@ -61,7 +61,7 @@ export class Projectile {
 					}
 					this.cEndX = this.x + ((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
 					this.cEndY = this.y + ((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (const clt of clutter) {
+					for (const [i, clt] of clutter.entries()) {
 						if (
 							this.active &&
 							clt.type === "clutter" &&
@@ -75,6 +75,13 @@ export class Projectile {
 								this.bounceDir(this.cEndY <= clt.y - clt.h || this.cEndY >= clt.y - this.yOffset);
 							} else {
 								this.active = false;
+								if (clt.i === 2) {
+									this.dmg = 92;
+									this.blastRadius = 150;
+									this.explodeOnDeath = true;
+									this.selfDamage = true;
+									this.lastHit.push(i);
+								}
 								this.hitSomething(false, 2);
 							}
 						}

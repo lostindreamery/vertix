@@ -169,6 +169,7 @@ export type MapObject = {
 	y: number;
 	active: boolean;
 	//CLUTTER
+	indx?: number;
 	i?: number;
 	w?: number;
 	h?: number;

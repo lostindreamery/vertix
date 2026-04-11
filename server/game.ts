@@ -183,16 +183,18 @@ export class Game {
 	}
 
 	genClutter() {
+		let nextID = 0;
 		for (const tl of this.tiles) {
 			if (tl.spriteIndex === 0 && !tl.wall) {
-				const rand = randomInt(0, 10);
+				const rand = randomInt(0, 5);
 				if (rand > 0) continue;
 				let clt = {
 					x: tl.x,
 					y: tl.y,
 					active: true,
+					indx: nextID++,
 					type: "clutter",
-					i: 1,
+					i: 2,
 					w: 48,
 					h: 84,
 					hc: true,
@@ -204,11 +206,8 @@ export class Game {
 				} else if (tl.right) {
 					clt.x += tl.scale - clt.w;
 					clt.y += randY;
-				} else if (tl.bottom || tl.top) {
-					continue;
 				} else {
-					clt.x += tl.scale / 2;
-					clt.y += tl.scale / 2;
+					continue;
 				}
 				this.clutter.push(clt);
 			}
