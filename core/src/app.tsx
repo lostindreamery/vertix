@@ -2309,10 +2309,7 @@ function updateGameLoop() {
 					playerReload(plr, true);
 				}
 				if (keys.lm && !st.gameOver && st.player.weapons.length > 0) {
-					if (
-						currentTime - getCurrentWeapon(plr).lastShot >=
-						getCurrentWeapon(plr).fireRate
-					) {
+					if (currentTime - getCurrentWeapon(plr).lastShot >= getCurrentWeapon(plr).fireRate) {
 						shootBullet(plr);
 					}
 				}
@@ -3821,10 +3818,7 @@ function drawGameObjects(delta: number) {
 		);
 	}
 	for (const clt of clutter) {
-		if (
-			clt.active &&
-			canSee(clt.x - st.startX, clt.y - st.startY, clt.w, clt.h)
-		) {
+		if (clt.active && canSee(clt.x - st.startX, clt.y - st.startY, clt.w, clt.h)) {
 			drawSprite(
 				graph,
 				clutterSprites[clt.i],
@@ -3859,11 +3853,7 @@ function drawPlayerNames() {
 	graph.lineJoin = "round";
 	graph.globalAlpha = 1;
 	for (const plr of players) {
-		if (
-			plr.dead ||
-			(plr.index !== st.player.index && !plr.onScreen)
-		)
-			continue;
+		if (plr.dead || (plr.index !== st.player.index && !plr.onScreen)) continue;
 
 		let d = plr.height / 3.2;
 		let e = Math.min(200, (plr.maxHealth / 100) * 100);

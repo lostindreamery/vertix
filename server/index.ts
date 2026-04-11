@@ -29,11 +29,16 @@ app.use(
 app.get("/getIP", (c) => {
 	let room;
 	if (c.req.query("room") !== "") {
-		room = rooms.find(r => r.name === c.req.query("room")) || rooms[0];
+		room = rooms.find((r) => r.name === c.req.query("room")) || rooms[0];
 	} else {
 		room = rooms[0];
 	}
-	return c.json({ ip: "localhost", region: "...", port: "1119", room: room.name });
+	return c.json({
+		ip: "localhost",
+		region: "...",
+		port: "1119",
+		room: room.name,
+	});
 });
 
 const server = serve({

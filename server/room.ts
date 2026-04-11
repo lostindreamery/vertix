@@ -14,7 +14,7 @@ import {
 	shootNextBullet,
 	wallCol,
 } from "core/src/utils.ts";
-import { Game }  from "./game.ts";
+import { Game } from "./game.ts";
 
 export class Room {
 	name;
@@ -77,10 +77,7 @@ export class Room {
 					player.classIndex = 5;
 				} else if (this.game.mode.code === "pyro") {
 					player.classIndex = 7;
-				} else if (
-					this.game.mode.code === "boss" &&
-					player.team === "blue"
-				) {
+				} else if (this.game.mode.code === "boss" && player.team === "blue") {
 					player.classIndex = 10;
 					player.isBoss = true;
 				}
@@ -391,7 +388,7 @@ export class Room {
 					bullet.selfDamage,
 				);
 				if (bullet.lastHit.length > 0) {
-					const i = bullet.lastHit[0]
+					const i = bullet.lastHit[0];
 					const clt = this.game.clutter[i];
 					clt.active = false;
 					this.io.emit("4", clt, i, 1);
@@ -518,10 +515,7 @@ export class Room {
 						gID: player.index,
 						h: (player.health += player.maxHealth - player.health),
 					});
-				} else if (
-					pkup.type === "lootcrate" &&
-					this.game.mode.code === "lc"
-				) {
+				} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
 					this.io.emit("upd", {
 						i: player.index,
 						s: (player.score += 50),
