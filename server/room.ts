@@ -434,9 +434,10 @@ export class Room {
 			bi: bi ? bi : null,
 			h: dest.health,
 		});
+		source.totalDamage += -dmg;
 		this.io.emit("upd", {
 			i: source.index,
-			dmg: (source.totalDamage += -dmg),
+			dmg: source.totalDamage,
 		});
 		const dead = dest.health <= 0;
 		if (!dead) return;
@@ -507,18 +508,21 @@ export class Room {
 					player.health < player.maxHealth &&
 					!player.isBoss
 				) {
+					player.totalHealing += player.maxHealth - player.health;
 					this.io.emit("upd", {
 						i: player.index,
-						hea: (player.totalHealing += player.maxHealth - player.health),
+						hea: player.totalHealing,
 					});
+					player.health = player.maxHealth;
 					this.io.emit("1", {
 						gID: player.index,
-						h: (player.health += player.maxHealth - player.health),
+						h: player.health,
 					});
 				} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
+					player.score += 50;
 					this.io.emit("upd", {
 						i: player.index,
-						s: (player.score += 50),
+						s: player.score,
 					});
 					this.updateScore(50, player);
 				} else {
@@ -532,7 +536,7 @@ export class Room {
 				}, 15000);
 			}
 		}
-		if (this.game.mode.code == "hp" || this.game.mode.code == "zmtch") {
+		if (this.game.mode.code === "hp" || this.game.mode.code === "zmtch") {
 			for (const tl of this.game.scoreTiles) {
 				if (
 					dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) &&
@@ -542,7 +546,7 @@ export class Room {
 						player.scoreCountdown = 1000;
 						const scored = this.game.mode.code === "hp" ? 10 : 100;
 						let tprt: ZoneEvent = { indx: player.index, scor: scored };
-						if (this.game.mode.code == "zmtch") {
+						if (this.game.mode.code === "zmtch") {
 							const spawn = this.game.getSpawn(player);
 							player.x = tprt.newX = spawn.x;
 							player.y = tprt.newY = spawn.y;

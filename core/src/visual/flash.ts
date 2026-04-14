@@ -34,7 +34,6 @@ export class FlashGlow {
 	}
 }
 
-var glowIntensity = 0.2;
 var flashGlows: FlashGlow[] = [];
 var glowIndex = 0;
 for (let i = 0; i < 30; ++i) {

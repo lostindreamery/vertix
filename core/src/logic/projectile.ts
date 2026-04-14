@@ -120,7 +120,7 @@ export class Projectile {
 					}
 					if (
 						this.active &&
-						(typeof window === "undefined" || this.owner.index == st.player.index)
+						(typeof window === "undefined" || this.owner.index === st.player.index)
 					) {
 						for (const [i, pl] of players.entries()) {
 							if (

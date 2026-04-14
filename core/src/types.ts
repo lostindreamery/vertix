@@ -1,3 +1,5 @@
+import type { hats, shirts } from "./skins.ts";
+
 export type Player = {
 	id: number;
 	room: string;
@@ -96,7 +98,10 @@ export type Weapon = {
 };
 
 // todo
-export type Account = any;
+export type Account = Record<string, string> & {
+	hat?: (typeof hats)[number];
+	shirt?: (typeof shirts)[number];
+};
 
 export type InputSendData = {
 	hdt: number;

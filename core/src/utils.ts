@@ -1,6 +1,6 @@
 import type { Projectile } from "./logic/projectile.ts";
 import { st } from "./state.svelte.ts";
-import type { Player, Tile } from "./types.ts";
+import type { Player, ShootEvent, Tile } from "./types.ts";
 
 var bulletIndex = 0;
 export function getNextBullet(bullets: Projectile[]) {
@@ -11,7 +11,7 @@ export function getNextBullet(bullets: Projectile[]) {
 	return bullets[bulletIndex];
 }
 export function shootNextBullet(
-	init: any,
+	init: Omit<ShootEvent, "i"> & { i?: number },
 	source: Player,
 	targetD: number,
 	currentTime: number,
@@ -61,7 +61,7 @@ export function shootNextBullet(
 	}
 	bullet = null;
 }
-export function setupMap(a: any, mapTileScale: number, flags: any) {
+export function setupMap(a: any, mapTileScale: number, flags: any[]) {
 	var b = a.genData;
 	var d = -(mapTileScale * 2);
 	var e = -(mapTileScale * 2);
