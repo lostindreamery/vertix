@@ -1171,7 +1171,7 @@ div {
 #startMenu {
 	width: 30.5%;
 	padding: 20px;
-	float: left;
+	float: none; /*left;*/
 	border-radius: 1px;
 	background-color: white;
 	box-sizing: border-box;
@@ -1182,7 +1182,7 @@ div {
 	box-shadow: inset 0 -5px #e0e0e0;
 }
 
-#adWrapper {
+#roomWrapper {
 	width: 35.5%;
 	float: left;
 	margin-bottom: 10px;

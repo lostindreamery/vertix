@@ -30,6 +30,7 @@ export const st = $state({
 	gameOver: false,
 	mobile: false,
 	socket: null as Socket | null,
+	room: null as string | null,
 	settings: Object.assign(
 		{
 			showNames: true,

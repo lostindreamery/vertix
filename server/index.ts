@@ -6,7 +6,7 @@ import { Room } from "./room.ts";
 
 const io = new Server({
 	cors: {
-		origin: "http://localhost:1118",
+		origin: ["http://localhost:5173", "http://localhost:1118"],
 		methods: ["GET"],
 	},
 });
@@ -39,6 +39,14 @@ app.get("/getIP", (c) => {
 		port: "1119",
 		room: room.name,
 	});
+});
+app.get("/getRooms", (c) => {
+	const list = rooms.map((r) => ({
+		n: r.name,
+		m: r.game.mode.code,
+		pl: r.game.players.length,
+	}));
+	return c.json(list);
 });
 
 const server = serve({
