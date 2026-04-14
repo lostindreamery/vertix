@@ -4,6 +4,7 @@ import type { UserConfig } from "vite";
 export default {
 	plugins: [
 		svelte({
+			configFile: false,
 			compilerOptions: {
 				runes: true,
 				hmr: true,
