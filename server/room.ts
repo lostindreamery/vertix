@@ -1,5 +1,3 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import type { Server, Socket } from "socket.io";
 import { characterClasses } from "core/src/loadouts.ts";
 import type { Projectile } from "core/src/logic/projectile.ts";
@@ -570,7 +568,6 @@ export class Room {
 	}
 
 	sortCosmetics() {
-		const hatPathBase = join(import.meta.dirname, "../core/public/images/hats");
 		this.cosmetics.hats = hats
 			.filter((h) => !h.hide)
 			.map((h) => ({
@@ -580,15 +577,12 @@ export class Room {
 				chance: h.chance,
 				count: 0,
 				creator: h.creator,
-				left: existsSync(join(hatPathBase, h.id.toString(), "l.png")),
-				up: existsSync(join(hatPathBase, h.id.toString(), "u.png")),
+				left: h.left,
+				up: h.up,
+				nameY: h.nameY,
 			}))
 			.toSorted((a, b) => a.chance - b.chance);
 
-		const shirtPathBase = join(
-			import.meta.dirname,
-			"../core/public/images/shirts",
-		);
 		this.cosmetics.shirts = shirts
 			.filter((h) => !h.hide)
 			.map((s) => ({
@@ -597,8 +591,8 @@ export class Room {
 				desc: s.desc,
 				chance: s.chance,
 				count: 0,
-				left: existsSync(join(shirtPathBase, s.id.toString(), "l.png")),
-				up: existsSync(join(shirtPathBase, s.id.toString(), "u.png")),
+				left: s.left,
+				up: s.up,
 			}))
 			.toSorted((a, b) => a.chance - b.chance);
 
