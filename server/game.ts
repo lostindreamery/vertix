@@ -16,6 +16,7 @@ import { defaultGenData } from "./maps.ts";
 export class Game {
 	roomName = "";
 	players: Player[] = [];
+	maxPlayers = 8;
 	mode: GameMode;
 	mapData: MapData;
 	tileScale = 256;
@@ -185,7 +186,7 @@ export class Game {
 		let nextID = 0;
 		for (const tl of this.tiles) {
 			if (tl.spriteIndex === 0 && !tl.wall) {
-				const rand = randomInt(0, 5);
+				const rand = randomInt(0, 10);
 				if (rand > 0) continue;
 				let clt = {
 					x: tl.x,

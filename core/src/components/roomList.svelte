@@ -28,7 +28,7 @@
 		{#each await (await rooms).json() as room}
 			<div class="roomSelectItem" onclick={() => joinRoom(room.n)}>
 				<b>{`${room.m}_${room.n}`}</b>
-				<b>{`${room.pl}/8`}</b>
+				<b>{`${room.pl}/${room.mxpl}`}</b>
 			</div>
 		{/each}
 	</svelte:boundary>

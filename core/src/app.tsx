@@ -1036,6 +1036,8 @@ function setupSocket(sock: Socket) {
 		if (d) {
 			st.gameMap = a.mapData;
 			st.gameMap.tiles = [];
+			clutter = [];
+			flags = [];
 			gameWidth = st.gameMap.width;
 			gameHeight = st.gameMap.height;
 			mapTileScale = a.tileScale;
@@ -2965,6 +2967,7 @@ function updateBullets(delta: number) {
 async function joinRoom(roomName: string) {
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
+	if (room === st.player.room) return;
 	if (changingLobby) return;
 	changingLobby = true;
 	const s = io(`http://${ip}:${port}/${room}`, {
@@ -2972,6 +2975,9 @@ async function joinRoom(roomName: string) {
 		forceNew: true,
 	});
 	inMainMenu = true;
+	hideUI(true);
+	document.getElementById("namesBox").style.display = "block";
+	document.getElementById("linkBox").style.display = "block";
 	socket.removeListener("disconnect");
 	socket.once("disconnect", () => {
 		socket.close();

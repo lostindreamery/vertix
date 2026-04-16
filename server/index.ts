@@ -45,6 +45,7 @@ app.get("/getRooms", (c) => {
 		n: r.name,
 		m: r.game.mode.code,
 		pl: r.game.players.length,
+		mxpl: r.game.maxPlayers,
 	}));
 	return c.json(list);
 });

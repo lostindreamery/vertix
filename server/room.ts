@@ -149,6 +149,7 @@ export class Room {
 			socket.on("disconnect", () => {
 				this.io.emit("rem", player.index);
 				this.game.players.splice(this.game.players.indexOf(player), 1);
+				this.updateScore(0, player);
 			});
 			socket.on("sw", (currentWeapon) => {
 				player.currentWeapon = currentWeapon;
@@ -189,7 +190,7 @@ export class Room {
 					this.io.emit("2", bulletData);
 					const bullet = getNextBullet(this.game.bullets);
 					shootNextBullet(bulletData, player, targetD, currentTime, bullet);
-					this.updateBullet(bullet, player, dir, currentTime);
+					this.updateBullet(bullet, player, dir);
 				}
 			});
 			socket.on("4", (data) => {
@@ -372,7 +373,6 @@ export class Room {
 		bullet: Projectile,
 		player: Player,
 		dir: number,
-		currentTime: number,
 	) {
 		const tick = () => {
 			if (!bullet.active && bullet.explodeOnDeath) {
@@ -399,10 +399,10 @@ export class Room {
 				for (const i of bullet.lastHit) {
 					this.handleHit(player, this.game.players[i], -bullet.dmg, dir, -1);
 				}
-			} else {
+			} else if (bullet.active) {
 				bullet.update(
 					player.delta,
-					currentTime,
+					Date.now(),
 					this.game.clutter,
 					this.game.tiles,
 					this.game.players,
