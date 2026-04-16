@@ -2971,13 +2971,16 @@ async function joinRoom(roomName: string) {
 		reconnection: true,
 		forceNew: true,
 	});
-	socket.close();
-	changingLobby = false;
-	socket = s;
-	st.socket = s;
-	setupSocket(socket);
-	st.kicked = false;
-	disconnected = false;
+	inMainMenu = true;
+	socket.removeListener("disconnect");
+	socket.once("disconnect", () => {
+		socket.close();
+		changingLobby = false;
+		socket = s;
+		st.socket = socket;
+		setupSocket(socket);
+	});
+	socket.disconnect();
 }
 
 var currentClassID = 0;

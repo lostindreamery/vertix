@@ -16,7 +16,10 @@
 	});
 </script>
 
-<h3 class="menuHeader">ROOM BROWSER</h3>
+<div class="roomListHeader">
+	<h3 class="menuHeader">ROOM BROWSER</h3>
+	<button class="smallMenuButton" onclick={() => rooms = fetch(url)}>REFRESH</button>
+</div>
 <div id="roomSelector">
 	<svelte:boundary>
 		{#snippet pending()}
@@ -24,17 +27,21 @@
 		{/snippet}
 		{#each await (await rooms).json() as room}
 			<div class="roomSelectItem" onclick={() => joinRoom(room.n)}>
-				<span>{`${room.m}_${room.n}`}</span>
-				<span>{`${room.pl}/8`}</span>
+				<b>{`${room.m}_${room.n}`}</b>
+				<b>{`${room.pl}/8`}</b>
 			</div>
 		{/each}
 	</svelte:boundary>
 </div>
 
 <style>
-	.menuHeader {
-		margin-top: 0px;
-		margin-bottom: 10px;
+	.roomListHeader {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 125%;
+		box-sizing: border-box;
+		font-size: 12px;
 	}
 
 	#roomSelector {
