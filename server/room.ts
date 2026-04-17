@@ -353,7 +353,8 @@ export class Room {
 				if (timeLeft >= 0) {
 					this.io.emit("8", timeLeft--);
 				} else {
-					this.game.newRound();
+					let sorted = this.game.modeVotes.toSorted((a, b) => b.votes - a.votes);
+					this.game.newRound(sorted[0].indx);
 					for (const pl of this.game.players) {
 						this.io.emit(
 							"welcome",

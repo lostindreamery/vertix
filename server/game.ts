@@ -44,7 +44,6 @@ export class Game {
 		this.roomName = name;
 		this.mode = gameModes[0];
 		this.mapData = this.newMap(defaultGenData[this.mode.maps[0]]);
-		this.newRound();
 	}
 
 	newPlayer() {
@@ -236,14 +235,14 @@ export class Game {
 		}
 	}
 
-	newRound() {
+	newRound(modeIndex: number) {
 		this.bullets = [];
 		this.score.red = 0;
 		this.score.blue = 0;
 		this.score.lb = 0;
-		let sorted = this.modeVotes.toSorted((a, b) => b.votes - a.votes);
-		this.mode = gameModes[sorted[0].indx];
-		this.mapData = this.newMap(defaultGenData[this.mode.maps[0]]);
+		this.mode = gameModes[modeIndex];
+		const mapIndex = this.mode.maps[randomInt(0, this.mode.maps.length - 1)]
+		this.mapData = this.newMap(defaultGenData[mapIndex]);
 		for (const m of this.modeVotes) {
 			m.votes = 0;
 		}

@@ -15,6 +15,7 @@ let rooms: Room[] = [];
 for (let i = 0; i < 9; i++) {
 	let room = new Room(io, `DEV${i}`);
 	rooms.push(room);
+	room.game.newRound(i);
 	room.handleSocket();
 	room.io.on("connection", (socket: Socket) => {
 		socket.on("cht", (msg, type) => {
