@@ -39,6 +39,10 @@ export class Game {
 		votes: 0,
 	}));
 	roundEnd = false;
+	mults = {
+		health: 1,
+		speed: 1,
+	}
 
 	constructor(name: string) {
 		this.roomName = name;
@@ -235,14 +239,14 @@ export class Game {
 		}
 	}
 
-	newRound(modeIndex: number) {
+	newRound(modeIndex: number, genData?: GenData) {
 		this.bullets = [];
 		this.score.red = 0;
 		this.score.blue = 0;
 		this.score.lb = 0;
 		this.mode = gameModes[modeIndex];
 		const mapIndex = this.mode.maps[randomInt(0, this.mode.maps.length - 1)]
-		this.mapData = this.newMap(defaultGenData[mapIndex]);
+		this.mapData = genData ? this.newMap(genData) : this.newMap(defaultGenData[mapIndex]);
 		for (const m of this.modeVotes) {
 			m.votes = 0;
 		}

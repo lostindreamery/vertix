@@ -12,12 +12,14 @@ import {
 	shootNextBullet,
 	wallCol,
 } from "core/src/utils.ts";
+import { gameModes } from "core/src/gamemodes.ts";
 import { Game } from "./game.ts";
 
 export class Room {
 	name;
 	io;
 	game;
+	password = "";
 	cosmetics = {
 		hats,
 		shirts,
@@ -84,10 +86,10 @@ export class Room {
 				player.weapons = currentClass.weaponIndexes.map(
 					(i) => this.game.weapons[i],
 				);
-				player.health = player.maxHealth = currentClass.maxHealth;
+				player.health = player.maxHealth = currentClass.maxHealth * this.game.mults.health;
 				player.height = currentClass.height;
 				player.width = currentClass.width;
-				player.speed = currentClass.speed;
+				player.speed = currentClass.speed * this.game.mults.speed;
 				if (init) return;
 
 				player.onScreen = true;
@@ -305,11 +307,25 @@ export class Room {
 			socket.on("ping1", () => {
 				socket.emit("pong1");
 			});
-			//TODO
 			socket.on("cSrv", (data) => {
-				if (data.srvMap) {
-					this.game.mapData = this.game.newMap(data.srvMap);
+				this.game.maxPlayers = Math.max(2, Math.min(8, data.srvPlayers));
+				this.game.mults.health = Math.max(0.01, Math.min(100, data.srvHealthMult));
+				this.game.mults.speed = Math.max(0.01, Math.min(100, data.srvSpeedMult));
+				this.password = data.srvPass ? data.srvPass : "";
+				let modeIndex = 0;
+				if (data.srvModes.length > 0) {
+					const modes = data.srvModes;
+					this.game.modeVotes = gameModes
+						.filter((m, i) => modes.includes(i))
+						.map((m, i) => ({
+							name: m.name,
+							indx: i,
+							votes: 0,
+						}));
+					modeIndex = modes[0];
 				}
+				let genData = data.srvMap ? data.srvMap : undefined; //TODO
+				this.game.newRound(modeIndex, genData);
 			});
 			socket.on("crtSpr", () => {
 				this.io.emit("crtSpr", player.index, player.x, player.y);
