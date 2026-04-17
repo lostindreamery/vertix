@@ -642,7 +642,7 @@ function keyDown(event: KeyboardEvent) {
 		if (keyMap[st.keysList.reloadKey] && !keys.rl) {
 			keys.rl = true;
 		}
-		if (keyMap[st.keysList.chatToggleKey]) {
+		if (event.code === st.keysList.chatToggleKey && keyMap[st.keysList.chatToggleKey]) {
 			document.getElementById("chatInput").focus();
 		}
 		if (

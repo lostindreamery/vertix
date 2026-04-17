@@ -17,7 +17,6 @@ export class ChatManager {
 		// });
 	}
 	sendChat(event: KeyboardEvent) {
-		var chatInput = document.getElementById("chatInput") as HTMLInputElement;
 		if (event.key === "Enter") {
 			let msg = chatInput.value.replace(/(<([^>]+)>)/gi, "");
 			if (msg !== "") {
