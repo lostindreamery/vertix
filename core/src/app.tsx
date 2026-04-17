@@ -3,6 +3,7 @@ import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { mount } from "svelte";
 import Controls from "./components/controls.svelte";
+import RoomList from "./components/roomList.svelte";
 import Settings from "./components/settings.svelte";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
@@ -41,7 +42,6 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
-import RoomList from "./components/roomList.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;

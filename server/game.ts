@@ -42,7 +42,7 @@ export class Game {
 	mults = {
 		health: 1,
 		speed: 1,
-	}
+	};
 
 	constructor(name: string) {
 		this.roomName = name;
@@ -245,8 +245,10 @@ export class Game {
 		this.score.blue = 0;
 		this.score.lb = 0;
 		this.mode = gameModes[modeIndex];
-		const mapIndex = this.mode.maps[randomInt(0, this.mode.maps.length - 1)]
-		this.mapData = genData ? this.newMap(genData) : this.newMap(defaultGenData[mapIndex]);
+		const mapIndex = this.mode.maps[randomInt(0, this.mode.maps.length - 1)];
+		this.mapData = genData
+			? this.newMap(genData)
+			: this.newMap(defaultGenData[mapIndex]);
 		for (const m of this.modeVotes) {
 			m.votes = 0;
 		}

@@ -1,4 +1,5 @@
 import type { Server, Socket } from "socket.io";
+import { gameModes } from "core/src/gamemodes.ts";
 import { characterClasses } from "core/src/loadouts.ts";
 import type { Projectile } from "core/src/logic/projectile.ts";
 import { camos, hats, shirts } from "core/src/skins.ts";
@@ -12,7 +13,6 @@ import {
 	shootNextBullet,
 	wallCol,
 } from "core/src/utils.ts";
-import { gameModes } from "core/src/gamemodes.ts";
 import { Game } from "./game.ts";
 
 export class Room {
@@ -84,7 +84,8 @@ export class Room {
 				player.weapons = currentClass.weaponIndexes.map(
 					(i) => this.game.weapons[i],
 				);
-				player.health = player.maxHealth = currentClass.maxHealth * this.game.mults.health;
+				player.health = player.maxHealth =
+					currentClass.maxHealth * this.game.mults.health;
 				player.height = currentClass.height;
 				player.width = currentClass.width;
 				player.speed = currentClass.speed * this.game.mults.speed;
@@ -307,8 +308,14 @@ export class Room {
 			});
 			socket.on("cSrv", (data) => {
 				this.game.maxPlayers = Math.max(2, Math.min(8, data.srvPlayers));
-				this.game.mults.health = Math.max(0.01, Math.min(100, data.srvHealthMult));
-				this.game.mults.speed = Math.max(0.01, Math.min(100, data.srvSpeedMult));
+				this.game.mults.health = Math.max(
+					0.01,
+					Math.min(100, data.srvHealthMult),
+				);
+				this.game.mults.speed = Math.max(
+					0.01,
+					Math.min(100, data.srvSpeedMult),
+				);
 				this.password = data.srvPass ? data.srvPass : "";
 				let modeIndex = 0;
 				if (data.srvModes.length > 0) {
@@ -350,8 +357,7 @@ export class Room {
 			lbScore = source.score / (this.game.mode.score / 100);
 			this.io.emit("ts");
 		}
-		const leading =
-			lbScore > this.game.score.lb ? lbScore : this.game.score.lb;
+		const leading = lbScore > this.game.score.lb ? lbScore : this.game.score.lb;
 		this.game.score.lb = roundNumber(leading, 0);
 		if (lbScore >= 100 && !this.game.roundEnd) {
 			this.game.roundEnd = true;
@@ -367,7 +373,9 @@ export class Room {
 				if (timeLeft >= 0) {
 					this.io.emit("8", timeLeft--);
 				} else {
-					let sorted = this.game.modeVotes.toSorted((a, b) => b.votes - a.votes);
+					let sorted = this.game.modeVotes.toSorted(
+						(a, b) => b.votes - a.votes,
+					);
 					this.game.newRound(sorted[0].indx);
 					for (const pl of this.game.players) {
 						this.io.emit(
