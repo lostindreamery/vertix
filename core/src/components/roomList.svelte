@@ -6,26 +6,28 @@
 	}
 	const { joinRoom }: Props = $props();
 
-	const url = "http://localhost:1118/getRooms";
+	let refreshTick = $state(0);
 
-	let rooms = $state(fetch(url));
-
-	$effect(() => {
+	const rooms = $derived.by(async () => {
+		// these are dependencies - if they change, this function runs again
+		refreshTick;
 		st.room;
-		rooms = fetch(url);
+
+		const r = await fetch("http://localhost:1118/getRooms");
+		return await r.json();
 	});
 </script>
 
 <div class="roomListHeader">
 	<h3 class="menuHeader">ROOM BROWSER</h3>
-	<button class="smallMenuButton" onclick={() => rooms = fetch(url)}>REFRESH</button>
+	<button class="smallMenuButton" onclick={() => refreshTick++}>REFRESH</button>
 </div>
 <div id="roomSelector">
 	<svelte:boundary>
 		{#snippet pending()}
 			Loading...
 		{/snippet}
-		{#each await (await rooms).json() as room}
+		{#each await rooms as room}
 			<div class="roomSelectItem" onclick={() => joinRoom(room.n)}>
 				<b>{`${room.m}_${room.n}`}</b>
 				<b>{`${room.lb}% - ${room.pl}/${room.mxpl}`}</b>
