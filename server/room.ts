@@ -325,18 +325,21 @@ export class Room {
 				.toSorted((a, b) => b.score - a.score)
 				.flatMap((pl) => [pl.index]),
 		);
-		let leaderboardScore = scored / (this.game.mode.score / 100);
+		let lbScore = scored / (this.game.mode.score / 100);
 		if (source.team === "red") {
-			leaderboardScore = this.game.scoreRed += leaderboardScore;
-			this.io.emit("ts", this.game.scoreRed, this.game.scoreBlue);
+			lbScore = this.game.score.red += lbScore;
+			this.io.emit("ts", this.game.score.red, this.game.score.blue);
 		} else if (source.team === "blue") {
-			leaderboardScore = this.game.scoreBlue += leaderboardScore;
-			this.io.emit("ts", this.game.scoreRed, this.game.scoreBlue);
+			lbScore = this.game.score.blue += lbScore;
+			this.io.emit("ts", this.game.score.red, this.game.score.blue);
 		} else {
-			leaderboardScore = source.score / (this.game.mode.score / 100);
+			lbScore = source.score / (this.game.mode.score / 100);
 			this.io.emit("ts");
 		}
-		if (leaderboardScore >= 100 && !this.game.roundEnd) {
+		const leading =
+			lbScore > this.game.score.lb ? lbScore : this.game.score.lb;
+		this.game.score.lb = roundNumber(leading, 0);
+		if (lbScore >= 100 && !this.game.roundEnd) {
 			this.game.roundEnd = true;
 			this.io.emit(
 				"7",
@@ -369,11 +372,7 @@ export class Room {
 		}
 	}
 
-	updateBullet(
-		bullet: Projectile,
-		player: Player,
-		dir: number,
-	) {
+	updateBullet(bullet: Projectile, player: Player, dir: number) {
 		const tick = () => {
 			if (!bullet.active && bullet.explodeOnDeath) {
 				this.doExplosion(

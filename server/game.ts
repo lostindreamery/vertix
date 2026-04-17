@@ -28,8 +28,11 @@ export class Game {
 	bullets: Projectile[] = [];
 	weapons = structuredClone(weapons);
 	nextSid = 0;
-	scoreRed = 0;
-	scoreBlue = 0;
+	score = {
+		red: 0,
+		blue: 0,
+		lb: 0,
+	};
 	modeVotes = gameModes.map((m, i) => ({
 		name: m.name,
 		indx: i,
@@ -235,8 +238,9 @@ export class Game {
 
 	newRound() {
 		this.bullets = [];
-		this.scoreRed = 0;
-		this.scoreBlue = 0;
+		this.score.red = 0;
+		this.score.blue = 0;
+		this.score.lb = 0;
 		let sorted = this.modeVotes.toSorted((a, b) => b.votes - a.votes);
 		this.mode = gameModes[sorted[0].indx];
 		this.mapData = this.newMap(defaultGenData[this.mode.maps[0]]);

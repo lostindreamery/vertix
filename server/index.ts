@@ -46,6 +46,7 @@ app.get("/getRooms", (c) => {
 		m: r.game.mode.code,
 		pl: r.game.players.length,
 		mxpl: r.game.maxPlayers,
+		lb: r.game.score.lb,
 	}));
 	return c.json(list);
 });
