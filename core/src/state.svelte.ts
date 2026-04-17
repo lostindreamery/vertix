@@ -66,3 +66,10 @@ export const st = $state({
 		JSON.parse(localStorage.getItem("keysList") ?? "{}") as object,
 	),
 });
+
+declare global {
+	interface Window {
+		st: typeof st;
+	}
+}
+window.st = st;
