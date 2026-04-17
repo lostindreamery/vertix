@@ -33,9 +33,8 @@ export class Room {
 	}
 	handleSocket() {
 		this.io.on("connection", (socket: Socket) => {
-			console.log("con", socket.id);
-
 			let player = this.game.newPlayer();
+			console.log(`${player.name} joined ${player.room}`);
 
 			socket.emit("yourRoom", `${this.name}`, `${this.name}`);
 			socket.emit(
@@ -68,7 +67,6 @@ export class Room {
 			});
 
 			socket.on("gotit", (client, init, currentTime) => {
-				console.log("gotit", client, init, currentTime);
 				player.name = client.name ? client.name : player.name;
 				player.classIndex = client.classIndex ? client.classIndex : 0;
 				if (this.game.mode.code === "snipe") {
