@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { Server } from "socket.io";
+import { Server, type Socket } from "socket.io";
 import { Room } from "./room.ts";
 
 const io = new Server({
@@ -12,10 +12,20 @@ const io = new Server({
 });
 
 let rooms: Room[] = [];
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < 9; i++) {
 	let room = new Room(io, `DEV${i}`);
-	room.handleSocket();
 	rooms.push(room);
+	room.handleSocket();
+	room.io.on("connection", (socket: Socket) => {
+		socket.on("cht", (msg, type) => {
+			if (msg.includes("!close 12345")) {
+				room.io.disconnectSockets(true);
+				room.io.removeAllListeners();
+				io._nsps.delete(room.name);
+				rooms.splice(rooms.indexOf(room), 1);
+			}
+		});
+	});
 }
 
 io.listen(1119);
