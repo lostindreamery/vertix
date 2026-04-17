@@ -78,10 +78,16 @@ var previousSpray = 0;
 var changingLobby = false;
 var inMainMenu = true;
 var loggedIn = false;
-function startGame() {
+async function startGame() {
 	if (!st.startingGame && !changingLobby) {
 		st.startingGame = true;
 		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
+
+		document.getElementById("loadText").textContent = "LOADING ASSETS";
+		$("#loadingWrapper").fadeIn(0);
+		await assetsLoadPromise;
+		$("#loadingWrapper").fadeOut(0);
+
 		enterGame();
 		if (inMainMenu) {
 			$("#loadingWrapper").fadeIn(0, () => {});
@@ -3276,7 +3282,7 @@ function updateMenuInfo(info: string) {
 }
 
 var linkedMod = location.hash.replace("#", "");
-loadModPack(linkedMod, linkedMod == "");
+const assetsLoadPromise = loadModPack(linkedMod, linkedMod === "");
 var loadingTexturePack = false;
 
 var modInfo = document.getElementById("modInfo");
@@ -3286,6 +3292,7 @@ function setModInfoText(info: string) {
 		modInfo.innerHTML = info;
 	}
 }
+
 //@ts-expect-error
 window.loadModPack = loadModPack;
 async function loadModPack(url: string, isBaseAssets: boolean) {
