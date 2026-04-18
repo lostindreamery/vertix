@@ -1,5 +1,4 @@
 import * as zip from "@zip.js/zip.js";
-import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import { mount } from "svelte";
 import Controls from "./components/controls.svelte";
@@ -78,19 +77,22 @@ var previousSpray = 0;
 var changingLobby = false;
 var inMainMenu = true;
 var loggedIn = false;
+
+const loadingWrapper = document.getElementById("loadingWrapper");
+
 async function startGame() {
 	if (!st.startingGame && !changingLobby) {
 		st.startingGame = true;
 		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 
 		document.getElementById("loadText").textContent = "LOADING ASSETS";
-		$("#loadingWrapper").fadeIn(0);
+		loadingWrapper.style.display = "block";
 		await assetsLoadPromise;
-		$("#loadingWrapper").fadeOut(0);
+		loadingWrapper.style.display = "none";
 
 		enterGame();
 		if (inMainMenu) {
-			$("#loadingWrapper").fadeIn(0, () => {});
+			loadingWrapper.style.display = "block";
 			document.getElementById("loadText").textContent = "CONNECTING";
 		}
 	}
@@ -231,9 +233,11 @@ window.onload = async () => {
 		window.open("/leaderboards.html", "_blank");
 	};
 	hideUI(true);
-	$(".noRightClick").on("contextmenu", (_) => false);
 	resize();
-	$("#loadingWrapper").fadeOut(200, () => {});
+	const anim = loadingWrapper.animate({ opacity: [1, 0] }, 200);
+	anim.finished.then(() => {
+		loadingWrapper.style.display = "none";
+	});
 
 	const roomName = window.location.pathname.split("/")[1] || "";
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
@@ -1085,7 +1089,7 @@ function setupSocket(sock: Socket) {
 		}
 		updateWeaponUI(st.player, true);
 		if (inMainMenu) {
-			$("#loadingWrapper").fadeOut(0, () => {});
+			loadingWrapper.style.display = "none";
 			inMainMenu = false;
 		}
 		st.startingGame = false;
@@ -2201,17 +2205,13 @@ function hideUI(hideChatbox: boolean) {
 		document.getElementById("chatbox").style.display = "none";
 	}
 }
-// $(window).focus(function () {
-//   if (socket != undefined) {
-//     socket.emit("5", 1);
-//   }
-//   tabbed = 0;
+// window.addEventListener("focus", () => {
+// 	socket?.emit("5", 1);
+// 	tabbed = 0;
 // });
-// $(window).blur(function () {
-//   if (socket != undefined) {
-//     socket.emit("5", 0);
-//   }
-//   tabbed = 1;
+// window.addEventListener("blur", () => {
+// 	socket?.emit("5", 0);
+// 	tabbed = 1;
 // });
 let fpsUpdateDelta = 0;
 let fpsSamples: number[] = [];
@@ -2825,15 +2825,9 @@ function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
 	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
 		updateWeaponUI(st.player, false);
 	}
-	let tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
+	const tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
-		tmpDiv.style.height = "100%";
-		$(`#actionCooldown${weaponIdx}`).animate(
-			{
-				height: "0%",
-			},
-			time,
-		);
+		tmpDiv.animate({ height: ["100%", "0%"] }, time);
 	} else {
 		tmpDiv.style.height = "0%";
 	}
