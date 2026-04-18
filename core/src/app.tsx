@@ -592,11 +592,13 @@ function gameInput(event: MouseEvent) {
 	// lastTarget = target.f;
 }
 function mouseDown(event: MouseEvent) {
+	if (event.button !== 0) return;
 	event.preventDefault();
 	event.stopPropagation();
 	keys.lm = true;
 }
 function mouseUp(event: MouseEvent) {
+	if (event.button !== 0) return;
 	event.preventDefault();
 	event.stopPropagation();
 	keys.lm = false;
