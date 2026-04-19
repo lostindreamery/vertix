@@ -463,7 +463,11 @@ export class Room {
 		if (!dead) return;
 		dest.dead = true;
 		dest.onScreen = false;
-		const scored = dest.isBoss ? 2000 : 100;
+		let scored = 0;
+		if (source.index !== dest.index) {
+			scored = dest.isBoss ? 2000 : 100;
+			source.kills += 1;
+		}
 		this.io.emit("3", {
 			dID: source.index,
 			gID: dest.index,
@@ -471,7 +475,6 @@ export class Room {
 			kB: dest.isBoss,
 		});
 		source.score += scored * this.game.mode.killScoreMult;
-		source.kills += 1;
 		this.io.emit("upd", {
 			i: source.index,
 			s: source.score,
