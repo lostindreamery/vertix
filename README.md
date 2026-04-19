@@ -1,5 +1,5 @@
-total mess, ~~completely~~ mostly broken, messy code, ..
+somewhat of a mess
 
 to run: `pnpm i`, `pnpm dev`, http://localhost:5173.
 
-to format: `pnpm biome format --write`
+to format & lint: `pnpm biome check --write --reporter=summary`
