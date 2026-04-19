@@ -516,7 +516,7 @@ function updateClanPage(clanData: any) {
 			chatURL = `http://${clanData}`;
 		}
 		clanChatLink.replaceChildren(
-			<a target="_blank" href={chatURL}>
+			<a target="_blank" href={chatURL} rel="noopener">
 				Clan Chat
 			</a>,
 		);
@@ -1023,7 +1023,7 @@ function setupSocket(sock: Socket) {
 			a.newURL = `http://${a.newURL}`;
 		}
 		clanChatLink.replaceChildren(
-			<a target="_blank" href={a.newURL}>
+			<a target="_blank" href={a.newURL} rel="noopener">
 				Clan Chat
 			</a>,
 		);
@@ -4262,12 +4262,7 @@ function getCachedShadow(
 	height: number,
 	scaleY: number,
 ) {
-	if (
-		cachedShadows[sprite.index] === undefined &&
-		width !== 0 &&
-		sprite !== undefined &&
-		sprite.isLoaded
-	) {
+	if (cachedShadows[sprite.index] === undefined && width !== 0 && sprite?.isLoaded) {
 		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		ctx.imageSmoothingEnabled = false;

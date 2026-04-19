@@ -156,7 +156,6 @@ var animTexts: AnimText[] = [];
 for (let i = 0; i < 20; i++) {
 	animTexts.push(new AnimText());
 }
-var shadowOffset = 6;
 
 export function updateAnimTexts(delta: number) {
 	window.graph.lineJoin = "round";
