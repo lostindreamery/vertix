@@ -22,6 +22,13 @@ export const st = $state({
 	sprites: {
 		light: null as Sprite | null,
 		particles: [] as Sprite[],
+		weapons: [] as {
+			upSprite: Sprite;
+			downSprite: Sprite;
+			leftSprite: Sprite;
+			rightSprite: Sprite;
+			icon: HTMLImageElement;
+		}[],
 	},
 	doSounds: false,
 	kicked: false,

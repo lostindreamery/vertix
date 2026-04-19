@@ -41,6 +41,7 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
+import ActionBar from "./components/actionBar.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
@@ -765,6 +766,9 @@ mount(RoomList, {
 	target: document.getElementById("roomWrapper")!,
 	props: { joinRoom },
 });
+mount(ActionBar, {
+	target: document.getElementById("actionBar")!,
+});
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>
@@ -1097,7 +1101,7 @@ function setupSocket(sock: Socket) {
 		} else {
 			players.push(st.player);
 		}
-		updateWeaponUI(st.player, true);
+		updateUiStats(st.player);
 		if (inMainMenu) {
 			loadingWrapper.style.display = "none";
 			inMainMenu = false;
@@ -2793,48 +2797,16 @@ function playerSwapWeapon(tmpPlayer: Player, change: number) {
 		tmpPlayer.currentWeapon = 0;
 	}
 	playerEquipWeapon(tmpPlayer, tmpPlayer.currentWeapon);
-	updateWeaponUI(tmpPlayer, false);
+	updateUiStats(tmpPlayer);
 	socket.emit("sw", tmpPlayer.currentWeapon);
 }
 function playerEquipWeapon(tmpPlayer: Player, weaponId: number) {
 	tmpPlayer.currentWeapon = weaponId;
 }
-var actionBar = document.getElementById("actionBar")!;
-function updateWeaponUI(tmpPlayer: Player, force: boolean) {
-	if (!weaponSpriteSheet[0] || !tmpPlayer.weapons) {
-		return false;
-	}
-	if (!actionBar.childNodes.length || force) {
-		actionBar.replaceChildren();
-		for (let i = 0; i < tmpPlayer.weapons.length; ++i) {
-			let actionContainer = document.createElement("div");
-			actionContainer.id = `actionContainer${i}`;
-			actionContainer.className =
-				i === tmpPlayer.currentWeapon ? "actionContainerActive" : "actionContainer";
-			let tmpDiv = weaponSpriteSheet[tmpPlayer.weapons[i].weaponIndex].icon;
-			if (tmpDiv) {
-				tmpDiv.className = "actionItem";
-				let actionCooldown = document.createElement("div");
-				actionCooldown.id = `actionCooldown${i}`;
-				actionCooldown.className = "actionCooldown";
-				actionContainer.appendChild(actionCooldown);
-				actionContainer.appendChild(tmpDiv);
-				actionBar.appendChild(actionContainer);
-			}
-		}
-	} else {
-		for (let i = 0; i < tmpPlayer.weapons.length; ++i) {
-			let tmpDiv = document.getElementById(`actionContainer${i}`)!;
-			tmpDiv.className =
-				i === tmpPlayer.currentWeapon ? "actionContainerActive" : "actionContainer";
-		}
-	}
-	updateUiStats(tmpPlayer);
-}
 function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
 	// for some reason, the action cooldown elements sometimes aren't created?
 	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
-		updateWeaponUI(st.player, false);
+		updateUiStats(st.player);
 	}
 	const tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`)!;
 	if (d) {
@@ -3202,13 +3174,6 @@ var cachedFloors: Record<string, SpriteCanvas> = {};
 var sideWalkSprite: Sprite | null = null;
 var ambientSprites: Sprite[] = [];
 var wallSpritesSeg: Sprite[] = [];
-var weaponSpriteSheet: {
-	upSprite: Sprite;
-	downSprite: Sprite;
-	leftSprite: Sprite;
-	rightSprite: Sprite;
-	icon: HTMLImageElement;
-}[] = [];
 var bulletSprites: Sprite[] = [];
 var cachedShadows: SpriteCanvas[] = [];
 var cachedWeaponSprites: Record<string, SpriteCanvas> = {};
@@ -3262,9 +3227,9 @@ function loadDefaultSprites(base: string) {
 	];
 	healthPackSprite = getSprite(`${base}healthpack`);
 	lootCrateSprite = getSprite(`${base}lootCrate1`);
-	weaponSpriteSheet = [];
+	st.sprites.weapons = [];
 	for (const name of weaponNames) {
-		weaponSpriteSheet.push({
+		st.sprites.weapons.push({
 			upSprite: getSprite(`${base}weapons/${name}/up`),
 			downSprite: getSprite(`${base}weapons/${name}/up`),
 			leftSprite: getSprite(`${base}weapons/${name}/left`),
@@ -3565,7 +3530,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	let tmpIndex = `${weaponIndex}${camo}${angle}`;
 	let tmpSprite = cachedWeaponSprites[tmpIndex];
 	if (!tmpSprite) {
-		let wepSprites = weaponSpriteSheet[weaponIndex];
+		let wepSprites = st.sprites.weapons[weaponIndex];
 		if (!wepSprites) return;
 		let wepSprite: Sprite;
 		if (angle === 90) {
