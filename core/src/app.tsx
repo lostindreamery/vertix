@@ -100,17 +100,27 @@ async function startGame() {
 var devTest = false;
 function enterGame() {
 	startSoundTrack(2);
-	playerClassIndex = currentClassID;
 	screenWidth = window.innerWidth;
 	screenHeight = window.innerHeight;
 	document.getElementById("startMenuWrapper").style.display = "none";
 	if (!st.room) {
 		socket.emit("create");
 	}
-	socket.emit("respawn");
 	hideMenuUI();
 	animateOverlay = true;
-	updateGameLoop();
+	if (st.player.dead) {
+		socket.emit("respawn");
+		playerClassIndex = currentClassID;
+		updateGameLoop();
+	} else {
+		inMainMenu = false;
+		st.startingGame = false;
+		if (st.gameOver) {
+			document.getElementById("gameStatWrapper").style.display = "block";
+		} else {
+			showUI();
+		}
+	}
 }
 var clanDBMessage = document.getElementById("clanDBMessage");
 var clanStats = document.getElementById("clanStats");
@@ -1310,9 +1320,11 @@ function updateVoteStats(a: any) {
 }
 function showESCMenu() {
 	deactiveAllAnimTexts();
-	st.gameStart = false;
+	st.startingGame = false;
+	inMainMenu = true;
 	hideUI(false);
 	document.getElementById("startMenuWrapper").style.display = "block";
+	document.getElementById("gameStatWrapper").style.display = "none";
 }
 var buttonCount = 0;
 function showStatTable(
