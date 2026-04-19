@@ -12,6 +12,6 @@
 		"jsxImportSource": "jsx-dom",
 		"strict": true,
 		// todo:
-		"strictNullChecks": false
+		"types": ["howler", "vite/client"]
 	}
 }

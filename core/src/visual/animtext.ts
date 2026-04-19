@@ -322,6 +322,8 @@ export function renderShadedAnimText(
 	if (cachedText === undefined) {
 		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
+		if (ctx === null) throw new Error("failed to get canvas ctx");
+
 		ctx.imageSmoothingEnabled = false;
 
 		ctx.textAlign = "center";

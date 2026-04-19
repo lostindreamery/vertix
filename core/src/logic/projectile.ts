@@ -20,20 +20,20 @@ export class Projectile {
 	weaponIndex = 0;
 	spriteIndex = 0;
 	pierceCount = 0;
-	blastRadius = 0;
+	blastRadius: number | undefined = 0;
 	glowHeight = 0;
 	glowWidth = 0;
 	speed = 0;
 	trailWidth = 0;
 	trailMaxLength = 0;
 	trailAlpha = 0;
-	owner: Player = null;
+	owner: Player | null = null;
 	dmg = 0;
 	lastHit: number[] = [];
 	serverIndex = 0;
 	skipMove = true;
 	startTime = 0;
-	maxLifeTime = 0;
+	maxLifeTime: number | null = 0;
 	explodeOnDeath = false;
 	updateAccuracy = 3;
 	bounce = false;
@@ -98,7 +98,7 @@ export class Projectile {
 											tl.x,
 											tl.y,
 											tl.scale,
-											tl.scale - this.owner.height - this.jumpY,
+											tl.scale - this.owner!.height - this.jumpY,
 											true,
 										)
 									) {
@@ -120,13 +120,13 @@ export class Projectile {
 					}
 					if (
 						this.active &&
-						(typeof window === "undefined" || this.owner.index === st.player.index)
+						(typeof window === "undefined" || this.owner!.index === st.player.index)
 					) {
 						for (const [i, pl] of players.entries()) {
 							if (
-								pl.index === this.owner.index ||
+								pl.index === this.owner!.index ||
 								this.lastHit.includes(pl.index) ||
-								pl.team === this.owner.team ||
+								pl.team === this.owner!.team ||
 								!pl.onScreen ||
 								pl.dead
 							) {

@@ -18,48 +18,49 @@ export function shootNextBullet(
 	bullet: Projectile,
 ) {
 	let weapon = getCurrentWeapon(source);
-	if (bullet !== undefined) {
-		bullet.serverIndex = init.si;
-		bullet.x = init.x - 1;
-		bullet.startX = init.x;
-		bullet.y = init.y;
-		bullet.startY = init.y;
-		bullet.dir = init.d;
-		bullet.speed = weapon.bSpeed;
-		bullet.updateAccuracy = weapon.cAcc;
-		bullet.width = weapon.bWidth;
-		bullet.height = weapon.bHeight;
-		let randScale = weapon.bRandScale;
-		if (randScale != null) {
-			let rand = randomFloat(randScale[0], randScale[1]);
-			bullet.width *= rand;
-			bullet.height *= rand;
-			//bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
-		}
-		bullet.trailWidth = bullet.width * 0.7;
-		bullet.trailMaxLength = Math.round(bullet.height * 5);
-		bullet.trailAlpha = weapon.bTrail;
-		bullet.weaponIndex = weapon.weaponIndex;
-		bullet.spriteIndex = weapon.bSprite;
-		bullet.yOffset = weapon.yOffset;
-		bullet.jumpY = source.jumpY;
-		bullet.owner = source;
-		bullet.dmg = weapon.dmg;
-		bullet.bounce = weapon.bounce;
-		bullet.startTime = currentTime;
-		bullet.maxLifeTime = weapon.maxLife;
-		if (weapon.distBased) {
-			bullet.maxLifeTime = targetD / bullet.speed;
-		}
-		bullet.glowWidth = weapon.glowWidth;
-		bullet.glowHeight = weapon.glowHeight;
-		bullet.explodeOnDeath = weapon.explodeOnDeath;
-		bullet.pierceCount = weapon.pierce;
-		bullet.blastRadius = weapon.blastRadius;
-		bullet.selfDamage = weapon.selfDamage;
-		bullet.activate();
+	if (!bullet) {
+		console.error("invalid bullet passed to shootNextBullet?");
+		return;
 	}
-	bullet = null;
+	bullet.serverIndex = init.si;
+	bullet.x = init.x - 1;
+	bullet.startX = init.x;
+	bullet.y = init.y;
+	bullet.startY = init.y;
+	bullet.dir = init.d;
+	bullet.speed = weapon.bSpeed;
+	bullet.updateAccuracy = weapon.cAcc;
+	bullet.width = weapon.bWidth;
+	bullet.height = weapon.bHeight;
+	let randScale = weapon.bRandScale;
+	if (randScale != null) {
+		let rand = randomFloat(randScale[0], randScale[1]);
+		bullet.width *= rand;
+		bullet.height *= rand;
+		//bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
+	}
+	bullet.trailWidth = bullet.width * 0.7;
+	bullet.trailMaxLength = Math.round(bullet.height * 5);
+	bullet.trailAlpha = weapon.bTrail;
+	bullet.weaponIndex = weapon.weaponIndex;
+	bullet.spriteIndex = weapon.bSprite;
+	bullet.yOffset = weapon.yOffset;
+	bullet.jumpY = source.jumpY;
+	bullet.owner = source;
+	bullet.dmg = weapon.dmg;
+	bullet.bounce = weapon.bounce;
+	bullet.startTime = currentTime;
+	bullet.maxLifeTime = weapon.maxLife;
+	if (weapon.distBased) {
+		bullet.maxLifeTime = targetD / bullet.speed;
+	}
+	bullet.glowWidth = weapon.glowWidth;
+	bullet.glowHeight = weapon.glowHeight;
+	bullet.explodeOnDeath = weapon.explodeOnDeath;
+	bullet.pierceCount = weapon.pierce;
+	bullet.blastRadius = weapon.blastRadius;
+	bullet.selfDamage = !!weapon.selfDamage;
+	bullet.activate();
 }
 export function setupMap(a: any, mapTileScale: number, flags: any[]) {
 	var b = a.genData;

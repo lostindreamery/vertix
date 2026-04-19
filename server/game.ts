@@ -3,10 +3,11 @@ import { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
 import type {
 	Account,
+	ClutterObject,
 	GameMode,
 	GenData,
 	MapData,
-	MapObject,
+	PickupObject,
 	Player,
 	Tile,
 } from "core/src/types.ts";
@@ -23,8 +24,8 @@ export class Game {
 	tiles: Tile[] = [];
 	spawnTiles: Tile[] = [];
 	scoreTiles: Tile[] = [];
-	clutter: MapObject[] = [];
-	pickups: MapObject[] = [];
+	clutter: ClutterObject[] = [];
+	pickups: PickupObject[] = [];
 	bullets: Projectile[] = [];
 	weapons = structuredClone(weapons);
 	nextSid = 0;

@@ -53,7 +53,7 @@ export type Player = {
 	hitFlash?: any;
 };
 
-export type Weapon = {
+type WeaponBase = {
 	name: string;
 	weaponIndex: number;
 	dmg: number;
@@ -96,6 +96,12 @@ export type Weapon = {
 	front?: boolean;
 	camo?: number;
 };
+
+export type Weapon = WeaponBase &
+	(
+		| { explodeOnDeath: true; blastRadius: number }
+		| { explodeOnDeath: false; blastRadius?: undefined }
+	);
 
 // todo
 export type Account = Record<string, string> & {
@@ -173,17 +179,21 @@ export type MapObject = {
 	x: number;
 	y: number;
 	active: boolean;
-	//CLUTTER
-	i?: number;
-	w?: number;
-	h?: number;
-	s?: boolean; //?
-	hc?: boolean; //?
-	tp?: number; //?
-	//PICKUPS
-	scale?: number;
-	type?: string;
 };
+
+export interface ClutterObject extends MapObject {
+	i: number;
+	w: number;
+	h: number;
+	s?: boolean; // has shadows
+	hc: boolean; //?
+	tp: number; //?
+}
+
+export interface PickupObject extends MapObject {
+	scale: number;
+	type: string;
+}
 
 export type GenData = {
 	width: number;
@@ -195,8 +205,8 @@ export type MapData = {
 	gameMode: GameMode;
 	genData: GenData;
 	tiles: Tile[];
-	clutter: MapObject[];
-	pickups: MapObject[];
+	clutter: ClutterObject[];
+	pickups: PickupObject[];
 	width: number;
 	height: number;
 };

@@ -1,8 +1,8 @@
 import type { Socket } from "socket.io-client";
-import type { Player, Sprite } from "./types.ts";
+import type { MapData, Player, Sprite } from "./types.ts";
 
 export const st = $state({
-	gameMap: null as any,
+	gameMap: null as any as MapData,
 	maxScreenWidth: 1920,
 	maxScreenHeight: 1080,
 	viewMult: 1,
@@ -12,7 +12,7 @@ export const st = $state({
 	player: {
 		dead: true,
 		weapons: [],
-	} as Player,
+	} as any as Player,
 	shake: {
 		x: 0,
 		y: 0,

@@ -10,10 +10,10 @@ import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.t
 import { st } from "./state.svelte.ts";
 import type {
 	Account,
+	ClutterObject,
 	GameMode,
 	GenData,
 	InputSendData,
-	MapObject,
 	Player,
 	ShootEvent,
 	Sprite,
@@ -47,12 +47,12 @@ const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, ran
 
 let playerName: string | undefined;
 var playerClassIndex: number | undefined;
-var playerNameInput = document.getElementById("playerNameInput") as HTMLInputElement;
-var socket: Socket | undefined;
+var playerNameInput = document.getElementById("playerNameInput")! as HTMLInputElement;
+var socket: Socket = undefined as any as Socket; // O_O
 var reason: string | undefined;
 var currentFPS = 0;
 var fillCounter = 0;
-var currentLikeButton: number = null;
+var currentLikeButton: number | null = null;
 var delta = 0;
 var currentTime = Date.now();
 var oldTime = Date.now();
@@ -78,14 +78,14 @@ var changingLobby = false;
 var inMainMenu = true;
 var loggedIn = false;
 
-const loadingWrapper = document.getElementById("loadingWrapper");
+const loadingWrapper = document.getElementById("loadingWrapper")!;
 
 async function startGame() {
 	if (!st.startingGame && !changingLobby) {
 		st.startingGame = true;
 		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 
-		document.getElementById("loadText").textContent = "LOADING ASSETS";
+		document.getElementById("loadText")!.textContent = "LOADING ASSETS";
 		loadingWrapper.style.display = "block";
 		await assetsLoadPromise;
 		loadingWrapper.style.display = "none";
@@ -93,7 +93,7 @@ async function startGame() {
 		enterGame();
 		if (inMainMenu) {
 			loadingWrapper.style.display = "block";
-			document.getElementById("loadText").textContent = "CONNECTING";
+			document.getElementById("loadText")!.textContent = "CONNECTING";
 		}
 	}
 }
@@ -102,7 +102,7 @@ function enterGame() {
 	startSoundTrack(2);
 	screenWidth = window.innerWidth;
 	screenHeight = window.innerHeight;
-	document.getElementById("startMenuWrapper").style.display = "none";
+	document.getElementById("startMenuWrapper")!.style.display = "none";
 	if (!st.room) {
 		socket.emit("create");
 	}
@@ -116,44 +116,44 @@ function enterGame() {
 		inMainMenu = false;
 		st.startingGame = false;
 		if (st.gameOver) {
-			document.getElementById("gameStatWrapper").style.display = "block";
+			document.getElementById("gameStatWrapper")!.style.display = "block";
 		} else {
 			showUI();
 		}
 	}
 }
-var clanDBMessage = document.getElementById("clanDBMessage");
-var clanStats = document.getElementById("clanStats");
-var clanSignUp = document.getElementById("clanSignUp");
-var clanHeader = document.getElementById("clanHeader");
-var clanAdminPanel = document.getElementById("clanAdminPanel");
-var clanInviteInput = document.getElementById("clanInviteInput") as HTMLInputElement;
-var leaveClanButton = document.getElementById("leaveClanButton");
-var clanInvMessage = document.getElementById("clanInvMessage");
-var clanChtMessage = document.getElementById("clanChtMessage");
-var clanChatLink = document.getElementById("clanChatLink");
-var loginWrapper = document.getElementById("loginWrapper");
-var loggedInWrapper = document.getElementById("loggedInWrapper");
-var loginMessage = document.getElementById("loginMessage");
-var userNameInput = document.getElementById("usernameInput") as HTMLInputElement;
-var userEmailInput = document.getElementById("emailInput") as HTMLInputElement;
-var userPassInput = document.getElementById("passwordInput") as HTMLInputElement;
+var clanDBMessage = document.getElementById("clanDBMessage")!;
+var clanStats = document.getElementById("clanStats")!;
+var clanSignUp = document.getElementById("clanSignUp")!;
+var clanHeader = document.getElementById("clanHeader")!;
+var clanAdminPanel = document.getElementById("clanAdminPanel")!;
+var clanInviteInput = document.getElementById("clanInviteInput")! as HTMLInputElement;
+var leaveClanButton = document.getElementById("leaveClanButton")!;
+var clanInvMessage = document.getElementById("clanInvMessage")!;
+var clanChtMessage = document.getElementById("clanChtMessage")!;
+var clanChatLink = document.getElementById("clanChatLink")!;
+var loginWrapper = document.getElementById("loginWrapper")!;
+var loggedInWrapper = document.getElementById("loggedInWrapper")!;
+var loginMessage = document.getElementById("loginMessage")!;
+var userNameInput = document.getElementById("usernameInput")! as HTMLInputElement;
+var userEmailInput = document.getElementById("emailInput")! as HTMLInputElement;
+var userPassInput = document.getElementById("passwordInput")! as HTMLInputElement;
 var loginUserNm = "";
 var loginUserPs = "";
-var settings = document.getElementById("settings");
-var controls = document.getElementById("controls");
-var lobbyInput = document.getElementById("lobbyKey") as HTMLInputElement;
-var lobbyPass = document.getElementById("lobbyPass") as HTMLInputElement;
-var lobbyMessage = document.getElementById("lobbyMessage");
-var serverCreateMessage = document.getElementById("serverCreateMessage");
-var serverKeyTxt = document.getElementById("serverKeyTxt");
+var settings = document.getElementById("settings")!;
+var controls = document.getElementById("controls")!;
+var lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
+var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
+var lobbyMessage = document.getElementById("lobbyMessage")!;
+var serverCreateMessage = document.getElementById("serverCreateMessage")!;
+var serverKeyTxt = document.getElementById("serverKeyTxt")!;
 
 let dropUpLinksCount = 5;
 let activeIndex = -1;
 Array.from(document.getElementsByClassName("dropUpLink") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>
 		elem.addEventListener("click", () => {
-			clickDropUpLink(Number.parseInt(elem.attributes.getNamedItem("data-drop-idx").value));
+			clickDropUpLink(Number.parseInt(elem.attributes.getNamedItem("data-drop-idx")!.value));
 		}),
 );
 function clickDropUpLink(index: number) {
@@ -161,11 +161,11 @@ function clickDropUpLink(index: number) {
 		const tmpIndex = i + 1;
 		if (tmpIndex === index && activeIndex !== index) {
 			activeIndex = index;
-			document.getElementById(`di${tmpIndex}`).style.opacity = "1";
-			document.getElementById(`di${tmpIndex}`).style.pointerEvents = "auto";
+			document.getElementById(`di${tmpIndex}`)!.style.opacity = "1";
+			document.getElementById(`di${tmpIndex}`)!.style.pointerEvents = "auto";
 		} else {
-			document.getElementById(`di${tmpIndex}`).style.opacity = "0";
-			document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
+			document.getElementById(`di${tmpIndex}`)!.style.opacity = "0";
+			document.getElementById(`di${tmpIndex}`)!.style.pointerEvents = "none";
 			if (tmpIndex === index) activeIndex = -1;
 		}
 	}
@@ -184,13 +184,13 @@ function startLogin() {
 }
 var customMap: GenData | null = null;
 
-(document.getElementById("customMapFile") as HTMLInputElement).addEventListener(
+(document.getElementById("customMapFile")! as HTMLInputElement).addEventListener(
 	"change",
 	function () {
 		clearCustomMap();
-		if (!this?.files[0]) return;
+		if (!this?.files?.[0]) return;
 		var name = this.value.split("\\");
-		document.getElementById("customMapButton").textContent = name[name.length - 1];
+		document.getElementById("customMapButton")!.textContent = name[name.length - 1];
 		let reader = new FileReader();
 		reader.onload = (e) => {
 			const img = document.createElement("img");
@@ -198,32 +198,32 @@ var customMap: GenData | null = null;
 				let tmpCanvas = document.createElement("canvas");
 				tmpCanvas.width = img.width;
 				tmpCanvas.height = img.height;
-				tmpCanvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+				tmpCanvas.getContext("2d")!.drawImage(img, 0, 0, img.width, img.height);
 				customMap = {
 					width: img.width,
 					height: img.height,
-					data: tmpCanvas.getContext("2d").getImageData(0, 0, img.width, img.height).data,
+					data: tmpCanvas.getContext("2d")!.getImageData(0, 0, img.width, img.height).data,
 				};
 			};
-			img.src = e.target.result as string;
+			img.src = e.target!.result as string;
 		};
 		reader.readAsDataURL(this.files[0]);
 	},
 );
 function clearCustomMap() {
 	customMap = null;
-	document.getElementById("customMapButton").textContent = "Select Map";
+	document.getElementById("customMapButton")!.textContent = "Select Map";
 }
 
 window.onload = async () => {
 	if (st.mobile) {
-		document.getElementById("loadText").textContent = "MOBILE VERSION COMING SOON";
+		document.getElementById("loadText")!.textContent = "MOBILE VERSION COMING SOON";
 		return;
 	}
 	document.documentElement.style.overflow = "hidden";
-	document.getElementById("gameAreaWrapper").style.opacity = "1";
+	document.getElementById("gameAreaWrapper")!.style.opacity = "1";
 	drawMenuBackground();
-	document.getElementById("settingsButton").onclick = () => {
+	document.getElementById("settingsButton")!.onclick = () => {
 		if (settings.style.maxHeight === "200px") {
 			settings.style.maxHeight = "0px";
 		} else {
@@ -231,7 +231,7 @@ window.onload = async () => {
 			controls.style.maxHeight = "0px";
 		}
 	};
-	document.getElementById("instructionButton").onclick = () => {
+	document.getElementById("instructionButton")!.onclick = () => {
 		if (controls.style.maxHeight === "200px") {
 			controls.style.maxHeight = "0px";
 		} else {
@@ -239,7 +239,7 @@ window.onload = async () => {
 			settings.style.maxHeight = "0px";
 		}
 	};
-	document.getElementById("leaderButton").onclick = () => {
+	document.getElementById("leaderButton")!.onclick = () => {
 		window.open("/leaderboards.html", "_blank");
 	};
 	hideUI(true);
@@ -275,7 +275,7 @@ window.onload = async () => {
 		} else {
 			loadSavedClass();
 		}
-		document.getElementById("startButton").onclick = () => {
+		document.getElementById("startButton")!.onclick = () => {
 			startGame();
 		};
 		playerNameInput.addEventListener("keypress", (event) => {
@@ -283,10 +283,10 @@ window.onload = async () => {
 				startGame();
 			}
 		});
-		document.getElementById("texturePackButton").onclick = () => {
-			loadModPack((document.getElementById("textureModInput") as HTMLInputElement).value, false);
+		document.getElementById("texturePackButton")!.onclick = () => {
+			loadModPack((document.getElementById("textureModInput")! as HTMLInputElement).value, false);
 		};
-		document.getElementById("registerButton").onclick = () => {
+		document.getElementById("registerButton")!.onclick = () => {
 			socket.emit("dbReg", {
 				userName: userNameInput.value,
 				userEmail: userEmailInput.value,
@@ -297,10 +297,10 @@ window.onload = async () => {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Registering...";
 		};
-		document.getElementById("loginButton").onclick = () => {
+		document.getElementById("loginButton")!.onclick = () => {
 			startLogin();
 		};
-		document.getElementById("logoutButton").onclick = () => {
+		document.getElementById("logoutButton")!.onclick = () => {
 			loggedInWrapper.style.display = "none";
 			loginWrapper.style.display = "block";
 			loginMessage.textContent = "";
@@ -312,35 +312,35 @@ window.onload = async () => {
 			localStorage.setItem("userName", "");
 			socket.emit("dbLogout");
 		};
-		document.getElementById("recoverButton").onclick = () => {
+		document.getElementById("recoverButton")!.onclick = () => {
 			socket.emit("dbRecov", {
 				userMail: userEmailInput.value,
 			});
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Please Wait...";
 		};
-		document.getElementById("createClanButton").onclick = () => {
+		document.getElementById("createClanButton")!.onclick = () => {
 			socket.emit("dbClanCreate", {
-				clanName: (document.getElementById("clanNameInput") as HTMLInputElement).value,
+				clanName: (document.getElementById("clanNameInput")! as HTMLInputElement).value,
 			});
 			clanDBMessage.style.display = "block";
 			clanDBMessage.textContent = "Please Wait...";
 		};
-		document.getElementById("joinClanButton").onclick = () => {
+		document.getElementById("joinClanButton")!.onclick = () => {
 			socket.emit("dbClanJoin", {
-				clanKey: (document.getElementById("clanKeyInput") as HTMLInputElement).value,
+				clanKey: (document.getElementById("clanKeyInput")! as HTMLInputElement).value,
 			});
 			clanDBMessage.style.display = "block";
 			clanDBMessage.textContent = "Please Wait...";
 		};
-		document.getElementById("inviteClanButton").onclick = () => {
+		document.getElementById("inviteClanButton")!.onclick = () => {
 			socket.emit("dbClanInvite", {
 				userName: clanInviteInput.value,
 			});
 			clanInvMessage.style.display = "block";
 			clanInvMessage.textContent = "Please Wait...";
 		};
-		document.getElementById("kickClanButton").onclick = () => {
+		document.getElementById("kickClanButton")!.onclick = () => {
 			socket.emit("dbClanKick", {
 				userName: clanInviteInput.value,
 			});
@@ -350,14 +350,14 @@ window.onload = async () => {
 		leaveClanButton.onclick = () => {
 			socket.emit("dbClanLeave");
 		};
-		document.getElementById("setChatClanButton").onclick = () => {
+		document.getElementById("setChatClanButton")!.onclick = () => {
 			socket.emit("dbClanChatURL", {
-				chUrl: (document.getElementById("clanChatInput") as HTMLInputElement).value,
+				chUrl: (document.getElementById("clanChatInput")! as HTMLInputElement).value,
 			});
 			clanChtMessage.style.display = "inline-block";
 			clanChtMessage.textContent = "Please Wait...";
 		};
-		document.getElementById("createServerButton").onclick = () => {
+		document.getElementById("createServerButton")!.onclick = () => {
 			var modes = [];
 			for (let i = 0; i < 9; ++i) {
 				if ((document.getElementById(`serverMode${i}`) as HTMLInputElement).checked) {
@@ -365,16 +365,16 @@ window.onload = async () => {
 				}
 			}
 			socket.emit("cSrv", {
-				srvPlayers: (document.getElementById("serverPlayers") as HTMLInputElement).value,
-				srvHealthMult: (document.getElementById("serverHealthMult") as HTMLInputElement).value,
-				srvSpeedMult: (document.getElementById("serverSpeedMult") as HTMLInputElement).value,
-				srvPass: (document.getElementById("serverPass") as HTMLInputElement).value,
+				srvPlayers: (document.getElementById("serverPlayers")! as HTMLInputElement).value,
+				srvHealthMult: (document.getElementById("serverHealthMult")! as HTMLInputElement).value,
+				srvSpeedMult: (document.getElementById("serverSpeedMult")! as HTMLInputElement).value,
+				srvPass: (document.getElementById("serverPass")! as HTMLInputElement).value,
 				srvMap: customMap,
-				srvClnWr: (document.getElementById("clanWarEnabled") as HTMLInputElement).checked,
+				srvClnWr: (document.getElementById("clanWarEnabled")! as HTMLInputElement).checked,
 				srvModes: modes,
 			});
 		};
-		document.getElementById("joinLobbyButton").onclick = () => {
+		document.getElementById("joinLobbyButton")!.onclick = () => {
 			if (changingLobby) return;
 			if (!lobbyInput.value.split("/")[0].trim()) {
 				lobbyMessage.style.display = "block";
@@ -423,54 +423,54 @@ window.onload = async () => {
 	});
 };
 
-var newUsernameInput = document.getElementById("newUsernameInput") as HTMLInputElement;
-var youtubeChannelInput = document.getElementById("youtubeChannelInput") as HTMLInputElement;
-var editProfileMessage = document.getElementById("editProfileMessage");
+var newUsernameInput = document.getElementById("newUsernameInput")! as HTMLInputElement;
+var youtubeChannelInput = document.getElementById("youtubeChannelInput")! as HTMLInputElement;
+var editProfileMessage = document.getElementById("editProfileMessage")!;
 function updateAccountPage(a: Account) {
 	st.player.account = a;
-	document.getElementById("accStatRank").replaceChildren(
+	document.getElementById("accStatRank")!.replaceChildren(
 		<>
 			<b>Rank: </b>
 			{a.rank}
 		</>,
 	);
-	document.getElementById("rankProgress").style.width = `${a.rankPercent}%`;
-	document.getElementById("accStatKills").replaceChildren(
+	document.getElementById("rankProgress")!.style.width = `${a.rankPercent}%`;
+	document.getElementById("accStatKills")!.replaceChildren(
 		<>
 			<b>Kills: </b>
 			{a.kills}
 		</>,
 	);
-	document.getElementById("accStatDeaths").replaceChildren(
+	document.getElementById("accStatDeaths")!.replaceChildren(
 		<>
 			<b>Deaths: </b>
 			{a.deaths}
 		</>,
 	);
-	document.getElementById("accStatKD").replaceChildren(
+	document.getElementById("accStatKD")!.replaceChildren(
 		<>
 			<b>KD: </b>
 			{a.kd}
 		</>,
 	);
-	document.getElementById("accStatWorldRank").replaceChildren(
+	document.getElementById("accStatWorldRank")!.replaceChildren(
 		<>
 			<b>World Rank: </b>
 			{a.worldRank}
 		</>,
 	);
-	document.getElementById("accStatLikes").replaceChildren(
+	document.getElementById("accStatLikes")!.replaceChildren(
 		<>
 			<b>Likes: </b>
 			{a.likes}
 		</>,
 	);
-	document.getElementById("profileButton").onclick = () => {
+	document.getElementById("profileButton")!.onclick = () => {
 		showUserStatPage(st.player.account.user_name);
 	};
 	newUsernameInput.value = st.player.account.user_name;
 	youtubeChannelInput.value = st.player.account.channel;
-	document.getElementById("saveAccountData").onclick = () => {
+	document.getElementById("saveAccountData")!.onclick = () => {
 		socket.emit("dbEditUser", {
 			userName: newUsernameInput.value,
 			userChannel: youtubeChannelInput.value,
@@ -496,25 +496,25 @@ function updateAccountPage(a: Account) {
 	}
 }
 function updateClanPage(clanData: any) {
-	document.getElementById("clanStatRank").replaceChildren(
+	document.getElementById("clanStatRank")!.replaceChildren(
 		<>
 			<b>Rank: </b>
 			{clanData.level}
 		</>,
 	);
-	document.getElementById("clanStatKD").replaceChildren(
+	document.getElementById("clanStatKD")!.replaceChildren(
 		<>
 			<b>Avg KD: </b>
 			{clanData.kd}
 		</>,
 	);
-	document.getElementById("clanStatFounder").replaceChildren(
+	document.getElementById("clanStatFounder")!.replaceChildren(
 		<>
 			<b>Founder: </b>
 			{clanData.founder}
 		</>,
 	);
-	document.getElementById("clanStatMembers").replaceChildren(
+	document.getElementById("clanStatMembers")!.replaceChildren(
 		<>
 			<b>Roster:</b>
 			{clanData.members}
@@ -544,7 +544,7 @@ calculateUIScale();
 var gameOverFade = false;
 var disconnected = false;
 var textSizeMult = 0.55;
-var gameMode: GameMode = null;
+var gameMode: GameMode | null = null;
 
 var target = {
 	f: 0,
@@ -552,7 +552,7 @@ var target = {
 	dOffset: 0,
 };
 let players: Player[] = [];
-let clutter: MapObject[] = [];
+let clutter: ClutterObject[] = [];
 let flags: any[] = []; // todo
 let bullets: Projectile[] = [];
 
@@ -570,7 +570,7 @@ const keys = {
 var reenviar = true;
 var directionLock = false;
 var directions = [];
-var mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
+var mainCanvas = document.getElementById("cvs")! as HTMLCanvasElement;
 mainCanvas.width = screenWidth;
 mainCanvas.height = screenHeight;
 mainCanvas.addEventListener("mousemove", gameInput, false);
@@ -665,7 +665,7 @@ function keyDown(event: KeyboardEvent) {
 			keys.rl = true;
 		}
 		if (event.code === st.keysList.chatToggleKey && keyMap[st.keysList.chatToggleKey]) {
-			document.getElementById("chatInput").focus();
+			document.getElementById("chatInput")!.focus();
 		}
 		if (
 			!!keyMap[st.keysList.leaderboardKey] &&
@@ -741,7 +741,7 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 		console.log(b);
 	}
 }
-var context = mainCanvas.getContext("2d");
+var context = mainCanvas.getContext("2d")!;
 var graph = context;
 window.graph = graph;
 declare global {
@@ -749,27 +749,27 @@ declare global {
 		graph: CanvasRenderingContext2D;
 	}
 }
-var mapCanvas = document.getElementById("mapc") as HTMLCanvasElement;
-var mapContext = mapCanvas.getContext("2d");
+var mapCanvas = document.getElementById("mapc")! as HTMLCanvasElement;
+var mapContext = mapCanvas.getContext("2d")!;
 mapCanvas.width = 200;
 mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
 
 mount(Settings, {
-	target: document.getElementById("settings"),
+	target: document.getElementById("settings")!,
 });
 mount(Controls, {
-	target: document.getElementById("controls"),
+	target: document.getElementById("controls")!,
 });
 mount(RoomList, {
-	target: document.getElementById("roomWrapper"),
+	target: document.getElementById("roomWrapper")!,
 	props: { joinRoom },
 });
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>
 		elem.addEventListener("click", (event) => {
-			changeMenuTab(event, elem.attributes.getNamedItem("data-menu-tab").value);
+			changeMenuTab(event, elem.attributes.getNamedItem("data-menu-tab")!.value);
 		}),
 );
 function changeMenuTab(event: MouseEvent, tabId: string) {
@@ -784,7 +784,7 @@ function changeMenuTab(event: MouseEvent, tabId: string) {
 	for (let i = 0; i < tabContents.length; i++) {
 		tabLinks[i].className = tabLinks[i].className.replace(" active", "");
 	}
-	document.getElementById(tabId).style.display = "block";
+	document.getElementById(tabId)!.style.display = "block";
 	(event.currentTarget as HTMLElement).className += " active";
 }
 function kickPlayer(secondReason: string) {
@@ -792,7 +792,7 @@ function kickPlayer(secondReason: string) {
 	hideStatTable();
 	hideUI(true);
 	hideMenuUI();
-	document.getElementById("startMenuWrapper").style.display = "none";
+	document.getElementById("startMenuWrapper")!.style.display = "none";
 	disconnected = true;
 	st.gameOver = true;
 	if (reason === undefined) {
@@ -803,15 +803,15 @@ function kickPlayer(secondReason: string) {
 	updateGameLoop();
 	stopAllSounds();
 }
-var classSelector = document.getElementById("classSelector");
-var spraySelector = document.getElementById("spraySelector");
-var hatSelector = document.getElementById("hatSelector");
-var lobbySelector = document.getElementById("lobbySelector");
-var camoSelector = document.getElementById("camoSelector");
-var shirtSelector = document.getElementById("shirtSelector");
-var lobbyCSelector = document.getElementById("lobbyCSelector");
-var charSelectorCont = document.getElementById("charSelectorCont");
-var lobbySelectorCont = document.getElementById("lobbySelectorCont");
+var classSelector = document.getElementById("classSelector")!;
+var spraySelector = document.getElementById("spraySelector")!;
+var hatSelector = document.getElementById("hatSelector")!;
+var lobbySelector = document.getElementById("lobbySelector")!;
+var camoSelector = document.getElementById("camoSelector")!;
+var shirtSelector = document.getElementById("shirtSelector")!;
+var lobbyCSelector = document.getElementById("lobbyCSelector")!;
+var charSelectorCont = document.getElementById("charSelectorCont")!;
+var lobbySelectorCont = document.getElementById("lobbySelectorCont")!;
 function showLobbySelector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -850,8 +850,8 @@ function hideLobbyCSelector() {
 window.hideLobbyCSelector = hideLobbyCSelector;
 var timeOutCheck = null;
 var tmpPingTimer = null;
-var pingText = document.getElementById("pingText");
-var fpsText = document.getElementById("fpsText");
+var pingText = document.getElementById("pingText")!;
+var fpsText = document.getElementById("fpsText")!;
 var pingStart = 0;
 function receivePing() {
 	var a = Date.now() - pingStart;
@@ -895,8 +895,8 @@ function setupSocket(sock: Socket) {
 		st.player.id = b.id;
 		st.player.room = b.room;
 		st.room = st.player.room;
-		st.player.name = playerName;
-		st.player.classIndex = playerClassIndex;
+		st.player.name = playerName!;
+		st.player.classIndex = playerClassIndex!;
 		b.name = st.player.name;
 		b.classIndex = playerClassIndex;
 		sock.emit("gotit", b, d, Date.now(), false);
@@ -905,10 +905,10 @@ function setupSocket(sock: Socket) {
 			deactiveAllAnimTexts();
 			st.gameStart = false;
 			hideUI(false);
-			document.getElementById("startMenuWrapper").style.display = "block";
+			document.getElementById("startMenuWrapper")!.style.display = "block";
 		}
 		if (st.gameOver) {
-			document.getElementById("gameStatWrapper").style.display = "none";
+			document.getElementById("gameStatWrapper")!.style.display = "none";
 		}
 		st.gameOver = false;
 		gameOverFade = false;
@@ -916,7 +916,7 @@ function setupSocket(sock: Socket) {
 		if (st.mobile) {
 			hideMenuUI();
 			hideUI(true);
-			document.getElementById("startMenuWrapper").style.display = "none";
+			document.getElementById("startMenuWrapper")!.style.display = "none";
 		}
 		resize();
 	});
@@ -940,7 +940,7 @@ function setupSocket(sock: Socket) {
 			loginMessage.textContent = "";
 			loginWrapper.style.display = "none";
 			loggedInWrapper.style.display = "block";
-			(document.getElementById("playerNameInput") as HTMLInputElement).value = a.text;
+			(document.getElementById("playerNameInput")! as HTMLInputElement).value = a.text;
 			localStorage.setItem("logKey", a.logKey);
 			localStorage.setItem("userName", a.text);
 			loggedIn = true;
@@ -959,10 +959,10 @@ function setupSocket(sock: Socket) {
 		loginMessage.style.display = "block";
 		loginMessage.textContent = b;
 		if (!d) return;
-		document.getElementById("recoverForm").style.display = "block";
-		const chngPassKey = document.getElementById("chngPassKey") as HTMLInputElement;
-		const chngPassPass = document.getElementById("chngPassPass") as HTMLInputElement;
-		document.getElementById("chngPassButton").onclick = () => {
+		document.getElementById("recoverForm")!.style.display = "block";
+		const chngPassKey = document.getElementById("chngPassKey")! as HTMLInputElement;
+		const chngPassPass = document.getElementById("chngPassPass")! as HTMLInputElement;
+		document.getElementById("chngPassButton")!.onclick = () => {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Please Wait...";
 			sock.emit("dbCngPass", {
@@ -973,7 +973,7 @@ function setupSocket(sock: Socket) {
 				loginMessage.style.display = "block";
 				loginMessage.textContent = a;
 				if (b) {
-					document.getElementById("recoverForm").style.display = "none";
+					document.getElementById("recoverForm")!.style.display = "none";
 				}
 			});
 		};
@@ -1066,9 +1066,9 @@ function setupSocket(sock: Socket) {
 			players = a.usersInRoom;
 			gameMode = st.gameMap.gameMode;
 			if (a.you.team === "blue") {
-				document.getElementById("gameModeText").textContent = gameMode.desc2;
+				document.getElementById("gameModeText")!.textContent = gameMode.desc2;
 			} else {
-				document.getElementById("gameModeText").textContent = gameMode.desc1;
+				document.getElementById("gameModeText")!.textContent = gameMode.desc1;
 			}
 			currentLikeButton = null;
 			for (const clt of st.gameMap.clutter) {
@@ -1084,7 +1084,7 @@ function setupSocket(sock: Socket) {
 		if (e) {
 			st.gameStart = true;
 			showUI();
-			document.getElementById("cvs").focus();
+			document.getElementById("cvs")!.focus();
 		}
 		keys.lm = false;
 		st.maxScreenHeight = a.maxScreenHeight * a.viewMult;
@@ -1141,7 +1141,7 @@ function setupSocket(sock: Socket) {
 		}
 		if (a.bi != null) {
 			let svb = findServerBullet(a.bi);
-			if (svb?.owner.index !== st.player.index) {
+			if (svb && svb.owner!.index !== st.player.index) {
 				if (b.onScreen && a.amount < 0) {
 					particleCone(
 						12,
@@ -1240,8 +1240,8 @@ function setupSocket(sock: Socket) {
 			st.player.dead = true;
 			window.setTimeout(() => {
 				if (!st.gameOver) {
-					document.getElementById("startMenuWrapper").style.display = "block";
-					document.getElementById("linkBox").style.display = "block";
+					document.getElementById("startMenuWrapper")!.style.display = "block";
+					document.getElementById("linkBox")!.style.display = "block";
 				}
 			}, 1300);
 			playSound("death1", st.player.x, st.player.y);
@@ -1301,7 +1301,7 @@ function setupSocket(sock: Socket) {
 	sock.on("7", (winner, userList, modeVoteData, isFading) => {
 		try {
 			st.gameOver = true;
-			document.getElementById("startMenuWrapper").style.display = "none";
+			document.getElementById("startMenuWrapper")!.style.display = "none";
 			showStatTable(userList, modeVoteData, winner, false, isFading, true);
 			startSoundTrack(1);
 		} catch (h) {
@@ -1309,22 +1309,22 @@ function setupSocket(sock: Socket) {
 		}
 	});
 	sock.on("8", (a) => {
-		document.getElementById("nextGameTimer").textContent = `${a}: UNTIL NEXT ROUND`;
+		document.getElementById("nextGameTimer")!.textContent = `${a}: UNTIL NEXT ROUND`;
 	});
 }
 function likePlayerStat(a: any) {
 	socket.emit("like", a);
 }
 function updateVoteStats(a: any) {
-	document.getElementById(`votesText${a.i}`).textContent = `${a.n}: ${a.v}`;
+	document.getElementById(`votesText${a.i}`)!.textContent = `${a.n}: ${a.v}`;
 }
 function showESCMenu() {
 	deactiveAllAnimTexts();
 	st.startingGame = false;
 	inMainMenu = true;
 	hideUI(false);
-	document.getElementById("startMenuWrapper").style.display = "block";
-	document.getElementById("gameStatWrapper").style.display = "none";
+	document.getElementById("startMenuWrapper")!.style.display = "block";
+	document.getElementById("gameStatWrapper")!.style.display = "none";
 }
 var buttonCount = 0;
 function showStatTable(
@@ -1339,41 +1339,41 @@ function showStatTable(
 	if (isEnd) {
 		hideUI(false);
 		if (reset) {
-			document.getElementById("nextGameTimer").textContent = "GAME STATS";
-			document.getElementById("winningTeamText").textContent = "";
-			document.getElementById("voteModeContainer").textContent = "";
+			document.getElementById("nextGameTimer")!.textContent = "GAME STATS";
+			document.getElementById("winningTeamText")!.textContent = "";
+			document.getElementById("voteModeContainer")!.textContent = "";
 		} else {
 			let isWinner = st.player.team === winner || st.player.id === winner;
 			if (!isFading) {
 				if (isWinner) {
 					startBigAnimText("Victory", "Well Played!", 2500, true, "#5151d9", "#ffffff", false, 2);
-					document.getElementById("winningTeamText").textContent = "VICTORY";
-					document.getElementById("winningTeamText").style.color = "#5151d9";
+					document.getElementById("winningTeamText")!.textContent = "VICTORY";
+					document.getElementById("winningTeamText")!.style.color = "#5151d9";
 				} else if (st.player.team != "") {
 					startBigAnimText("Defeat", "Bad Luck!", 2500, true, "#d95151", "#ffffff", false, 2);
-					document.getElementById("winningTeamText").textContent = "DEFEAT";
-					document.getElementById("winningTeamText").style.color = "#d95151";
+					document.getElementById("winningTeamText")!.textContent = "DEFEAT";
+					document.getElementById("winningTeamText")!.style.color = "#d95151";
 				}
 			}
 			if (modeVoteData != null) {
-				document.getElementById("voteModeContainer").textContent = "";
+				document.getElementById("voteModeContainer")!.textContent = "";
 				for (let i = 0; i < modeVoteData.length; ++i) {
 					let modeVoteBtn = document.createElement("button");
 					modeVoteBtn.className = "modeVoteButton";
 					modeVoteBtn.setAttribute("id", `votesText${i}`);
 					modeVoteBtn.textContent = `${modeVoteData[i].name}: ${modeVoteData[i].votes}`;
-					document.getElementById("voteModeContainer").appendChild(modeVoteBtn);
+					document.getElementById("voteModeContainer")!.appendChild(modeVoteBtn);
 					modeVoteBtn.onclick = () => {
 						mainCanvas.focus();
 						socket.emit("modeVote", i);
 						for (let j = 0; j < modeVoteData.length; ++j) {
 							if (
 								i === j &&
-								document.getElementById(`votesText${j}`).className === "modeVoteButton"
+								document.getElementById(`votesText${j}`)!.className === "modeVoteButton"
 							) {
-								document.getElementById(`votesText${j}`).className = "modeVoteButtonA";
+								document.getElementById(`votesText${j}`)!.className = "modeVoteButtonA";
 							} else {
-								document.getElementById(`votesText${j}`).className = "modeVoteButton";
+								document.getElementById(`votesText${j}`)!.className = "modeVoteButton";
 							}
 						}
 					};
@@ -1381,7 +1381,7 @@ function showStatTable(
 			}
 		}
 	}
-	document.getElementById("gameStatBoard").textContent = "";
+	document.getElementById("gameStatBoard")!.textContent = "";
 	addRowToStatTable(
 		[
 			{
@@ -1410,7 +1410,7 @@ function showStatTable(
 				color: "#fff",
 			},
 			{
-				text: gameMode.code === "zmtch" ? "GOALS" : "HEALING",
+				text: gameMode?.code === "zmtch" ? "GOALS" : "HEALING",
 				className: "headerC",
 				color: "#fff",
 			},
@@ -1441,44 +1441,37 @@ function showStatTable(
 							: user.team !== st.player.team
 								? "#d95151"
 								: "#5151d9",
-					id: null,
 					userInfo: findUserByIndex(user.index),
 				},
 				{
 					text: user.score || 0,
 					className: "contC",
 					color: "#fff",
-					id: null,
 				},
 				{
 					text: user.kills || 0,
 					className: "contC",
 					color: "#fff",
-					id: null,
 				},
 				{
 					text: user.deaths || 0,
 					className: "contC",
 					color: "#fff",
-					id: null,
 				},
 				{
 					text: user.totalDamage || 0,
 					className: "contC",
 					color: "#fff",
-					id: null,
 				},
 				{
-					text: gameMode.code == "zmtch" ? user.totalGoals || 0 : user.totalHealing || 0,
+					text: gameMode?.code === "zmtch" ? user.totalGoals || 0 : user.totalHealing || 0,
 					className: "contC",
 					color: "#fff",
-					id: null,
 				},
 				{
 					text: user.lastItem != null ? user.lastItem.name : "No Reward",
 					className: "rewardText",
 					color: user.lastItem != null ? getItemRarityColor(user.lastItem.chance) : "#fff",
-					id: null,
 					hoverInfo: user.lastItem,
 				},
 				{
@@ -1499,7 +1492,7 @@ function showStatTable(
 			animateOverlay = false;
 			gameOverFade = true;
 			deactiveAllAnimTexts();
-			document.getElementById("gameStatWrapper").style.display = "block";
+			document.getElementById("gameStatWrapper")!.style.display = "block";
 		} else {
 			hideStatTable();
 			hideUI(false);
@@ -1508,7 +1501,7 @@ function showStatTable(
 				gameOverFade = true;
 			}, 2500);
 			window.setTimeout(() => {
-				document.getElementById("gameStatWrapper").style.display = "block";
+				document.getElementById("gameStatWrapper")!.style.display = "block";
 			}, 4500);
 		}
 	}
@@ -1519,8 +1512,8 @@ function hideStatTable() {
 	showingScoreBoard = false;
 	animateOverlay = true;
 	drawOverlay(graph, false, true);
-	document.getElementById("gameStatWrapper").style.display = "none";
-	document.getElementById("linkBox").style.display = "none";
+	document.getElementById("gameStatWrapper")!.style.display = "none";
+	document.getElementById("linkBox")!.style.display = "none";
 }
 type StatTableRow = {
 	text: string | number;
@@ -1631,11 +1624,11 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 				likePlayerStat(m.pos);
 				for (let i = 0; i < buttonCount; ++i) {
 					document
-						.getElementById(`gameStatLikeButton${i}`)
+						.getElementById(`gameStatLikeButton${i}`)!
 						.setAttribute("class", "gameStatLikeButton");
 				}
 				if (currentLikeButton !== m.uID) {
-					currentLikeButton = m.uID;
+					currentLikeButton = m.uID ?? null;
 					btn.setAttribute("class", "gameStatLikeButtonA");
 				} else {
 					currentLikeButton = null;
@@ -1652,8 +1645,9 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 			trow.appendChild(btn);
 			let tmpDiv = document.createElement("div");
 			tmpDiv.textContent = data[i].text.toString();
-			if (data[i].id != null) {
-				tmpDiv.setAttribute("id", data[i].id);
+			const tmpId = data[i].id;
+			if (tmpId) {
+				tmpDiv.setAttribute("id", tmpId);
 			}
 			tcell.appendChild(btn);
 			tcell.className = data[i].className;
@@ -1661,7 +1655,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 		}
 		trow.appendChild(tcell);
 	}
-	document.getElementById("gameStatBoard").appendChild(trow);
+	document.getElementById("gameStatBoard")!.appendChild(trow);
 }
 function addUser(userString: string) {
 	let parsed = JSON.parse(userString);
@@ -1683,15 +1677,15 @@ function removeUser(userIndex: number) {
 	}
 }
 function updateUiStats(player: Player) {
-	document.getElementById("scoreValue").textContent = player.score.toString();
+	document.getElementById("scoreValue")!.textContent = player.score.toString();
 	if (player.weapons.length > 0) {
-		document.getElementById("ammoValue").textContent = getCurrentWeapon(player).ammo.toString();
+		document.getElementById("ammoValue")!.textContent = getCurrentWeapon(player).ammo.toString();
 	}
-	document.getElementById("healthValue").textContent = player.health.toString();
+	document.getElementById("healthValue")!.textContent = player.health.toString();
 	if (player.health <= 10) {
-		document.getElementById("healthValue").style.color = "#e06363";
+		document.getElementById("healthValue")!.style.color = "#e06363";
 	} else {
-		document.getElementById("healthValue").style.color = "#fff";
+		document.getElementById("healthValue")!.style.color = "#fff";
 	}
 }
 function getItemRarityColor(chance: number) {
@@ -1756,8 +1750,8 @@ function updateUserValue(data: any) {
 		if (st.gameOver) {
 			if (data.l != undefined) {
 				document
-					.getElementById(`likeStat${tmpUser.index}`)
-					.replaceChildren(tmpUser.likes.toString());
+					.getElementById(`likeStat${tmpUser.index}`)!
+					.replaceChildren(tmpUser.likes!.toString());
 			}
 		} else {
 			showStatTable(getUsersList(), null, null, true, true, false);
@@ -1830,7 +1824,7 @@ function receiveServerData(data: number[]) {
 		if (plr.dead) continue;
 		let i = 0;
 		while (i < thisInput.length) {
-			if (thisInput[i].isn <= plr.isn) {
+			if (thisInput[i].isn <= plr.isn!) {
 				thisInput.splice(i, 1);
 				continue;
 			}
@@ -1856,18 +1850,18 @@ function receiveServerData(data: number[]) {
 	}
 }
 function updatePlayerInfo(data: Partial<Player>) {
-	st.player.x = data.x;
-	st.player.y = data.y;
-	st.player.dead = data.dead;
-	if (st.player.score < data.score) {
+	st.player.x = data.x!;
+	st.player.y = data.y!;
+	st.player.dead = data.dead!;
+	if (st.player.score < data.score!) {
 		playSound("score", st.player.x, st.player.y);
 	}
-	st.player.score = data.score;
-	st.player.health = data.health;
+	st.player.score = data.score!;
+	st.player.health = data.health!;
 }
-var currentHat = document.getElementById("currentHat");
-var hatList = document.getElementById("hatList");
-var hatHeader = document.getElementById("hatHeader");
+var currentHat = document.getElementById("currentHat")!;
+var hatList = document.getElementById("hatList")!;
+var hatHeader = document.getElementById("hatHeader")!;
 function updateHatList(totalCount: number, hats: any[]) {
 	hatHeader.textContent = `SELECT HAT: (${hats.length}/${totalCount})`;
 	let content: Node[] = [];
@@ -1919,7 +1913,7 @@ function resetHatList() {
 	);
 	changeHat(-1);
 }
-document.getElementById("currentHat").addEventListener("click", showHatselector);
+document.getElementById("currentHat")!.addEventListener("click", showHatselector);
 function showHatselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -1937,8 +1931,8 @@ function changeHat(a: number) {
 	if (!socket) return;
 	socket.emit("cHat", a);
 	localStorage.setItem("previousHat", a.toString());
-	currentHat.innerHTML = document.getElementById(`hatItem${a}`).innerHTML.replace(/ x\d/, "");
-	currentHat.style.color = document.getElementById(`hatItem${a}`).style.color;
+	currentHat.innerHTML = document.getElementById(`hatItem${a}`)!.innerHTML.replace(/ x\d/, "");
+	currentHat.style.color = document.getElementById(`hatItem${a}`)!.style.color;
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	classSelector.style.display = "none";
@@ -1948,9 +1942,9 @@ function changeHat(a: number) {
 	lobbySelector.style.display = "none";
 	lobbyCSelector.style.display = "none";
 }
-var currentShirt = document.getElementById("currentShirt");
-var shirtList = document.getElementById("shirtList");
-var shirtHeader = document.getElementById("shirtHeader");
+var currentShirt = document.getElementById("currentShirt")!;
+var shirtList = document.getElementById("shirtList")!;
+var shirtHeader = document.getElementById("shirtHeader")!;
 function updateShirtList(totalCount: number, shirts: any[]) {
 	shirtHeader.textContent = `SELECT SHIRT: (${shirts.length}/${totalCount})`;
 
@@ -1998,7 +1992,7 @@ function resetShirtList() {
 	);
 	changeShirt(-1);
 }
-document.getElementById("currentShirt").addEventListener("click", showShirtselector);
+document.getElementById("currentShirt")!.addEventListener("click", showShirtselector);
 function showShirtselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2017,9 +2011,9 @@ function changeShirt(shirtId: number) {
 	socket.emit("cShirt", shirtId);
 	localStorage.setItem("previousShirt", shirtId.toString());
 	currentShirt.innerHTML = document
-		.getElementById(`shirtItem${shirtId}`)
+		.getElementById(`shirtItem${shirtId}`)!
 		.innerHTML.replace(/ x\d/, "");
-	currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`).style.color;
+	currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`)!.style.color;
 	charSelectorCont.style.display = "block";
 	lobbySelectorCont.style.display = "block";
 	classSelector.style.display = "none";
@@ -2029,8 +2023,8 @@ function changeShirt(shirtId: number) {
 	lobbySelector.style.display = "none";
 	lobbyCSelector.style.display = "none";
 }
-var currentSpray = document.getElementById("currentSpray");
-var sprayList = document.getElementById("sprayList");
+var currentSpray = document.getElementById("currentSpray")!;
+var sprayList = document.getElementById("sprayList")!;
 function updateSpraysList(sprays: any[]) {
 	let listContent: Node[] = [];
 	for (let i = 0; i < sprays.length; ++i) {
@@ -2050,8 +2044,13 @@ function updateSpraysList(sprays: any[]) {
 		);
 	}
 	sprayList.replaceChildren(...listContent);
+	// cursed
 	if (localStorage.getItem("previousSpray")) {
-		previousSpray = Number.parseInt(localStorage.getItem("previousSpray"));
+		previousSpray = Number.parseInt(localStorage.getItem("previousSpray") ?? "NaN");
+		if (Number.isNaN(previousSpray)) {
+			changeSpray(1, sprays[1].id);
+			return;
+		}
 		try {
 			changeSpray(previousSpray, sprays[previousSpray - 1].id);
 		} catch (_) {
@@ -2061,7 +2060,7 @@ function updateSpraysList(sprays: any[]) {
 		changeSpray(1, sprays[1].id);
 	}
 }
-document.getElementById("currentSpray").addEventListener("click", showSprayselector);
+document.getElementById("currentSpray")!.addEventListener("click", showSprayselector);
 function showSprayselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2073,13 +2072,13 @@ function showSprayselector() {
 	hatSelector.style.display = "none";
 	spraySelector.style.display = "block";
 }
-function changeSpray(dir: number, sprayId: number) {
+function changeSpray(id: number, sprayId: number) {
 	if (!socket) return;
-	socket.emit("cSpray", dir);
-	localStorage.setItem("previousSpray", dir.toString());
-	currentSpray.innerHTML = document.getElementById(`sprayItem${dir}`).innerHTML.replace(/ x\d/, "");
-	currentSpray.style.color = document.getElementById(`sprayItem${dir}`).style.color;
-	let hoverElem = document.getElementById(`sprayHoverImage${dir}`);
+	socket.emit("cSpray", id);
+	localStorage.setItem("previousSpray", id.toString());
+	currentSpray.innerHTML = document.getElementById(`sprayItem${id}`)!.innerHTML.replace(/ x\d/, "");
+	currentSpray.style.color = document.getElementById(`sprayItem${id}`)!.style.color;
+	let hoverElem = document.getElementById(`sprayHoverImage${id}`);
 	hoverElem?.replaceChildren(
 		<img class="sprayDisplayImage" src={`/images/sprays/${sprayId}.png`} />,
 	);
@@ -2096,7 +2095,7 @@ function changeSpray(dir: number, sprayId: number) {
 //@ts-expect-error
 window.changeSpray = changeSpray;
 function findUserByIndex(index: number): Player {
-	return players.find((obj) => obj.index === index) ?? null;
+	return players.find((obj) => obj.index === index) ?? null!;
 }
 function getUsersList(): Player[] {
 	return players.sort(sortUsersByScore);
@@ -2153,13 +2152,13 @@ function updateLeaderboard(data: number[]) {
 			);
 		}
 	}
-	document.getElementById("status").replaceChildren(...test);
+	document.getElementById("status")!.replaceChildren(...test);
 }
 function updateTeamScores(scoreRed: number, scoreBlue: number) {
-	var redProgress = document.getElementById("redProgress");
-	var blueText = document.getElementById("blueText");
-	var blueProgress = document.getElementById("blueProgress");
-	var redProgCont = document.getElementById("redProgCont");
+	var redProgress = document.getElementById("redProgress")!;
+	var blueText = document.getElementById("blueText")!;
+	var blueProgress = document.getElementById("blueProgress")!;
+	var redProgCont = document.getElementById("redProgCont")!;
 	if (!gameMode) return;
 	if (gameMode.teams) {
 		blueText.textContent = "A";
@@ -2186,35 +2185,35 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 }
 function showUI() {
 	if (st.settings.showUI) {
-		document.getElementById("status").style.display = "block";
-		document.getElementById("statContainer2").style.display = "block";
-		document.getElementById("actionBar").style.display = "block";
-		document.getElementById("statContainer").style.display = "block";
-		document.getElementById("score").style.display = "block";
+		document.getElementById("status")!.style.display = "block";
+		document.getElementById("statContainer2")!.style.display = "block";
+		document.getElementById("actionBar")!.style.display = "block";
+		document.getElementById("statContainer")!.style.display = "block";
+		document.getElementById("score")!.style.display = "block";
 		if (st.settings.showPINGFPS) {
-			document.getElementById("conStatContainer").style.display = "block";
+			document.getElementById("conStatContainer")!.style.display = "block";
 		}
 		if (!st.settings.showLeader) {
-			document.getElementById("status").style.display = "none";
+			document.getElementById("status")!.style.display = "none";
 		}
 	}
 	if (st.settings.showChat) {
-		document.getElementById("chatbox").style.display = "block";
+		document.getElementById("chatbox")!.style.display = "block";
 	}
 }
 function hideMenuUI() {
-	document.getElementById("namesBox").style.display = "none";
-	document.getElementById("linkBox").style.display = "none";
+	document.getElementById("namesBox")!.style.display = "none";
+	document.getElementById("linkBox")!.style.display = "none";
 }
 function hideUI(hideChatbox: boolean) {
-	document.getElementById("status").style.display = "none";
-	document.getElementById("statContainer2").style.display = "none";
-	document.getElementById("actionBar").style.display = "none";
-	document.getElementById("conStatContainer").style.display = "none";
-	document.getElementById("score").style.display = "none";
-	document.getElementById("statContainer").style.display = "none";
+	document.getElementById("status")!.style.display = "none";
+	document.getElementById("statContainer2")!.style.display = "none";
+	document.getElementById("actionBar")!.style.display = "none";
+	document.getElementById("conStatContainer")!.style.display = "none";
+	document.getElementById("score")!.style.display = "none";
+	document.getElementById("statContainer")!.style.display = "none";
 	if (hideChatbox) {
-		document.getElementById("chatbox").style.display = "none";
+		document.getElementById("chatbox")!.style.display = "none";
 	}
 }
 // window.addEventListener("focus", () => {
@@ -2345,7 +2344,7 @@ function updateGameLoop() {
 			} else {
 				let f = Math.abs(b) + Math.abs(d);
 				if (plr.index != st.player.index) {
-					f = Math.abs(plr.xSpeed) + Math.abs(plr.ySpeed);
+					f = Math.abs(plr.xSpeed!) + Math.abs(plr.ySpeed!);
 				}
 				if (f > 0) {
 					plr.frameCountdown -= delta / 4;
@@ -2395,11 +2394,11 @@ function updateGameLoop() {
 	if (disconnected || st.kicked) {
 		drawOverlay(graph, false, false);
 		const renderedReason = st.kicked
-			? reason !== ""
+			? !!reason
 				? renderShadedAnimText(reason, st.viewMult * 48, "#ffffff", 6, "")
 				: renderShadedAnimText("You were kicked", st.viewMult * 48, "#ffffff", 6, "")
 			: renderShadedAnimText("Disconnected", st.viewMult * 48, "#ffffff", 6, "");
-		if (renderedReason !== undefined) {
+		if (renderedReason) {
 			graph.drawImage(
 				renderedReason,
 				st.maxScreenWidth / 2 - renderedReason.width / 2,
@@ -2514,9 +2513,9 @@ function resize() {
 		(screenWidth - st.maxScreenWidth * a) / 2,
 		(screenHeight - st.maxScreenHeight * a) / 2,
 	);
-	document.getElementById("startMenuWrapper").style.transform =
+	document.getElementById("startMenuWrapper")!.style.transform =
 		`perspective(1px) translate(-50%, -50%) scale(${uiScale})`;
-	document.getElementById("gameStatWrapper").style.transform =
+	document.getElementById("gameStatWrapper")!.style.transform =
 		`perspective(1px) translate(-50%, -50%) scale(${uiScale})`;
 	graph.imageSmoothingEnabled = false;
 	drawMenuBackground();
@@ -2524,6 +2523,7 @@ function resize() {
 resize();
 var grd: CanvasGradient | null = null;
 function drawEdgeShader() {
+	if (!graph) return;
 	try {
 		if (grd == null) {
 			grd = graph.createRadialGradient(
@@ -2545,7 +2545,7 @@ function drawEdgeShader() {
 }
 
 function drawGameLights(delta: number) {
-	if (!st.sprites.light) return;
+	if (!st.sprites.light || !graph) return;
 	graph.globalCompositeOperation = "lighter";
 	graph.globalAlpha = 0.2;
 	for (const tmpObject of bullets) {
@@ -2588,7 +2588,7 @@ function getCachedMiniMap() {
 	fillCounter++;
 	if (cachedMiniMap == null && st.gameMap?.tiles.length > 0) {
 		let baseCanvasElem = document.createElement("canvas");
-		let baseCtx = baseCanvasElem.getContext("2d");
+		let baseCtx = baseCanvasElem.getContext("2d")!;
 		baseCanvasElem.width = mapScale;
 		baseCanvasElem.height = mapScale;
 		baseCtx.fillStyle = "#fff";
@@ -2602,7 +2602,7 @@ function getCachedMiniMap() {
 			);
 		}
 		let finalCanvasElem = document.createElement("canvas");
-		let finalCtx = finalCanvasElem.getContext("2d");
+		let finalCtx = finalCanvasElem.getContext("2d")!;
 		finalCanvasElem.width = mapScale;
 		finalCanvasElem.height = mapScale;
 		finalCtx.globalAlpha = 0.1;
@@ -2698,8 +2698,8 @@ function createSpray(plrIdx: number, x: number, y: number) {
 	tmpSpray.scale = tmpPlayer.spray.info.scale;
 	tmpSpray.alpha = tmpPlayer.spray.info.alpha;
 	tmpSpray.resolution = tmpPlayer.spray.info.resolution;
-	tmpSpray.xPos = x - tmpSpray.scale / 2;
-	tmpSpray.yPos = y - tmpSpray.scale / 2;
+	tmpSpray.xPos = x - tmpSpray.scale! / 2;
+	tmpSpray.yPos = y - tmpSpray.scale! / 2;
 	if (tmpSpray.src !== tmpPlayer.spray.src) {
 		tmpSpray.src = tmpPlayer.spray.src;
 	}
@@ -2718,17 +2718,17 @@ function cacheSpray(img: Sprite) {
 	if (tmpSpray || img.width === 0) return;
 
 	let initialCanvas = document.createElement("canvas");
-	let initialCtx = initialCanvas.getContext("2d");
-	initialCanvas.width = img.resolution;
-	initialCanvas.height = img.resolution;
-	initialCtx.drawImage(img, 0, 0, img.resolution, img.resolution);
+	let initialCtx = initialCanvas.getContext("2d")!;
+	initialCanvas.width = img.resolution!;
+	initialCanvas.height = img.resolution!;
+	initialCtx.drawImage(img, 0, 0, img.resolution!, img.resolution!);
 	let finalCanvas = document.createElement("canvas");
-	let finalCtx = finalCanvas.getContext("2d");
-	finalCanvas.width = img.scale;
-	finalCanvas.height = img.scale;
+	let finalCtx = finalCanvas.getContext("2d")!;
+	finalCanvas.width = img.scale!;
+	finalCanvas.height = img.scale!;
 	finalCtx.imageSmoothingEnabled = false;
-	finalCtx.globalAlpha = img.alpha;
-	finalCtx.drawImage(initialCanvas, 0, 0, img.scale, img.scale);
+	finalCtx.globalAlpha = img.alpha!;
+	finalCtx.drawImage(initialCanvas, 0, 0, img.scale!, img.scale!);
 	tmpSpray = finalCanvas;
 	cachedSprays[tmpIndex] = tmpSpray;
 }
@@ -2738,10 +2738,9 @@ function drawSprays() {
 		if (!sp.active) continue;
 		let tmpSpray = cachedSprays[`${sp.src}`];
 		if (!tmpSpray) continue;
-		graph.drawImage(tmpSpray, sp.xPos - st.startX, sp.yPos - st.startY);
+		graph.drawImage(tmpSpray, sp.xPos! - st.startX, sp.yPos! - st.startY);
 	}
 }
-var spritesLoaded = false;
 var spriteIndex = 0;
 function getSprite(fileName: string) {
 	var b = new Image() as Sprite;
@@ -2800,9 +2799,9 @@ function playerSwapWeapon(tmpPlayer: Player, change: number) {
 function playerEquipWeapon(tmpPlayer: Player, weaponId: number) {
 	tmpPlayer.currentWeapon = weaponId;
 }
-var actionBar = document.getElementById("actionBar");
+var actionBar = document.getElementById("actionBar")!;
 function updateWeaponUI(tmpPlayer: Player, force: boolean) {
-	if (weaponSpriteSheet[0] == undefined || tmpPlayer.weapons == undefined) {
+	if (!weaponSpriteSheet[0] || !tmpPlayer.weapons) {
 		return false;
 	}
 	if (!actionBar.childNodes.length || force) {
@@ -2825,7 +2824,7 @@ function updateWeaponUI(tmpPlayer: Player, force: boolean) {
 		}
 	} else {
 		for (let i = 0; i < tmpPlayer.weapons.length; ++i) {
-			let tmpDiv = document.getElementById(`actionContainer${i}`);
+			let tmpDiv = document.getElementById(`actionContainer${i}`)!;
 			tmpDiv.className =
 				i === tmpPlayer.currentWeapon ? "actionContainerActive" : "actionContainer";
 		}
@@ -2837,7 +2836,7 @@ function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
 	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
 		updateWeaponUI(st.player, false);
 	}
-	const tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
+	const tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`)!;
 	if (d) {
 		tmpDiv.animate({ height: ["100%", "0%"] }, time);
 	} else {
@@ -2990,8 +2989,8 @@ async function joinRoom(roomName: string) {
 	});
 	inMainMenu = true;
 	hideUI(true);
-	document.getElementById("namesBox").style.display = "block";
-	document.getElementById("linkBox").style.display = "block";
+	document.getElementById("namesBox")!.style.display = "block";
+	document.getElementById("linkBox")!.style.display = "block";
 	socket.removeListener("disconnect");
 	socket.once("disconnect", () => {
 		socket.close();
@@ -3004,10 +3003,10 @@ async function joinRoom(roomName: string) {
 }
 
 var currentClassID = 0;
-var currentClass = document.getElementById("currentClass");
-var classList = document.getElementById("classList");
-var characterWepnDisplay = document.getElementById("charWpn");
-var characterWepnDisplay2 = document.getElementById("charWpn2");
+var currentClass = document.getElementById("currentClass")!;
+var classList = document.getElementById("classList")!;
+var characterWepnDisplay = document.getElementById("charWpn")!;
+var characterWepnDisplay2 = document.getElementById("charWpn2")!;
 function createClassList() {
 	let res: Node[] = [];
 	for (const [i, cl] of characterClasses.entries()) {
@@ -3021,24 +3020,20 @@ function createClassList() {
 	classList.replaceChildren(...res);
 }
 createClassList();
-document.getElementById("currentClass").addEventListener("click", showClassselector);
+document.getElementById("currentClass")!.addEventListener("click", showClassselector);
 function showClassselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
 	classSelector.style.display = "block";
 }
 function loadSavedClass() {
-	if (localStorage.getItem("previousClass")) {
-		previousClass = Number.parseInt(localStorage.getItem("previousClass"));
-		pickedCharacter(previousClass);
-	} else {
-		pickedCharacter(0);
-	}
+	previousClass = Number.parseInt(localStorage.getItem("previousClass") ?? "0");
+	pickedCharacter(previousClass);
 }
 function pickedCharacter(classId: number) {
 	currentClassID = classId;
-	currentClass.textContent = document.getElementById(`classItem${classId}`).textContent;
-	currentClass.style.color = document.getElementById(`classItem${classId}`).style.color;
+	currentClass.textContent = document.getElementById(`classItem${classId}`)!.textContent;
+	currentClass.style.color = document.getElementById(`classItem${classId}`)!.style.color;
 	characterWepnDisplay.replaceChildren(
 		<>
 			<b>Primary:</b>
@@ -3064,11 +3059,11 @@ function pickedCharacter(classId: number) {
 			}
 		}
 		if (localStorage.getItem("previousHat")) {
-			previousHat = Number.parseInt(localStorage.getItem("previousHat"));
+			previousHat = Number.parseInt(localStorage.getItem("previousHat")!);
 			changeHat(previousHat);
 		}
 		if (localStorage.getItem("previousShirt")) {
-			previousShirt = Number.parseInt(localStorage.getItem("previousShirt"));
+			previousShirt = Number.parseInt(localStorage.getItem("previousShirt")!);
 			changeShirt(previousShirt);
 		}
 	}
@@ -3084,7 +3079,7 @@ function pickedCharacter(classId: number) {
 }
 var camoDataList: any[] | null = null;
 var maxCamos = 0;
-var camoList = document.getElementById("camoList");
+var camoList = document.getElementById("camoList")!;
 characterWepnDisplay.addEventListener("click", () => showWeaponSelector(0));
 characterWepnDisplay2.addEventListener("click", () => showWeaponSelector(1));
 function showWeaponSelector(wepType: 0 | 1) {
@@ -3111,10 +3106,10 @@ function showWeaponSelector(wepType: 0 | 1) {
 				</div>,
 			);
 		}
-		document.getElementById("camoHeaderAmount").textContent =
+		document.getElementById("camoHeaderAmount")!.textContent =
 			`SELECT CAMO (${camoDataList[classWeapon].length + 1}/${maxCamos + 1})`;
 	} else {
-		document.getElementById("camoHeaderAmount").textContent = "SELECT CAMO";
+		document.getElementById("camoHeaderAmount")!.textContent = "SELECT CAMO";
 	}
 	camoList.replaceChildren(...list);
 }
@@ -3283,7 +3278,7 @@ function loadDefaultSprites(base: string) {
 	resize();
 }
 
-var mainTitleText = document.getElementById("mainTitleText");
+var mainTitleText = document.getElementById("mainTitleText")!;
 function updateMenuInfo(info: string) {
 	// active security risk
 	mainTitleText.innerHTML = info;
@@ -3293,7 +3288,7 @@ var linkedMod = location.hash.replace("#", "");
 const assetsLoadPromise = loadModPack(linkedMod, linkedMod === "");
 var loadingTexturePack = false;
 
-var modInfo = document.getElementById("modInfo");
+var modInfo = document.getElementById("modInfo")!;
 function setModInfoText(info: string) {
 	if (modInfo) {
 		// active security risk
@@ -3586,7 +3581,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 			wepSprite = wepSprites.downSprite;
 		}
 		let canvasElem = document.createElement("canvas");
-		let ctx = canvasElem.getContext("2d");
+		let ctx = canvasElem.getContext("2d")!;
 		ctx.imageSmoothingEnabled = false;
 		canvasElem.width = wepSprite.width;
 		canvasElem.height = wepSprite.height;
@@ -3600,7 +3595,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 			img.tmpInx = tmpIndex;
 			img.onload = () => {
 				var canvas = document.createElement("canvas");
-				var ctx = canvas.getContext("2d");
+				var ctx = canvas.getContext("2d")!;
 				ctx.imageSmoothingEnabled = false;
 				canvas.width = img.width;
 				canvas.height = img.height;
@@ -3609,7 +3604,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 				ctx.globalCompositeOperation = "source-atop";
 				ctx.globalAlpha = 0.75;
 				ctx.drawImage(img.flip ? flipSprite(img, true) : img, 0, 0, img.width, img.height);
-				cachedWeaponSprites[img.tmpInx] = canvas;
+				cachedWeaponSprites[img.tmpInx!] = canvas;
 			};
 			img.src = getCamoURL(camo);
 		}
@@ -3617,7 +3612,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	return cachedWeaponSprites[tmpIndex];
 }
 var playerCanvas = document.createElement("canvas") as SpriteCanvas;
-var playerContext = playerCanvas.getContext("2d");
+var playerContext = playerCanvas.getContext("2d")!;
 var initPlayerCanv = false;
 function drawGameObjects(delta: number) {
 	if (!initPlayerCanv) {
@@ -3648,7 +3643,7 @@ function drawGameObjects(delta: number) {
 			if (plr.weapons.length > 0) {
 				e = getWeaponSprite(
 					getCurrentWeapon(plr).weaponIndex,
-					getCurrentWeapon(plr).camo, // this isn't set anywhere..?
+					getCurrentWeapon(plr).camo!, // this isn't set anywhere..?
 					k,
 				);
 				f = classSpriteSheets[plr.classIndex]?.arm;
@@ -3873,7 +3868,7 @@ function drawGameObjects(delta: number) {
 				clt.w,
 				clt.h,
 				0,
-				clt.s,
+				!!clt.s,
 				0,
 				0.5,
 				0,
@@ -3966,7 +3961,7 @@ function drawPlayerNames() {
 function drawBackground() {
 	drawSprite(
 		graph,
-		darkFillerSprite,
+		darkFillerSprite!,
 		0,
 		0,
 		st.maxScreenWidth,
@@ -3983,19 +3978,19 @@ function getCachedWall(tile: Tile) {
 
 	if (cachedWalls[cacheKey] === undefined && wallSprite?.isLoaded) {
 		let canvasElem = document.createElement("canvas");
-		let ctx = canvasElem.getContext("2d");
+		let ctx = canvasElem.getContext("2d")!;
 		ctx.imageSmoothingEnabled = false;
 		canvasElem.width = tile.scale;
 		canvasElem.height = tile.scale;
 		ctx.drawImage(wallSprite, 0, 0, tile.scale, tile.scale);
-		drawSprite(ctx, darkFillerSprite, 12, 12, tile.scale - 24, tile.scale - 24, 0, false, 0, 0, 0);
+		drawSprite(ctx, darkFillerSprite!, 12, 12, tile.scale - 24, tile.scale - 24, 0, false, 0, 0, 0);
 		if (tile.left === 1) {
-			drawSprite(ctx, darkFillerSprite, 0, 12, 12, tile.scale - 24, 0, false, 0, 0, 0);
+			drawSprite(ctx, darkFillerSprite!, 0, 12, 12, tile.scale - 24, 0, false, 0, 0, 0);
 		}
 		if (tile.right === 1) {
 			drawSprite(
 				ctx,
-				darkFillerSprite,
+				darkFillerSprite!,
 				tile.scale - 12,
 				12,
 				12,
@@ -4008,12 +4003,12 @@ function getCachedWall(tile: Tile) {
 			);
 		}
 		if (tile.top === 1) {
-			drawSprite(ctx, darkFillerSprite, 12, 0, tile.scale - 24, 12, 0, false, 0, 0, 0);
+			drawSprite(ctx, darkFillerSprite!, 12, 0, tile.scale - 24, 12, 0, false, 0, 0, 0);
 		}
 		if (tile.bottom === 1) {
 			drawSprite(
 				ctx,
-				darkFillerSprite,
+				darkFillerSprite!,
 				12,
 				tile.scale - 12,
 				tile.scale - 24,
@@ -4026,18 +4021,18 @@ function getCachedWall(tile: Tile) {
 			);
 		}
 		if (!tile.hasCollision || (tile.topLeft === 1 && tile.top === 1 && tile.left === 1)) {
-			drawSprite(ctx, darkFillerSprite, 0, 0, 12, 12, 0, false, 0, 0, 0);
+			drawSprite(ctx, darkFillerSprite!, 0, 0, 12, 12, 0, false, 0, 0, 0);
 		}
 		if (!tile.hasCollision || (tile.topRight === 1 && tile.top === 1 && tile.right === 1)) {
-			drawSprite(ctx, darkFillerSprite, tile.scale - 12, 0, 12, 12, 0, false, 0, 0, 0);
+			drawSprite(ctx, darkFillerSprite!, tile.scale - 12, 0, 12, 12, 0, false, 0, 0, 0);
 		}
 		if (!tile.hasCollision || (tile.bottomLeft === 1 && tile.bottom === 1 && tile.left === 1)) {
-			drawSprite(ctx, darkFillerSprite, 0, tile.scale - 12, 12, 12, 0, false, 0, 0, 0);
+			drawSprite(ctx, darkFillerSprite!, 0, tile.scale - 12, 12, 12, 0, false, 0, 0, 0);
 		}
 		if (!tile.hasCollision || (tile.bottomRight === 1 && tile.bottom === 1 && tile.right === 1)) {
 			drawSprite(
 				ctx,
-				darkFillerSprite,
+				darkFillerSprite!,
 				tile.scale - 12,
 				tile.scale - 12,
 				12,
@@ -4058,7 +4053,7 @@ function getCachedFloor(tile: Tile) {
 	let tmpIndex = `${tile.spriteIndex}${tile.left}${tile.right}${tile.top}${tile.bottom}${tile.topLeft}${tile.topRight}`;
 	if (cachedFloors[tmpIndex] === undefined && sideWalkSprite != null && sideWalkSprite.isLoaded) {
 		let tmpCanvas = document.createElement("canvas");
-		let ctx = tmpCanvas.getContext("2d");
+		let ctx = tmpCanvas.getContext("2d")!;
 		ctx.imageSmoothingEnabled = false;
 
 		tmpCanvas.width = tile.scale;
@@ -4101,14 +4096,14 @@ function renderSideWalks(
 	ctx: CanvasRenderingContext2D,
 	count: number,
 	scale: number,
-	rot: number,
+	rot: number | null,
 	x: number,
 	y: number,
 	xInc: number,
 	yInc: number,
 ) {
 	for (let i = 0; i < count; ++i) {
-		ctx.drawImage(sideWalkSprite, x, y, scale, scale);
+		ctx.drawImage(sideWalkSprite!, x, y, scale, scale);
 		if (rot != null) {
 			ctx.save();
 			ctx.translate(x + scale / 2, y + scale / 2);
@@ -4131,7 +4126,7 @@ function drawMap(layer: number) {
 				let tmpTlSprite = getCachedFloor(tile);
 				if (tmpTlSprite !== undefined) {
 					drawSprite(
-						graph,
+						graph!,
 						tmpTlSprite,
 						tile.x - st.startX,
 						tile.y - st.startY,
@@ -4157,7 +4152,7 @@ function drawMap(layer: number) {
 				)
 			) {
 				drawSprite(
-					graph,
+					graph!,
 					wallSpritesSeg[tile.spriteIndex],
 					tile.x - st.startX,
 					tile.y + Math.round(mapTileScale / 2) - st.startY,
@@ -4183,7 +4178,7 @@ function drawMap(layer: number) {
 			let tmpTlSprite = getCachedWall(tile);
 			if (tmpTlSprite !== undefined) {
 				drawSprite(
-					graph,
+					graph!,
 					tmpTlSprite,
 					tile.x - st.startX,
 					Math.round(tile.y - mapTileScale / 2 - st.startY),
@@ -4205,8 +4200,8 @@ function drawMap(layer: number) {
 
 			if (tmpPickup.type === "healthpack") {
 				drawSprite(
-					graph,
-					healthPackSprite,
+					graph!,
+					healthPackSprite!,
 					tmpPickup.x - tmpPickup.scale / 2 - st.startX,
 					tmpPickup.y - tmpPickup.scale / 2 - st.startY,
 					tmpPickup.scale,
@@ -4219,8 +4214,8 @@ function drawMap(layer: number) {
 				);
 			} else {
 				drawSprite(
-					graph,
-					lootCrateSprite,
+					graph!,
+					lootCrateSprite!,
 					tmpPickup.x - tmpPickup.scale / 2 - st.startX,
 					tmpPickup.y - tmpPickup.scale / 2 - st.startY,
 					tmpPickup.scale,
@@ -4274,9 +4269,9 @@ function getCachedShadow(
 	height: number,
 	scaleY: number,
 ) {
-	if (cachedShadows[sprite.index] === undefined && width !== 0 && sprite?.isLoaded) {
+	if (cachedShadows[sprite.index!] === undefined && width !== 0 && sprite?.isLoaded) {
 		let tmpCanvas = document.createElement("canvas");
-		let ctx = tmpCanvas.getContext("2d");
+		let ctx = tmpCanvas.getContext("2d")!;
 		ctx.imageSmoothingEnabled = false;
 
 		tmpCanvas.width = width;
@@ -4295,9 +4290,9 @@ function getCachedShadow(
 			pixelArray[i + 3] = pixelArray[i + 3]; // ??
 		}
 		ctx.putImageData(imgData, 0, 0);
-		cachedShadows[sprite.index] = tmpCanvas;
+		cachedShadows[sprite.index!] = tmpCanvas;
 	}
-	return cachedShadows[sprite.index];
+	return cachedShadows[sprite.index!];
 }
 
 function callUpdate() {

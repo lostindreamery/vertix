@@ -20,10 +20,10 @@ export class ChatManager {
 		if (event.key === "Enter") {
 			let msg = chatInput.value.replace(/(<([^>]+)>)/gi, "");
 			if (msg !== "") {
-				st.socket.emit("cht", msg.substring(0, 50), currentChatType);
+				st.socket?.emit("cht", msg.substring(0, 50), currentChatType);
 				this.addChatLine(
 					st.player.name,
-					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg,
+					(currentChatType === "TEAM" ? "(TEAM) " : "") + msg + (!st.socket ? " (unsent)" : ""),
 					true,
 					st.player.team,
 				);
@@ -35,8 +35,8 @@ export class ChatManager {
 	appendMessage(msgElem: HTMLElement) {
 		if (st.mobile) return;
 
-		const chatbox = document.getElementById("chatbox");
-		const chatList = document.getElementById("chatList");
+		const chatbox = document.getElementById("chatbox")!;
+		const chatList = document.getElementById("chatList")!;
 		while (chatbox.clientHeight > 260) {
 			chatList.removeChild(chatList.childNodes[0]);
 		}
@@ -73,19 +73,19 @@ export class ChatManager {
 		}
 		this.appendMessage(listElem);
 		if (tmp) {
-			document.getElementById(`chatLine${this.chatLineCounter}`).textContent = text;
+			document.getElementById(`chatLine${this.chatLineCounter}`)!.textContent = text;
 		}
 	}
 }
 
 let chatTypeIndex = 0;
 const chatTypes = ["ALL", "TEAM"];
-document.getElementById("chatType").addEventListener("click", () => {
+document.getElementById("chatType")!.addEventListener("click", () => {
 	chatTypeIndex++;
 	if (chatTypeIndex >= chatTypes.length) {
 		chatTypeIndex = 0;
 	}
 	currentChatType = chatTypes[chatTypeIndex];
-	document.getElementById("chatType").textContent = currentChatType;
+	document.getElementById("chatType")!.textContent = currentChatType;
 	mainCanvas.focus();
 });

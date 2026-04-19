@@ -126,6 +126,12 @@ export function loadSounds(base: string) {
 	for (let i = 0; i < soundMeta.length; ++i) {
 		let tmpSound = localStorage.getItem(`${base + soundMeta[i].loc}data`);
 		let tmpFormat = localStorage.getItem(`${base + soundMeta[i].loc}format`);
+		if (!tmpSound || !tmpFormat) {
+			console.error(
+				`sound info for ${soundMeta[i].id} ${soundMeta[i].loc} is missing from localstorage`,
+			);
+			continue;
+		}
 		loadSound(tmpSound, soundMeta[i], tmpFormat);
 	}
 }

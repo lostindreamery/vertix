@@ -25,7 +25,7 @@ export class FlashGlow {
 	draw() {
 		if (!this.active) return;
 		window.graph.drawImage(
-			st.sprites.light,
+			st.sprites.light!,
 			this.x - st.startX - this.scale / 2,
 			this.y - st.startY - this.scale / 2,
 			this.scale,
