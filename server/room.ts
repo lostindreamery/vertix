@@ -267,6 +267,7 @@ export class Room {
 				);
 			});
 			socket.on("cht", (msg, type) => {
+				// TODO: implement team-only messages
 				if (msg.includes("!sync")) {
 					this.io.emit(
 						"rsd",
@@ -402,7 +403,7 @@ export class Room {
 					player,
 					bullet.x,
 					bullet.y,
-					bullet.blastRadius,
+					bullet.blastRadius!,
 					bullet.dmg,
 					dir,
 					bullet.selfDamage,
