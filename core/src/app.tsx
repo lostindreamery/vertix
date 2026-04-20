@@ -30,7 +30,6 @@ import {
 	updateAnimTexts,
 	updateNotifications,
 } from "./visual/animtext.ts";
-import { ChatManager } from "./visual/chat.tsx";
 import { updateFlashGlows } from "./visual/flash.ts";
 import {
 	createExplosion,
@@ -42,6 +41,7 @@ import {
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
 import ActionBar from "./components/actionBar.svelte";
+import Chatbox from "./components/chatbox.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
@@ -721,22 +721,21 @@ function keyUp(event: KeyboardEvent) {
 		hideStatTable();
 	}
 }
-var chat = new ChatManager();
 function messageFromServer(a: [userIdx: number, userMsg: string]) {
 	try {
 		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
 			if (tmpChatUser.index === st.player.index) return;
-			chat.addChatLine(
+			addChatLine(
 				tmpChatUser.name,
 				a[1],
 				tmpChatUser.index === st.player.index,
 				tmpChatUser.team,
 			);
 		} else if (a[0] === -1) {
-			chat.addChatLine("", a[1], false, "system");
+			addChatLine("", a[1], false, "system");
 		} else {
-			chat.addChatLine("", a[1], false, "notif");
+			addChatLine("", a[1], false, "notif");
 		}
 	} catch (b) {
 		console.log(b);
@@ -768,6 +767,9 @@ mount(RoomList, {
 });
 mount(ActionBar, {
 	target: document.getElementById("actionBar")!,
+});
+const { addChatLine } = mount(Chatbox, {
+	target: document.getElementById("chatbox")!,
 });
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
@@ -2972,6 +2974,7 @@ async function joinRoom(roomName: string) {
 		setupSocket(socket);
 	});
 	socket.disconnect();
+	st.chatLines = [];
 }
 
 var currentClassID = 0;
