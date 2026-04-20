@@ -271,7 +271,10 @@ div {
 .chatbox .chat-list {
 	position: relative;
 	list-style: none;
+	display: flex;
+	flex-direction: column-reverse;
 	width: 250px;
+	height: 260px;
 	overflow: hidden;
 	margin: 0px;
 	padding: 8px;
