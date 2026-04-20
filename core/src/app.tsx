@@ -1,9 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
 import { mount } from "svelte";
-import Controls from "./components/controls.svelte";
 import RoomList from "./components/roomList.svelte";
-import Settings from "./components/settings.svelte";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
@@ -42,13 +40,30 @@ import {
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
 import ActionBar from "./components/actionBar.svelte";
 import Chatbox from "./components/chatbox.svelte";
+import StartMenu from "./components/startMenu.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
 
+mount(StartMenu, {
+	target: document.getElementById("startMenu")!,
+	props: {
+		startGame
+	}
+});
+mount(RoomList, {
+	target: document.getElementById("roomWrapper")!,
+	props: { joinRoom },
+});
+mount(ActionBar, {
+	target: document.getElementById("actionBar")!,
+});
+const { addChatLine } = mount(Chatbox, {
+	target: document.getElementById("chatbox")!,
+});
+
 let playerName: string | undefined;
 var playerClassIndex: number | undefined;
-var playerNameInput = document.getElementById("playerNameInput")! as HTMLInputElement;
 var socket: Socket = undefined as any as Socket; // O_O
 var reason: string | undefined;
 var currentFPS = 0;
@@ -84,7 +99,7 @@ const loadingWrapper = document.getElementById("loadingWrapper")!;
 async function startGame() {
 	if (!st.startingGame && !changingLobby) {
 		st.startingGame = true;
-		playerName = playerNameInput.value.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
+		st.playerName = st.playerName.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 
 		document.getElementById("loadText")!.textContent = "LOADING ASSETS";
 		loadingWrapper.style.display = "block";
@@ -224,25 +239,6 @@ window.onload = async () => {
 	document.documentElement.style.overflow = "hidden";
 	document.getElementById("gameAreaWrapper")!.style.opacity = "1";
 	drawMenuBackground();
-	document.getElementById("settingsButton")!.onclick = () => {
-		if (settings.style.maxHeight === "200px") {
-			settings.style.maxHeight = "0px";
-		} else {
-			settings.style.maxHeight = "200px";
-			controls.style.maxHeight = "0px";
-		}
-	};
-	document.getElementById("instructionButton")!.onclick = () => {
-		if (controls.style.maxHeight === "200px") {
-			controls.style.maxHeight = "0px";
-		} else {
-			controls.style.maxHeight = "200px";
-			settings.style.maxHeight = "0px";
-		}
-	};
-	document.getElementById("leaderButton")!.onclick = () => {
-		window.open("/leaderboards.html", "_blank");
-	};
 	hideUI(true);
 	resize();
 	const anim = loadingWrapper.animate({ opacity: [1, 0] }, 200);
@@ -276,14 +272,6 @@ window.onload = async () => {
 		} else {
 			loadSavedClass();
 		}
-		document.getElementById("startButton")!.onclick = () => {
-			startGame();
-		};
-		playerNameInput.addEventListener("keypress", (event) => {
-			if (event.code === "Enter") {
-				startGame();
-			}
-		});
 		document.getElementById("texturePackButton")!.onclick = () => {
 			loadModPack((document.getElementById("textureModInput")! as HTMLInputElement).value, false);
 		};
@@ -726,12 +714,7 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
 			if (tmpChatUser.index === st.player.index) return;
-			addChatLine(
-				tmpChatUser.name,
-				a[1],
-				tmpChatUser.index === st.player.index,
-				tmpChatUser.team,
-			);
+			addChatLine(tmpChatUser.name, a[1], tmpChatUser.index === st.player.index, tmpChatUser.team);
 		} else if (a[0] === -1) {
 			addChatLine("", a[1], false, "system");
 		} else {
@@ -754,23 +737,6 @@ var mapContext = mapCanvas.getContext("2d")!;
 mapCanvas.width = 200;
 mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
-
-mount(Settings, {
-	target: document.getElementById("settings")!,
-});
-mount(Controls, {
-	target: document.getElementById("controls")!,
-});
-mount(RoomList, {
-	target: document.getElementById("roomWrapper")!,
-	props: { joinRoom },
-});
-mount(ActionBar, {
-	target: document.getElementById("actionBar")!,
-});
-const { addChatLine } = mount(Chatbox, {
-	target: document.getElementById("chatbox")!,
-});
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>
@@ -901,7 +867,7 @@ function setupSocket(sock: Socket) {
 		st.player.id = b.id;
 		st.player.room = b.room;
 		st.room = st.player.room;
-		st.player.name = playerName!;
+		st.player.name = st.playerName;
 		st.player.classIndex = playerClassIndex!;
 		b.name = st.player.name;
 		b.classIndex = playerClassIndex;
@@ -946,7 +912,7 @@ function setupSocket(sock: Socket) {
 			loginMessage.textContent = "";
 			loginWrapper.style.display = "none";
 			loggedInWrapper.style.display = "block";
-			(document.getElementById("playerNameInput")! as HTMLInputElement).value = a.text;
+			st.playerName = a.text;
 			localStorage.setItem("logKey", a.logKey);
 			localStorage.setItem("userName", a.text);
 			loggedIn = true;

@@ -13,6 +13,7 @@ export const st = $state({
 		dead: true,
 		weapons: [],
 	} as any as Player,
+	playerName: "", // content of the player name input box
 	shake: {
 		x: 0,
 		y: 0,
@@ -72,7 +73,7 @@ export const st = $state({
 		},
 		JSON.parse(localStorage.getItem("keysList") ?? "{}") as object,
 	),
-	chatLines: [] as { text: string; source: string; author: string }[]
+	chatLines: [] as { text: string; source: string; author: string }[],
 });
 
 declare global {

@@ -699,6 +699,11 @@ div {
 	font-size: 17px;
 }
 
+button:disabled {
+	filter: brightness(0.9);
+	cursor: not-allowed !important;
+}
+
 #settingsButton {
 	cursor: pointer;
 	position: relative;

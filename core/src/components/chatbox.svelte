@@ -36,10 +36,10 @@
 		} else {
 			st.chatLines.push({ text, source: st.player.team === type ? "blue" : "red", author });
 		}
-        // arbitrary, so the DOM doesn't grow forever
-        if (st.chatLines.length >= 20) {
-            st.chatLines.shift();
-        }
+		// arbitrary, so the DOM doesn't grow forever
+		if (st.chatLines.length >= 20) {
+			st.chatLines.shift();
+		}
 	}
 </script>
 <ul id="chatList" class="chat-list">
