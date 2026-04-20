@@ -5,7 +5,8 @@
 	"linter": {
 		"rules": {
 			"style": {
-				"useConst": "off"
+				"useConst": "off",
+				"noNonNullAssertion": "off"
 			},
 			"suspicious": {
 				// "noVar": "warn",
