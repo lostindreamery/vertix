@@ -1,7 +1,10 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
 import { mount } from "svelte";
+import ActionBar from "./components/actionBar.svelte";
+import Chatbox from "./components/chatbox.svelte";
 import RoomList from "./components/roomList.svelte";
+import StartMenu from "./components/startMenu.svelte";
 import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
@@ -38,9 +41,6 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
-import ActionBar from "./components/actionBar.svelte";
-import Chatbox from "./components/chatbox.svelte";
-import StartMenu from "./components/startMenu.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
@@ -62,7 +62,6 @@ const { addChatLine } = mount(Chatbox, {
 	target: document.getElementById("chatbox")!,
 });
 
-let playerName: string | undefined;
 var playerClassIndex: number | undefined;
 var socket: Socket = undefined as any as Socket; // O_O
 var reason: string | undefined;
@@ -156,36 +155,11 @@ var userEmailInput = document.getElementById("emailInput")! as HTMLInputElement;
 var userPassInput = document.getElementById("passwordInput")! as HTMLInputElement;
 var loginUserNm = "";
 var loginUserPs = "";
-var settings = document.getElementById("settings")!;
-var controls = document.getElementById("controls")!;
 var lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
 var serverKeyTxt = document.getElementById("serverKeyTxt")!;
-
-let dropUpLinksCount = 5;
-let activeIndex = -1;
-Array.from(document.getElementsByClassName("dropUpLink") as HTMLCollectionOf<HTMLElement>).map(
-	(elem) =>
-		elem.addEventListener("click", () => {
-			clickDropUpLink(Number.parseInt(elem.attributes.getNamedItem("data-drop-idx")!.value));
-		}),
-);
-function clickDropUpLink(index: number) {
-	for (let i = 0; i < dropUpLinksCount; ++i) {
-		const tmpIndex = i + 1;
-		if (tmpIndex === index && activeIndex !== index) {
-			activeIndex = index;
-			document.getElementById(`di${tmpIndex}`)!.style.opacity = "1";
-			document.getElementById(`di${tmpIndex}`)!.style.pointerEvents = "auto";
-		} else {
-			document.getElementById(`di${tmpIndex}`)!.style.opacity = "0";
-			document.getElementById(`di${tmpIndex}`)!.style.pointerEvents = "none";
-			if (tmpIndex === index) activeIndex = -1;
-		}
-	}
-}
 
 function startLogin() {
 	if (!socket) return;
