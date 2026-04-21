@@ -1,6 +1,6 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
-import { mount } from "svelte";
+import { flushSync, mount } from "svelte";
 import ActionBar from "./components/actionBar.svelte";
 import Chatbox from "./components/chatbox.svelte";
 import RoomList from "./components/roomList.svelte";
@@ -61,6 +61,7 @@ mount(ActionBar, {
 const { addChatLine } = mount(Chatbox, {
 	target: document.getElementById("chatbox")!,
 });
+flushSync();
 
 var playerClassIndex: number | undefined;
 var socket: Socket = undefined as any as Socket; // O_O
