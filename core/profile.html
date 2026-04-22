@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Vertix Social</title>
+		<link rel="stylesheet" href="./assets/social.css">
+		<link rel="shortcut icon" type="image/png" href="./assets/favicon.png">
+        <!-- <script src="https://apis.google.com/js/platform.js"></script> -->
+	</head>
+	<body>
+		<nav>
+			<ul id="n" class="clearfix">
+				<li><a target="_blank" href="/">Play</a></li>
+				<li class="sel"><a href="#">Profile</a></li>
+				<li><a href="#">Achievements</a></li>
+				<li><a href="#">Clans</a></li>
+				<li><a href="./leaderboards.html">Leaderboards</a></li>
+				<li><a href="#">Find Friends</a></li>
+				<li><a href="./donate.html">Donate</a></li>
+			</ul>
+		</nav>
+
+		<div id="content" class="clearfix">
+			<section id="left">
+				<div id="userStats" class="clearfix">
+					<div class="pic">
+						<a href="#"><img id="userProfileImg" width="102px" height="102px"></a>
+					</div>
+					<div class="data">
+						<h1 id="userName">Loading...</h1>
+						<h3 id="userClanName"></h3>
+						<ul class="numbers clearfix">
+							<li>World<strong id="userWorldRank">...</strong></li>
+							<li>Rank<strong id="userRank">...</strong></li>
+							<li>KDR<strong id="userKDR">...</strong></li>
+							<li>Kills<strong id="userKills">...</strong></li>
+							<li>Deaths<strong id="userDeaths">...</strong></li>
+							<li>Score<strong id="userScore">...</strong></li>
+							<li>Hats<strong id="userHats">...</strong></li>
+							<li class="nobrdr">Likes<strong id="userLikes">...</strong></li>
+						</ul>
+					</div>
+					<div id="twitterContainer"></div>
+					<div id="youtubeContainer"><div id="youtuberReplace"></div></div>
+				</div>
+				<h1 id="serverMessage"></h1>
+			</section>
+			<section id="right">
+				<div class="gcontent">
+					<div class="head"><h1>Achievements (0)</h1></div>
+					<div class="boxy">
+						<p>Coming Soon...</p>
+					</div>
+				</div>
+				<div class="gcontent">
+					<div class="head"><h1>Friends (0)</h1></div>
+					<div class="boxy">
+						<p>Coming Soon...</p>
+					</div>
+				</div>
+			</section>
+		</div>
+		<!-- <script>
+			window.twttr = (function (d, s, id) {
+				var js,
+					fjs = d.getElementsByTagName(s)[0],
+					t = window.twttr || {};
+				if (d.getElementById(id)) return t;
+				js = d.createElement(s);
+				js.id = id;
+				js.src = "https://platform.twitter.com/widgets.js";
+				fjs.parentNode.insertBefore(js, fjs);
+
+				t._e = [];
+				t.ready = function (f) {
+					t._e.push(f);
+				};
+
+				return t;
+			})(document, "script", "twitter-wjs");
+		</script> -->
+		<script src="./src/stats.ts"></script>
+	</body>
+</html>

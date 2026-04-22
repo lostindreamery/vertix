@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Vertix Social</title>
+		<link rel="stylesheet" href="./assets/social.css">
+		<link rel="shortcut icon" type="image/png" href="./assets/favicon.png">
+	</head>
+	<body>
+		<nav>
+			<ul id="n" class="clearfix">
+				<li><a target="_blank" href="/">Play</a></li>
+				<li><a href="#">Profile</a></li>
+				<li><a href="#">Achievements</a></li>
+				<li><a href="#">Clans</a></li>
+				<li class="sel"><a href="./leaderboards.html">Leaderboards</a></li>
+				<li><a href="#">Find Friends</a></li>
+				<li><a href="./donate.html">Donate</a></li>
+			</ul>
+		</nav>
+		<div id="content" class="clearfix">
+			<section id="left">
+				<div class="contentCard">
+					<div style="color:#969696;font-size:22px;padding:10px;font-size:25px;margin-top:5px;">
+						<b>Leaderboards</b>
+					</div>
+					<div id="rankButton" onclick="toggleLeaderboardDisplay('rank');" class="changeLeaderbordButton activeButton">
+						<b>Rank</b>
+					</div>
+					<div id="kdr2Button" onclick="toggleLeaderboardDisplay('kdr2');" class="changeLeaderbordButton">
+						<b>KDR (1000+)</b>
+					</div>
+					<div id="kdrButton" onclick="toggleLeaderboardDisplay('kdr');" class="changeLeaderbordButton">
+						<b>KDR (Any)</b>
+					</div>
+					<div id="killsButton" onclick="toggleLeaderboardDisplay('kills');" class="changeLeaderbordButton">
+						<b>Kills</b>
+					</div>
+					<div id="clnRankButton" onclick="toggleLeaderboardDisplay('clnRank');" class="changeLeaderbordButton">
+						<b>Clans (Rank)</b>
+					</div>
+					<div id="clnKdrButton" onclick="toggleLeaderboardDisplay('clnKdr');" class="changeLeaderbordButton">
+						<b>Clans (KDR)</b>
+					</div>
+
+					<div id="rankLeaderboard" class="leaderboardContainer">
+						<div class="leaderMessage"><b>Loading...</b></div>
+					</div>
+					<div id="kdrLeaderboard" style="display:none" class="leaderboardContainer">
+						<div class="leaderMessage"><b>Loading...</b></div>
+					</div>
+					<div id="kdr2Leaderboard" style="display:none" class="leaderboardContainer">
+						<div class="leaderMessage"><b>Loading...</b></div>
+					</div>
+					<div id="killsLeaderboard" style="display:none" class="leaderboardContainer">
+						<div class="leaderMessage"><b>Loading...</b></div>
+					</div>
+					<div id="clnRankLeaderboard" style="display:none" class="leaderboardContainer">
+						<div class="leaderMessage"><b>Loading...</b></div>
+					</div>
+					<div id="clnKdrLeaderboard" style="display:none" class="leaderboardContainer">
+						<div class="leaderMessage"><b>Loading...</b></div>
+					</div>
+				</div>
+			</section>
+		</div>
+		<script src="./src/leaderboards.ts" type="module"></script>
+	</body>
+</html>

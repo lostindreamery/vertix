@@ -31,7 +31,7 @@
 <br>
 <button type="button" id="startButton" onclick={() => startGame()}>ENTER GAME</button>
 
-<button type="button" disabled id="leaderButton" onclick={() => window.open("/leaderboards.html", "_blank")}>
+<button type="button" id="leaderButton" onclick={() => window.open("/leaderboards.html", "_blank")}>
 	LEADERBOARDS
 </button>
 
