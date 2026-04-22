@@ -75,9 +75,7 @@ var oldTime = Date.now();
 var count = -1;
 var clientPrediction = true;
 var inputNumber = 0;
-var clientSpeed = 12;
 var thisInput: InputSendData[] = [];
-var timeOfLastUpdate = 0;
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 	st.mobile = true;
@@ -116,8 +114,6 @@ async function startGame() {
 var devTest = false;
 function enterGame() {
 	startSoundTrack(2);
-	screenWidth = window.innerWidth;
-	screenHeight = window.innerHeight;
 	document.getElementById("startMenuWrapper")!.style.display = "none";
 	if (!st.room) {
 		socket.emit("create");
@@ -499,8 +495,6 @@ function updateClanPage(clanData: any) {
 function showUserStatPage(userName: string) {
 	window.open(`/profile.html?${userName}`, "_blank");
 }
-var screenWidth = window.innerWidth;
-var screenHeight = window.innerHeight;
 var gameWidth = 0;
 var gameHeight = 0;
 var uiScale = 1;
@@ -535,8 +529,8 @@ var reenviar = true;
 var directionLock = false;
 var directions = [];
 var mainCanvas = document.getElementById("cvs")! as HTMLCanvasElement;
-mainCanvas.width = screenWidth;
-mainCanvas.height = screenHeight;
+mainCanvas.width = window.innerWidth;
+mainCanvas.height = window.innerHeight;
 mainCanvas.addEventListener("mousemove", gameInput, false);
 mainCanvas.addEventListener("mousedown", mouseDown, false);
 mainCanvas.addEventListener("drag", mouseDown, false);
@@ -557,10 +551,10 @@ function gameInput(event: MouseEvent) {
 	lastAngle = target.f;
 	lastDist = target.d;
 	target.d = Math.sqrt(
-		(mouseY - (screenHeight / 2 - b / 2)) ** 2 + (mouseX - screenWidth / 2) ** 2,
+		(mouseY - (window.innerHeight / 2 - b / 2)) ** 2 + (mouseX - window.innerWidth / 2) ** 2,
 	);
-	target.d *= Math.min(st.maxScreenWidth / screenWidth, st.maxScreenHeight / screenHeight);
-	target.f = Math.atan2(screenHeight / 2 - b / 2 - mouseY, screenWidth / 2 - mouseX);
+	target.d *= Math.min(st.maxScreenWidth / window.innerWidth, st.maxScreenHeight / window.innerHeight);
+	target.f = Math.atan2(window.innerHeight / 2 - b / 2 - mouseY, window.innerWidth / 2 - mouseX);
 	target.f = utils.roundNumber(target.f, 2);
 	target.d = utils.roundNumber(target.d, 2);
 	target.dOffset = utils.roundNumber(target.d / 4, 1);
@@ -1709,7 +1703,6 @@ function fetchUserWithIndex(a: number) {
 	socket.emit("ftc", a);
 }
 function receiveServerData(data: number[]) {
-	timeOfLastUpdate = Date.now();
 	if (!st.gameOver) {
 		players.forEach((obj) => {
 			obj.onScreen = false;
@@ -2341,7 +2334,7 @@ function updateGameLoop() {
 	if (disconnected || st.kicked) {
 		drawOverlay(graph, false, false);
 		const renderedReason = st.kicked
-			? !!reason
+			? reason
 				? renderShadedAnimText(reason, st.viewMult * 48, "#ffffff", 6, "")
 				: renderShadedAnimText("You were kicked", st.viewMult * 48, "#ffffff", 6, "")
 			: renderShadedAnimText("Disconnected", st.viewMult * 48, "#ffffff", 6, "");
@@ -2446,19 +2439,17 @@ function doGame(delta: number) {
 }
 window.addEventListener("resize", resize);
 function resize() {
-	screenWidth = Math.round(window.innerWidth);
-	screenHeight = Math.round(window.innerHeight);
 	calculateUIScale();
-	var a = Math.max(screenWidth / st.maxScreenWidth, screenHeight / st.maxScreenHeight);
-	mainCanvas.width = screenWidth;
-	mainCanvas.height = screenHeight;
+	var a = Math.max(window.innerWidth / st.maxScreenWidth, window.innerHeight / st.maxScreenHeight);
+	mainCanvas.width = window.innerWidth;
+	mainCanvas.height = window.innerHeight;
 	graph.setTransform(
 		a,
 		0,
 		0,
 		a,
-		(screenWidth - st.maxScreenWidth * a) / 2,
-		(screenHeight - st.maxScreenHeight * a) / 2,
+		(window.innerWidth - st.maxScreenWidth * a) / 2,
+		(window.innerHeight - st.maxScreenHeight * a) / 2,
 	);
 	document.getElementById("startMenuWrapper")!.style.transform =
 		`perspective(1px) translate(-50%, -50%) scale(${uiScale})`;
@@ -2528,8 +2519,7 @@ function drawGameLights(delta: number) {
 var mapScale = mapCanvas.width;
 var pingScale = mapScale / 80;
 mapContext.lineWidth = pingScale / 2;
-var pingFade = 0.085;
-var pingGrow = 0.4;
+
 var cachedMiniMap: HTMLCanvasElement | null = null;
 function getCachedMiniMap() {
 	fillCounter++;
@@ -2619,7 +2609,7 @@ function drawMiniMap() {
 	}
 }
 function calculateUIScale() {
-	uiScale = ((screenHeight + screenWidth) / (1920 + 1080)) * 1.25;
+	uiScale = ((window.innerHeight + window.innerWidth) / (1920 + 1080)) * 1.25;
 }
 function drawMenuBackground() {}
 function drawUI() {}
