@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from "svelte";
 	import { st } from "../state.svelte.ts";
 
 	const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
@@ -7,9 +8,9 @@
 	function changeChatType() {
 		// swap
 		currentChatType = currentChatType === "ALL" ? "TEAM" : "ALL";
-		setTimeout(() => {
+		tick().then(() => {
 			mainCanvas.focus();
-		}, 0);
+		});
 	}
 
 	function sendChat(this: HTMLInputElement, event: KeyboardEvent) {
@@ -23,9 +24,9 @@
 				st.player.team,
 			);
 			this.value = "";
-			setTimeout(() => {
+			tick().then(() => {
 				mainCanvas.focus();
-			}, 0);
+			});
 		}
 	}
 	export function addChatLine(author: string, text: string, fromSelf: boolean, type: string) {
@@ -41,14 +42,25 @@
 			st.chatLines.shift();
 		}
 	}
+	function nameColorFromSource(source: string) {
+		if (source === "red") {
+			return "#d95151";
+		} else if (source === "blue") {
+			return "#5151d9";
+		} else if (source === "system") {
+			return "#db4fcd";
+		} else if (source === "me" || source === "notif") {
+			return "#fff";
+		}
+	}
 </script>
 <ul id="chatList" class="chat-list">
 	{#each st.chatLines.toReversed() as line}
-		<li class={line.source}>
+		<li>
 			{#if line.source === "system" || line.source === "notif"}
-				<span>{line.text}</span>
+				<span style:color={nameColorFromSource(line.source)}>{line.text}</span>
 			{:else}
-				<span>{line.source === "me" ? "YOU" : line.author}: </span>
+				<span style:color={nameColorFromSource(line.source)}>{line.source === "me" ? "YOU" : line.author}: </span>
 				<div style="display: inline-block">{line.text}</div>
 			{/if}
 		</li>

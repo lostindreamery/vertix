@@ -1188,7 +1188,7 @@ function setupSocket(sock: Socket) {
 			window.setTimeout(() => {
 				if (!st.gameOver) {
 					document.getElementById("startMenuWrapper")!.style.display = "block";
-					document.getElementById("linkBox")!.style.display = "block";
+					document.getElementById("linkBoxRight")!.style.display = "block";
 				}
 			}, 1300);
 			playSound("death1", st.player.x, st.player.y);
@@ -1460,7 +1460,7 @@ function hideStatTable() {
 	animateOverlay = true;
 	drawOverlay(graph, false, true);
 	document.getElementById("gameStatWrapper")!.style.display = "none";
-	document.getElementById("linkBox")!.style.display = "none";
+	document.getElementById("linkBoxRight")!.style.display = "none";
 }
 type StatTableRow = {
 	text: string | number;
@@ -2149,8 +2149,8 @@ function showUI() {
 	}
 }
 function hideMenuUI() {
-	document.getElementById("namesBox")!.style.display = "none";
-	document.getElementById("linkBox")!.style.display = "none";
+	document.getElementById("linkBoxLeft")!.style.display = "none";
+	document.getElementById("linkBoxRight")!.style.display = "none";
 }
 function hideUI(hideChatbox: boolean) {
 	document.getElementById("status")!.style.display = "none";
@@ -2904,8 +2904,8 @@ async function joinRoom(roomName: string) {
 	});
 	inMainMenu = true;
 	hideUI(true);
-	document.getElementById("namesBox")!.style.display = "block";
-	document.getElementById("linkBox")!.style.display = "block";
+	document.getElementById("linkBoxLeft")!.style.display = "block";
+	document.getElementById("linkBoxRight")!.style.display = "block";
 	socket.removeListener("disconnect");
 	socket.once("disconnect", () => {
 		socket.close();
