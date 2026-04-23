@@ -161,14 +161,6 @@ div {
 	padding: 2px;
 }
 
-#grayText {
-	color: rgba(0, 0, 0, 0.6);
-}
-
-#smlLineSpace {
-	height: 10px;
-}
-
 #statContainer2 {
 	top: 10px;
 	left: 10px;
@@ -183,14 +175,6 @@ div {
 	width: 200px;
 	top: 10px;
 	color: #ffd100;
-}
-
-#googlePlayImg {
-	position: absolute;
-	height: 60px;
-	bottom: 30px;
-	left: 0px;
-	cursor: pointer;
 }
 
 .rewardText {
@@ -274,51 +258,6 @@ div {
 	bottom: 15px;
 	left: 10px;
 	pointer-events: none;
-}
-
-.chatbox .chat-list {
-	position: relative;
-	list-style: none;
-	display: flex;
-	flex-direction: column-reverse;
-	width: 250px;
-	height: 260px;
-	overflow: hidden;
-	margin: 0px;
-	padding: 8px;
-	color: rgba(255, 255, 255, 0.7);
-	font-size: 16px;
-	-webkit-user-select: text;
-	user-select: text;
-}
-
-.chatbox li {
-	padding: 2px;
-	margin: 3px;
-	word-wrap: break-word;
-}
-
-.chatbox .chat-input {
-	position: relative;
-	pointer-events: auto;
-	width: 250px;
-	padding: 8px;
-	color: #fff;
-	border: none;
-	font-size: 14px;
-	background: rgba(0, 0, 0, 0.2);
-	display: inline-block;
-}
-
-#chatType {
-	display: inline-block;
-	font-size: 14px;
-	pointer-events: auto;
-	margin-left: 5px;
-	background: rgba(0, 0, 0, 0.2);
-	padding: 8px;
-	color: #fff;
-	cursor: pointer;
 }
 
 #teamProgress {
@@ -514,27 +453,6 @@ div {
 	margin-bottom: 10px;
 }
 
-#playerNameInput {
-	width: 100%;
-	text-align: center;
-	padding: 10px;
-	border: solid 1px #dcdcdc;
-	transition:
-		box-shadow 0.3s,
-		border 0.3s;
-	box-sizing: border-box;
-	border-radius: 1px;
-	font-size: 14px;
-	margin-bottom: 10px;
-	outline: none;
-}
-
-#playerNameInput:focus,
-#playerNameInput.focus {
-	border: solid 1px #cccccc;
-	box-shadow: 0 0 3px 1px #dddddd;
-}
-
 #loginWrapper {
 	width: 300px;
 }
@@ -620,19 +538,6 @@ div {
 	overflow-x: hidden;
 }
 
-.inputSelectItem {
-	display: inline-block;
-	font-size: 12px;
-	padding: 5px;
-	cursor: pointer;
-	position: relative;
-}
-
-.inputSelectItem:hover {
-	background: rgba(0, 0, 0, 0.1);
-	font-size: 14px;
-}
-
 .hatSelectItem {
 	font-size: 12px;
 	padding: 5px;
@@ -653,44 +558,10 @@ div {
 	font-size: 14px;
 }
 
-#startButton,
-#leaderButton,
-#compButton {
-	cursor: pointer;
-	position: relative;
-	margin: auto;
-	margin-top: 10px;
-	width: 100%;
-	height: 41px;
-	box-sizing: border-box;
-	text-align: center;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-	background: #76b3e3;
-	border: 0;
-	box-shadow: inset 0 -3px #6fa9d6;
-	border-radius: 1px;
-	margin-bottom: 10px;
-	font-size: 15px;
-	color: rgba(255, 255, 255, 1);
-}
-
-#leaderButton:active,
-#leaderButton:hover,
-#startButton:active,
-#startButton:hover,
-#compButton:hover,
-#compButton:active {
-	top: 1px;
-	background: #6fa9d6;
-	outline: none;
-	box-shadow: none;
-	font-size: 17px;
-}
-
-button:disabled {
+/* button:disabled {
 	filter: brightness(0.9);
 	cursor: not-allowed !important;
-}
+} */
 
 #settingsButton {
 	cursor: pointer;
@@ -733,19 +604,9 @@ button:disabled {
 	overflow: hidden;
 }
 
-#socialContainer {
-	margin-bottom: 5px;
-	display: inline-block;
-}
-
 #likeButton {
 	position: relative;
 	top: -4px;
-}
-
-#settings {
-	max-height: 0;
-	overflow-y: scroll;
 }
 
 #leaderboardWrapper {
@@ -753,42 +614,6 @@ button:disabled {
 	overflow-y: scroll;
 	color: rgba(0, 0, 0, 0.3);
 	line-height: 220%;
-}
-
-#instructionButton {
-	cursor: pointer;
-	position: relative;
-	margin: auto;
-	margin-top: 10px;
-	width: 100%;
-	height: 41px;
-	box-sizing: border-box;
-	text-align: center;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-	background: #76b3e3;
-	border: 0;
-	box-shadow: inset 0 -3px #6fa9d6;
-	border-radius: 1px;
-	margin-bottom: 10px;
-	font-size: 15px;
-	color: rgba(255, 255, 255, 1);
-}
-
-#instructionButton:active,
-#instructionButton:hover {
-	top: 1px;
-	background: #6fa9d6;
-	outline: none;
-	box-shadow: none;
-	font-size: 17px;
-}
-
-#controls {
-	transition: max-height 0.2s;
-	overflow-y: scroll;
-	line-height: 200%;
-	margin-bottom: 10px;
-	max-height: 0;
 }
 
 .smallMenuButton {
@@ -1082,18 +907,6 @@ button:disabled {
 	filter: blur(0);
 }
 
-.menuHeader {
-	margin-top: 0px;
-	margin-bottom: 10px;
-}
-
-.html-marquee {
-	width: 100%;
-	font-size: 14px;
-	margin-bottom: -8px;
-	color: #2e3031;
-}
-
 #mobileMessage {
 	z-index: 5;
 	font-size: 18px;
@@ -1173,11 +986,6 @@ button:disabled {
 	box-shadow: inset 0 -5px #e0e0e0;
 }
 
-#noAdText {
-	font-size: 14px;
-	color: rgba(0, 0, 0, 0.4);
-}
-
 #linkBoxRight {
 	font-size: 14px;
 	color: #2e3031;
@@ -1190,11 +998,6 @@ button:disabled {
 	padding: 5px 10px;
 	box-sizing: border-box;
 	text-align: center;
-}
-
-#bannerAdContainer {
-	text-align: center;
-	pointer-events: all;
 }
 
 #modInfo {
@@ -1266,13 +1069,4 @@ ul.tab li {
 
 #clanRoster {
 	padding-left: 10px;
-}
-
-ul.share-buttons {
-	list-style: none;
-	padding: 0;
-}
-
-ul.share-buttons li {
-	display: inline;
 }

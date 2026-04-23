@@ -3,14 +3,14 @@
 	import { st } from "../state.svelte.ts";
 
 	const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
+	const refocusCanvas = () => tick().then(() => mainCanvas.focus());
+
 
 	let currentChatType = $state("ALL");
 	function changeChatType() {
 		// swap
 		currentChatType = currentChatType === "ALL" ? "TEAM" : "ALL";
-		tick().then(() => {
-			mainCanvas.focus();
-		});
+		refocusCanvas();
 	}
 
 	function sendChat(this: HTMLInputElement, event: KeyboardEvent) {
@@ -24,44 +24,34 @@
 				st.player.team,
 			);
 			this.value = "";
-			tick().then(() => {
-				mainCanvas.focus();
-			});
+			refocusCanvas();
 		}
 	}
 	export function addChatLine(author: string, text: string, fromSelf: boolean, type: string) {
-		if (type === "system" || type === "notif") {
-			st.chatLines.push({ text, source: type, author });
-		} else if (fromSelf) {
-			st.chatLines.push({ text, source: "me", author });
-		} else {
-			st.chatLines.push({ text, source: st.player.team === type ? "blue" : "red", author });
-		}
+		const source =
+			type === "system" || type === "notif" ? type : fromSelf ? "me" : st.player.team === type ? "blue" : "red";
+
+		st.chatLines.push({ text, source, author });
+
 		// arbitrary, so the DOM doesn't grow forever
-		if (st.chatLines.length >= 20) {
-			st.chatLines.shift();
-		}
+		if (st.chatLines.length >= 20) st.chatLines.shift();
 	}
-	function nameColorFromSource(source: string) {
-		if (source === "red") {
-			return "#d95151";
-		} else if (source === "blue") {
-			return "#5151d9";
-		} else if (source === "system") {
-			return "#db4fcd";
-		} else if (source === "me" || source === "notif") {
-			return "#fff";
-		}
-	}
+	const SOURCE_COLORS = {
+		red: "#d95151",
+		blue: "#5151d9",
+		system: "#db4fcd",
+		me: "#fff",
+		notif: "#fff",
+	};
 </script>
-<ul id="chatList" class="chat-list">
+<ul id="chatList">
 	{#each st.chatLines.toReversed() as line}
 		<li>
 			{#if line.source === "system" || line.source === "notif"}
-				<span style:color={nameColorFromSource(line.source)}>{line.text}</span>
+				<span style:color={SOURCE_COLORS[line.source]}>{line.text}</span>
 			{:else}
-				<span style:color={nameColorFromSource(line.source)}>{line.source === "me" ? "YOU" : line.author}: </span>
-				<div style="display: inline-block">{line.text}</div>
+				<span style:color={SOURCE_COLORS[line.source]}>{line.source === "me" ? "YOU" : line.author}: </span>
+				<span>{line.text}</span>
 			{/if}
 		</li>
 	{/each}
@@ -70,10 +60,52 @@
 	<input
 		id="chatInput"
 		type="text"
-		class="chat-input"
+		class="chat-control"
 		placeholder="Send Message..."
 		maxlength="50"
 		onkeydown={sendChat}
 	>
-	<div id="chatType" onclick={changeChatType}>{currentChatType}</div>
+	<div id="chatType" class="chat-control" onclick={changeChatType}>{currentChatType}</div>
 </div>
+
+<style>
+	li {
+		padding: 2px;
+		margin: 3px;
+		word-wrap: break-word;
+	}
+
+	#chatList {
+		list-style: none;
+		display: flex;
+		flex-direction: column-reverse;
+		width: 250px;
+		height: 260px;
+		overflow: hidden;
+		margin: 0;
+		padding: 8px;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 16px;
+		-webkit-user-select: text;
+		user-select: text;
+	}
+
+	.chat-control {
+		display: inline-block;
+		font-size: 14px;
+		pointer-events: auto;
+		background: rgba(0, 0, 0, 0.2);
+		padding: 8px;
+		color: #fff;
+		border: none;
+	}
+
+	#chatInput {
+		width: 250px;
+	}
+
+	#chatType {
+		margin-left: 5px;
+		cursor: pointer;
+	}
+</style>

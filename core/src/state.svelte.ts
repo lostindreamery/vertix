@@ -73,7 +73,11 @@ export const st = $state({
 		},
 		JSON.parse(localStorage.getItem("keysList") ?? "{}") as object,
 	),
-	chatLines: [] as { text: string; source: string; author: string }[],
+	chatLines: [] as {
+		text: string;
+		source: "system" | "notif" | "me" | "blue" | "red";
+		author: string;
+	}[],
 });
 
 declare global {

@@ -45,6 +45,10 @@
 		box-sizing: border-box;
 		font-size: 12px;
 	}
+	.menuHeader {
+		margin-top: 0px;
+		margin-bottom: 10px;
+	}
 
 	#roomSelector {
 		max-height: 265px;
