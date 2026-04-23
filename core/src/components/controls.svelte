@@ -3,7 +3,7 @@
 
 	$effect(() => {
 		// don't save if the user is in the middle of selecting a new keybind
-		if (Object.values(st.keysList).includes(null)) return;
+		if (Object.values(st.keysList).includes(null!)) return;
 
 		localStorage.setItem("keysList", JSON.stringify(st.keysList));
 	});
@@ -25,7 +25,7 @@
 	}
 
 	function getKeyInput(control: keyof typeof st.keysList) {
-		st.keysList[control] = null;
+		st.keysList[control] = null!;
 		document.addEventListener(
 			"keydown",
 			(event) => {
