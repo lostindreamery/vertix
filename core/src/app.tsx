@@ -55,7 +55,7 @@ mount(RoomList, {
 	target: document.getElementById("roomWrapper")!,
 	props: { joinRoom },
 });
-mount(ActionBar, {
+const { setCooldownAnimation } = mount(ActionBar, {
 	target: document.getElementById("actionBar")!,
 });
 const { addChatLine } = mount(Chatbox, {
@@ -2735,18 +2735,6 @@ function playerSwapWeapon(tmpPlayer: Player, change: number) {
 }
 function playerEquipWeapon(tmpPlayer: Player, weaponId: number) {
 	tmpPlayer.currentWeapon = weaponId;
-}
-function setCooldownAnimation(weaponIdx: number, time: number, d: boolean) {
-	// for some reason, the action cooldown elements sometimes aren't created?
-	if (!document.getElementById(`actionCooldown${weaponIdx}`)) {
-		updateUiStats(st.player);
-	}
-	const tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`)!;
-	if (d) {
-		tmpDiv.animate({ height: ["100%", "0%"] }, time);
-	} else {
-		tmpDiv.style.height = "0%";
-	}
 }
 function shootBullet(source: Player) {
 	let sourceWep = getCurrentWeapon(source);

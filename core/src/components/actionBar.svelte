@@ -1,15 +1,23 @@
 <script lang="ts">
 	import { st } from "../state.svelte.ts";
+
+	const cooldownMap: Record<number, HTMLElement> = {};
+
+	export function setCooldownAnimation(weaponIdx: number, time: number, play: boolean) {
+		const tmpDiv = cooldownMap[weaponIdx];
+		if (play) {
+			tmpDiv.animate({ height: ["100%", "0%"] }, time);
+		} else {
+			tmpDiv.style.height = "0%";
+		}
+	}
 </script>
 {#if st.sprites.weapons[0] && st.player.weapons}
 	{#each st.player.weapons as weapon, idx}
 		{@const icon = st.sprites.weapons[weapon.weaponIndex].icon}
-		<div
-			id={`actionContainer${idx}`}
-			class={idx === st.player.currentWeapon ? "actionContainerActive" : "actionContainer"}
-		>
+		<div class={idx === st.player.currentWeapon ? "actionContainerActive" : "actionContainer"}>
 			{#if icon}
-				<div id={`actionCooldown${idx}`} class="actionCooldown"></div>
+				<div bind:this={cooldownMap[idx]} class="actionCooldown"></div>
 				<img src={icon.src} class="actionItem">
 			{/if}
 		</div>
