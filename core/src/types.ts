@@ -39,6 +39,7 @@ export type Player = {
 	team: string;
 	isBoss: boolean;
 	loggedIn?: boolean;
+	socketId?: string;
 	likes?: number;
 	totalDamage: number;
 	totalHealing: number;
