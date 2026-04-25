@@ -34,6 +34,7 @@ export class Room {
 	handleSocket() {
 		this.io.on("connection", (socket: Socket) => {
 			let player = this.game.newPlayer();
+			player.socketId = socket.id;
 			console.log(`${player.name} joined ${player.room}`);
 
 			socket.emit("yourRoom", `${this.name}`, `${this.name}`);
@@ -267,7 +268,6 @@ export class Room {
 				);
 			});
 			socket.on("cht", (msg, type) => {
-				// TODO: implement team-only messages
 				if (msg.includes("!sync")) {
 					this.io.emit(
 						"rsd",
@@ -282,7 +282,15 @@ export class Room {
 					socket.emit("cht", [-1, "synced"]);
 					return;
 				}
-				this.io.emit("cht", [player.index, msg]);
+				if (type === "TEAM" && this.game.mode.teams) {
+					for (let pl of this.game.players) {
+						if (pl.team === player.team && pl.socketId) {
+							this.io.to(pl.socketId).emit("cht", [player.index, "(TEAM) " + msg]);
+						}
+					}
+				} else {
+					this.io.emit("cht", [player.index, msg]);
+				}
 			});
 			socket.on("modeVote", (i) => {
 				let vote = this.game.modeVotes[i];
