@@ -37,7 +37,7 @@ export class Room {
 			player.socketId = socket.id;
 			console.log(`${player.name} joined ${player.room}`);
 
-			socket.emit("yourRoom", `${this.name}`, `${this.name}`);
+			socket.emit("yourRoom", `${this.name}`);
 			socket.emit(
 				"welcome",
 				{

@@ -14,7 +14,6 @@ import type {
 	Account,
 	ClutterObject,
 	GameMode,
-	GenData,
 	InputSendData,
 	Player,
 	ShootEvent,
@@ -172,7 +171,6 @@ var lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
-var serverKeyTxt = document.getElementById("serverKeyTxt")!;
 
 function startLogin() {
 	if (!socket) return;
@@ -185,38 +183,7 @@ function startLogin() {
 	loginMessage.style.display = "block";
 	loginMessage.textContent = "Please Wait...";
 }
-var customMap: GenData | null = null;
 
-(document.getElementById("customMapFile")! as HTMLInputElement).addEventListener(
-	"change",
-	function () {
-		clearCustomMap();
-		if (!this?.files?.[0]) return;
-		var name = this.value.split("\\");
-		document.getElementById("customMapButton")!.textContent = name[name.length - 1];
-		let reader = new FileReader();
-		reader.onload = (e) => {
-			const img = document.createElement("img");
-			img.onload = () => {
-				let tmpCanvas = document.createElement("canvas");
-				tmpCanvas.width = img.width;
-				tmpCanvas.height = img.height;
-				tmpCanvas.getContext("2d")!.drawImage(img, 0, 0, img.width, img.height);
-				customMap = {
-					width: img.width,
-					height: img.height,
-					data: tmpCanvas.getContext("2d")!.getImageData(0, 0, img.width, img.height).data,
-				};
-			};
-			img.src = e.target!.result as string;
-		};
-		reader.readAsDataURL(this.files[0]);
-	},
-);
-function clearCustomMap() {
-	customMap = null;
-	document.getElementById("customMapButton")!.textContent = "Select Map";
-}
 
 window.onload = async () => {
 	if (st.mobile) {
@@ -326,23 +293,6 @@ window.onload = async () => {
 			});
 			clanChtMessage.style.display = "inline-block";
 			clanChtMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("createServerButton")!.onclick = () => {
-			var modes = [];
-			for (let i = 0; i < 9; ++i) {
-				if ((document.getElementById(`serverMode${i}`) as HTMLInputElement).checked) {
-					modes.push(i);
-				}
-			}
-			socket.emit("cSrv", {
-				srvPlayers: (document.getElementById("serverPlayers")! as HTMLInputElement).value,
-				srvHealthMult: (document.getElementById("serverHealthMult")! as HTMLInputElement).value,
-				srvSpeedMult: (document.getElementById("serverSpeedMult")! as HTMLInputElement).value,
-				srvPass: (document.getElementById("serverPass")! as HTMLInputElement).value,
-				srvMap: customMap,
-				srvClnWr: (document.getElementById("clanWarEnabled")! as HTMLInputElement).checked,
-				srvModes: modes,
-			});
 		};
 		document.getElementById("joinLobbyButton")!.onclick = () => {
 			if (changingLobby) return;
@@ -762,9 +712,8 @@ function setupSocket(sock: Socket) {
 		pingStart = Date.now();
 		sock.emit("ping1");
 	}, 2000);
-	sock.on("yourRoom", (a, d) => {
-		st.room = a;
-		serverKeyTxt.textContent = d;
+	sock.on("yourRoom", (roomName) => {
+		st.room = roomName;
 	});
 	sock.on("connect_failed", () => {
 		kickPlayer("Connection failed. Please check your internet connection.");
@@ -808,7 +757,6 @@ function setupSocket(sock: Socket) {
 	});
 	sock.on("cSrvRes", (a, d) => {
 		if (d) {
-			serverKeyTxt.textContent = a;
 			serverCreateMessage.textContent = `Success. Created server with IP: ${a}`;
 		} else {
 			serverCreateMessage.textContent = a;

@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { gameModes } from "../../gamemodes.ts";
 	import { st } from "../../state.svelte.ts";
-	import { getItemRarityColor } from "../../utils.ts";
+	import { getItemRarityColor, loadImageData } from "../../utils.ts";
 	import CosmeticTooltip from "./cosmeticTooltip.svelte";
 
 	let currentScreen:
@@ -64,16 +65,26 @@
 	$effect(() => {
 		st.socket?.emit("cSpray", st.loadout.spray ?? 1);
 	});
+
+	const createGameOpts = $state({
+		srvPlayers: 6,
+		srvHealthMult: 1,
+		srvSpeedMult: 1,
+		srvPass: "",
+		srvMap: null as { name: string; width: number; height: number; data: ImageDataArray } | null,
+		srvClnWr: false,
+		srvModes: [] as number[],
+	});
 </script>
-<div id="charSelectorCont" style:display={currentScreen === "main" ? "block" : "none"}>
+<div style:display={currentScreen === "main" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed2">LOADOUT</h3>
-	<div id="charClass">
+	<div>
 		<b>Class:</b>
-		<div class="hatSelectItem" id="currentClass" onclick={() => currentScreen = "class"} style="display:inline-block">
+		<div class="hatSelectItem" onclick={() => currentScreen = "class"} style="display:inline-block">
 			{st.loadout.class.classN}
 		</div>
 	</div>
-	<div id="charWpn" onclick={() => currentScreen = "primaryCamo"} style="margin-top:-5px;">
+	<div onclick={() => currentScreen = "primaryCamo"} style="margin-top:-5px;">
 		<b>Primary: </b>
 		<div
 			class="hatSelectItem"
@@ -83,7 +94,7 @@
 			{st.loadout.primaryCamo?.name ?? st.loadout.class.pWeapon}
 		</div>
 	</div>
-	<div id="charWpn2" onclick={() => currentScreen = "secondaryCamo"} style="margin-top:-5px;">
+	<div onclick={() => currentScreen = "secondaryCamo"} style="margin-top:-5px;">
 		<b>Secondary: </b>
 		<div
 			class="hatSelectItem"
@@ -93,11 +104,10 @@
 			{st.loadout.secondaryCamo?.name ?? st.loadout.class.sWeapon}
 		</div>
 	</div>
-	<div id="charHat" onclick={() => currentScreen = "hat"} style="margin-top:-5px;">
+	<div onclick={() => currentScreen = "hat"} style="margin-top:-5px;">
 		<b>Hat:</b>
 		<div
 			class="hatSelectItem"
-			id="currentHat"
 			style="display:inline-block"
 			style:color={st.loadout.hat ? getItemRarityColor(st.loadout.hat.chance) : undefined}
 		>
@@ -107,11 +117,10 @@
 			{/if}
 		</div>
 	</div>
-	<div id="charShirt" onclick={() => currentScreen = "shirt"} style="margin-top:-5px;">
+	<div onclick={() => currentScreen = "shirt"} style="margin-top:-5px;">
 		<b>Shirt:</b>
 		<div
 			class="hatSelectItem"
-			id="currentShirt"
 			style="display:inline-block"
 			style:color={st.loadout.shirt ? getItemRarityColor(st.loadout.shirt.chance) : undefined}
 		>
@@ -121,12 +130,9 @@
 			{/if}
 		</div>
 	</div>
-	<div id="charSpray" onclick={() => currentScreen = "spray"} style="margin-top:-5px;">
+	<div onclick={() => currentScreen = "spray"} style="margin-top:-5px;">
 		<b>Spray:</b>
-		<div class="hatSelectItem" id="currentSpray" style="display:inline-block">Strike</div>
-	</div>
-	<div style="display:none;">
-		<div class="hatSelectItem" id="openStore" style="display:inline-block">Enter Store</div>
+		<div class="hatSelectItem" style="display:inline-block">Strike</div>
 	</div>
 </div>
 
@@ -143,7 +149,7 @@
 	id="camoSelector"
 	style:display={currentScreen === "primaryCamo" || currentScreen === "secondaryCamo" ? "block" : "none"}
 >
-	<h3 class="menuHeaderTabbed" id="camoHeaderAmount">SELECT CAMO</h3>
+	<h3 class="menuHeaderTabbed">SELECT CAMO</h3>
 	<div id="camoList">
 		<div
 			class="hatSelectItem"
@@ -169,13 +175,12 @@
 </div>
 
 <div id="hatSelector" style:display={currentScreen === "hat" ? "block" : "none"}>
-	<h3 id="hatHeader" class="menuHeaderTabbed">SELECT HAT</h3>
+	<h3 class="menuHeaderTabbed">SELECT HAT</h3>
 	<div id="hatList">
 		{#if st.cosmetics.hats}
 			{#each st.cosmetics.hats as hat}
 				<div
 					class="hatSelectItem"
-					id={`hatItem${hat.id}`}
 					style:color={getItemRarityColor(hat.chance)}
 					onclick={() => {st.loadout.hat = hat; currentScreen = "main"}}
 				>
@@ -185,23 +190,18 @@
 				</div>
 			{/each}
 		{:else}
-			<div class="hatSelectItem" id="hatItem-1" onclick={() => {st.loadout.hat = null; currentScreen = "main"}}>
-				Default
-			</div>
+			<div class="hatSelectItem" onclick={() => {st.loadout.hat = null; currentScreen = "main"}}>Default</div>
 		{/if}
 	</div>
 </div>
 
 <div id="shirtSelector" style:display={currentScreen === "shirt" ? "block" : "none"}>
-	<h3 id="shirtHeader" class="menuHeaderTabbed">SELECT SHIRT</h3>
-	<div id="shirtList">
-		<div class="hatSelectItem" id="shirtItem-1" onclick={() => {st.loadout.shirt = null; currentScreen = "main"}}>
-			Default
-		</div>
+	<h3 class="menuHeaderTabbed">SELECT SHIRT</h3>
+	<div>
+		<div class="hatSelectItem" onclick={() => {st.loadout.shirt = null; currentScreen = "main"}}>Default</div>
 		{#each st.cosmetics.shirts as shirt}
 			<div
 				class="hatSelectItem"
-				id={`shirtItem${shirt.id}`}
 				style:color={getItemRarityColor(shirt.chance)}
 				onclick={() => {st.loadout.shirt = shirt; currentScreen = "main"}}
 			>
@@ -215,15 +215,13 @@
 
 <div id="spraySelector" style:display={currentScreen === "spray" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT SPRAY</h3>
-	<div id="sprayList">
+	<div>
 		<!-- tmp since we don't have spray data -->
-		<div class="hatSelectItem" id="sprayItem1" onclick={() => {st.loadout.spray = 1; currentScreen = "main"}}>
-			Strike
-		</div>
+		<div class="hatSelectItem" onclick={() => {st.loadout.spray = 1; currentScreen = "main"}}>Strike</div>
 	</div>
 </div>
 
-<div id="lobbySelector" style:display={currentScreen === "joinServer" ? "block" : "none"}>
+<div style:display={currentScreen === "joinServer" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed2">JOIN SERVER</h3>
 	<input class="menuTextInput" placeholder="Server IP" id="lobbyKey" maxlength="50" style="margin-top:10px;">
 	<input
@@ -248,54 +246,31 @@
 	</button>
 </div>
 
-<div id="lobbyCSelector" style:display={currentScreen === "createServer" ? "block" : "none"}>
+<div style:display={currentScreen === "createServer" ? "block" : "none"}>
 	<div id="createServerContainer">
 		<h3 class="menuHeaderTabbed2" style="margin-bottom:8px;">CREATE SERVER</h3>
 		<h1>Statistics will not be affected by games played in private servers.</h1>
 		<b>Gamemodes:</b>
 		<div style="margin-top:5px;margin-bottom:5px;">
-			<input id="serverMode0" type="checkbox">
-			Lootcrate
-			<br>
-			<input id="serverMode1" type="checkbox">
-			Hardpoint
-			<br>
-			<input id="serverMode2" type="checkbox">
-			Free for All
-			<br>
-			<input id="serverMode3" type="checkbox">
-			Boss Hunt
-			<br>
-			<input id="serverMode4" type="checkbox">
-			Sniper War
-			<br>
-			<input id="serverMode5" type="checkbox">
-			Team Deathmatch
-			<br>
-			<input id="serverMode6" type="checkbox">
-			Rocket War
-			<br>
-			<input id="serverMode7" type="checkbox">
-			Zone War
-			<br>
-			<input id="serverMode8" type="checkbox">
-			Pyro War
-			<br>
+			{#each gameModes as gameMode, idx}
+				<input type="checkbox" value={idx} bind:group={createGameOpts.srvModes}>
+				{gameMode.name}
+				<br>
+			{/each}
 		</div>
 		<b>Clan War</b>
 		<br>
-		<input id="clanWarEnabled" type="checkbox">
+		<input type="checkbox" bind:checked={createGameOpts.srvClnWr}>
 		Enable
 		<br>
 		<b>Server Size: (2-8 Players)</b>
 		<input
 			class="menuTextInput"
 			placeholder="Number of Players"
-			value="6"
+			bind:value={createGameOpts.srvPlayers}
 			min="2"
 			max="8"
 			step="2"
-			id="serverPlayers"
 			maxlength="1"
 			type="number"
 			style="margin-top:5px;margin-bottom:8px;width:95%;"
@@ -304,11 +279,10 @@
 		<input
 			class="menuTextInput"
 			placeholder="Health Multiplier"
-			value="1"
+			bind:value={createGameOpts.srvHealthMult}
 			min="0.1"
 			max="3.0"
 			step="0.1"
-			id="serverHealthMult"
 			maxlength="1"
 			type="number"
 			style="margin-top:5px;margin-bottom:8px;width:95%;"
@@ -317,11 +291,10 @@
 		<input
 			class="menuTextInput"
 			placeholder="Speed Multiplier"
-			value="1"
+			bind:value={createGameOpts.srvSpeedMult}
 			min="0.1"
 			max="2.0"
 			step="0.1"
-			id="serverSpeedMult"
 			maxlength="1"
 			type="number"
 			style="margin-top:5px;margin-bottom:8px;width:95%;"
@@ -330,23 +303,35 @@
 		<input
 			class="menuTextInput"
 			placeholder="Server Password"
-			id="serverPass"
+			bind:value={createGameOpts.srvPass}
 			maxlength="10"
 			type="password"
 			style="margin-top:5px;margin-bottom:8px;width:95%;"
 		>
 		<b>Custom Map: (Optional)</b>
+		<button type="button" class="smallMenuButton" onclick={() => document.getElementById('customMapFile')!.click()}>
+			{createGameOpts.srvMap?.name ?? "Select Map"}
+		</button>
+		<input
+			type="file"
+			id="customMapFile"
+			style="display:none;"
+			accept="image/*"
+			onchange={async (event) => {
+			    const file = event.currentTarget?.files?.[0];
+        		if (!file) return;
+        		const name = event.currentTarget.value.split("\\").at(-1)!;
+        		createGameOpts.srvMap = { name, ...(await loadImageData(file)) };
+			}}
+		>
+		<div id="serverCreateMessage" class="lobbyKey" style="margin-bottom:8px;">Press start to start the Server.</div>
 		<button
 			type="button"
-			id="customMapButton"
 			class="smallMenuButton"
-			onclick={() => document.getElementById('customMapFile')!.click()}
+			onclick={() => st.socket?.emit("cSrv", createGameOpts)}
 		>
-			Select Map
+			START
 		</button>
-		<input type="file" id="customMapFile" style="display:none;" accept="image/*">
-		<div id="serverCreateMessage" class="lobbyKey" style="margin-bottom:8px;">Press start to start the Server.</div>
-		<button type="button" id="createServerButton" class="smallMenuButton">START</button>
 	</div>
 	<button
 		type="button"
@@ -358,11 +343,7 @@
 	</button>
 </div>
 
-<div
-	id="lobbySelectorCont"
-	style="margin-top:-3px;margin-bottom:-5px;"
-	style:display={currentScreen === "main" ? "block" : "none"}
->
+<div style="margin-top:-3px;margin-bottom:-5px;" style:display={currentScreen === "main" ? "block" : "none"}>
 	<h3 style="margin-top:12px;margin-bottom:3px;">SERVERS</h3>
 	<div
 		class="hatSelectItem"
@@ -380,5 +361,5 @@
 		Create a Server
 	</div>
 	<b>Current Server:</b>
-	<div id="serverKeyTxt" class="lobbyKey" style="margin-bottom:8px;display:inline-block;">{st.room ?? "none"}</div>
+	<div class="lobbyKey" style="margin-bottom:8px;display:inline-block;">{st.room ?? "none"}</div>
 </div>

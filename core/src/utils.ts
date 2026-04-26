@@ -395,3 +395,28 @@ export function getItemRarityColor(chance: number) {
 		return "#9d9d9d";
 	}
 }
+export async function loadImageData(file: File) {
+	const dataUrl = await new Promise<string>((resolve) => {
+		const reader = new FileReader();
+		reader.addEventListener("load", () => resolve(reader.result as string));
+		reader.readAsDataURL(file);
+	});
+
+	const img = await new Promise<HTMLImageElement>((resolve) => {
+		const img = document.createElement("img");
+		img.addEventListener("load", () => resolve(img));
+		img.src = dataUrl;
+	});
+
+	const canvas = document.createElement("canvas");
+	canvas.width = img.width;
+	canvas.height = img.height;
+	const ctx = canvas.getContext("2d")!;
+	ctx.drawImage(img, 0, 0);
+
+	return {
+		width: img.width,
+		height: img.height,
+		data: ctx.getImageData(0, 0, img.width, img.height).data,
+	};
+}
