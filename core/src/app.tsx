@@ -130,6 +130,7 @@ var devTest = false;
 function enterGame() {
 	startSoundTrack(2);
 	document.getElementById("startMenuWrapper")!.style.display = "none";
+	mainCanvas.focus();
 	if (!st.room) {
 		socket.emit("create");
 	}
