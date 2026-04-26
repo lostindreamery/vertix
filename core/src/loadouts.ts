@@ -1,6 +1,6 @@
 import type { Weapon } from "./types.ts";
 
-export let characterClasses = [
+export const characterClasses = [
 	{
 		classN: "Triggerman",
 		maxHealth: 100,
@@ -135,9 +135,7 @@ export let characterClasses = [
 		hasDown: true,
 	},
 ];
-export function setCharacterClasses(newArr: typeof characterClasses) {
-	characterClasses = newArr;
-}
+
 export const specialClasses = [
 	{
 		pWeapon: "???",

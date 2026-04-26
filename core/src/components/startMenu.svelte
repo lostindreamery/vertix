@@ -75,7 +75,7 @@
 		position: relative;
 		margin: auto;
 		margin-top: 10px;
-		width: 100%;	
+		width: 100%;
 		height: 41px;
 		box-sizing: border-box;
 		text-align: center;

@@ -1,0 +1,125 @@
+<script lang="ts">
+</script>
+<!-- NOT LOGGED IN -->
+<div id="loginWrapper">
+	<h3 class="menuHeaderTabbed">LOGIN &amp; REGISTER</h3>
+	<input
+		type="text"
+		class="menuTextInput"
+		style="margin-bottom:10px;"
+		placeholder="Username"
+		id="usernameInput"
+		maxlength="15"
+	>
+	<input
+		type="text"
+		class="menuTextInput"
+		style="margin-bottom:10px;"
+		placeholder="Email (Registration Only)"
+		id="emailInput"
+		maxlength="40"
+	>
+	<input type="password" class="menuTextInput" placeholder="Password" id="passwordInput" maxlength="15">
+	<div id="loginMessage" style="display:none;"></div>
+	<button type="button" id="registerButton" class="smallMenuButton">REGISTER</button>
+	<button type="button" id="loginButton" class="smallMenuButton">LOGIN</button>
+	<button type="button" id="recoverButton" class="smallMenuButton">RECOVER</button>
+	<div id="recoverForm" style="display:none;">
+		<input class="menuTextInput" placeholder="Enter Key" id="chngPassKey" maxlength="4" style="width:100%;">
+		<input
+			class="menuTextInput"
+			type="password"
+			placeholder="Enter new Password"
+			id="chngPassPass"
+			maxlength="15"
+			style="width:72%;margin-top:10px;"
+		>
+		<button type="button" id="chngPassButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+			Change
+		</button>
+	</div>
+</div>
+<!-- LOGGED IN -->
+<div id="loggedInWrapper" style="display:none;">
+	<div id="accountStatWrapper">
+		<h3 class="menuHeaderTabbed">YOUR STATS</h3>
+		<div id="rankProgressCont">
+			<div id="rankProgress"></div>
+		</div>
+		<div id="accStatRank"><b>Rank: </b>...</div>
+		<div id="accStatWorldRank"><b>World Rank: </b>...</div>
+		<div id="accStatLikes"><b>Likes: </b>...</div>
+		<div id="accStatKills"><b>Kills: </b>...</div>
+		<div id="accStatDeaths"><b>Deaths: </b>...</div>
+		<div id="accStatKD"><b>KD: </b>...</div>
+		<h3 id="clanHeader">CLANS</h3>
+		<div id="clanSignUp" style="display:none;">
+			<input class="menuTextInput" placeholder="Clan Name" id="clanNameInput" maxlength="4" style="width:70%;">
+			<button type="button" id="createClanButton" class="smallMenuButton" style="margin-left:5px;">CREATE</button>
+			<input class="menuTextInput" placeholder="Clan Name" id="clanKeyInput" maxlength="4" style="width:78%;">
+			<button type="button" id="joinClanButton" class="smallMenuButton" style="margin-left:5px;">JOIN</button>
+			<div id="clanDBMessage" class="serverRespMsg">Join or Create a Clan.</div>
+		</div>
+		<div id="clanStats" style="display:none;">
+			<div id="clanStatFounder"><b>Founder: </b>...</div>
+			<div id="clanStatRank"><b>Level: </b>...</div>
+			<div id="clanStatKD"><b>Avg KD: </b>...</div>
+			<div id="clanStatMembers">
+				<b>Roster: </b>
+				<br>
+				...
+			</div>
+			<div id="clanChatLink" style="margin-top:5px;"></div>
+			<div id="clanAdminPanel" style="display:none;margin-top:10px;">
+				<input class="menuTextInput" placeholder="Clan Chat URL" id="clanChatInput" maxlength="50" style="width:95%;">
+				<button type="button" id="setChatClanButton" class="smallMenuButton" style="margin-top:10px;">UPDATE</button>
+				<div id="clanChtMessage" class="serverRespMsg" style="display:inline-block;margin-left:5px;">
+					(eg. Discord URL)
+				</div>
+				<input class="menuTextInput" placeholder="Username" id="clanInviteInput" maxlength="15" style="width:95%;">
+				<button type="button" id="inviteClanButton" class="smallMenuButton" style="margin-top:10px;">INVITE</button>
+				<button type="button" id="kickClanButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+					KICK
+				</button>
+				<div id="clanInvMessage" class="serverRespMsg">Invite or Kick Members.</div>
+			</div>
+		</div>
+		<div id="editAccount">
+			<h3 class="menuHeaderTabbed" style="margin-top:8px;">EDIT PROFILE</h3>
+			<input
+				class="menuTextInput"
+				placeholder="Username"
+				id="newUsernameInput"
+				maxlength="15"
+				style="margin-bottom:10px;width:95%;"
+			>
+			<input
+				class="menuTextInput"
+				placeholder="Youtube Channel Name/ID"
+				id="youtubeChannelInput"
+				style="margin-bottom:10px;width:95%;"
+			>
+			<button type="button" id="saveAccountData" class="smallMenuButton">SAVE</button>
+			<div id="editProfileMessage" class="serverRespMsg">Edit Profile Info.</div>
+		</div>
+	</div>
+	<button type="button" id="logoutButton" class="smallMenuButton" style="margin-top:10px; margin-bottom:0px;">
+		LOGOUT
+	</button>
+	<button
+		type="button"
+		id="leaveClanButton"
+		class="smallMenuButton"
+		style="margin-top:10px; margin-left:5px; margin-bottom:0px; display:none;"
+	>
+		LEAVE CLAN
+	</button>
+	<button
+		type="button"
+		id="profileButton"
+		class="smallMenuButton"
+		style="margin-top:10px; margin-bottom:0px; margin-left:5px; "
+	>
+		PROFILE
+	</button>
+</div>

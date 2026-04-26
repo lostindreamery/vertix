@@ -382,3 +382,16 @@ export function canSee(x: number, y: number, width: number, height: number) {
 export function dotInRect(dotX: number, dotY: number, x: number, y: number, w: number, h: number) {
 	return x <= dotX && dotX <= x + w && y <= dotY && dotY <= y + h;
 }
+export function getItemRarityColor(chance: number) {
+	if (chance <= 1) {
+		return "#ff8000";
+	} else if (chance <= 6) {
+		return "#a335ee";
+	} else if (chance <= 18) {
+		return "#0070dd";
+	} else if (chance <= 45) {
+		return "#1eff00";
+	} else {
+		return "#9d9d9d";
+	}
+}

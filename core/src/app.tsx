@@ -3,9 +3,10 @@ import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
 import ActionBar from "./components/actionBar.svelte";
 import Chatbox from "./components/chatbox.svelte";
+import RightMenu from "./components/rightMenu.svelte";
 import RoomList from "./components/roomList.svelte";
 import StartMenu from "./components/startMenu.svelte";
-import { characterClasses, setCharacterClasses, specialClasses, weaponNames } from "./loadouts.ts";
+import { specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
 import { st } from "./state.svelte.ts";
@@ -42,18 +43,32 @@ import {
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
 
-const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
-	utils;
+const {
+	shootNextBullet,
+	getNextBullet,
+	setupMap,
+	wallCol,
+	getCurrentWeapon,
+	randomInt,
+	canSee,
+	getItemRarityColor,
+} = utils;
 
 mount(StartMenu, {
 	target: document.getElementById("startMenu")!,
 	props: {
-		startGame
-	}
+		startGame,
+	},
 });
 mount(RoomList, {
 	target: document.getElementById("roomWrapper")!,
 	props: { joinRoom },
+});
+mount(RightMenu, {
+	target: document.getElementById("rightMenu")!,
+	props: {
+		loadModPack,
+	},
 });
 const { setCooldownAnimation } = mount(ActionBar, {
 	target: document.getElementById("actionBar")!,
@@ -84,10 +99,10 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 	alert("tried to open google play");
 	// openGooglePlay(false);
 }
-var previousClass = 0;
-var previousHat = 0;
-var previousShirt = 0;
-var previousSpray = 0;
+// var previousClass = 0;
+// var previousHat = 0;
+// var previousShirt = 0;
+// var previousSpray = 0;
 var changingLobby = false;
 var inMainMenu = true;
 var loggedIn = false;
@@ -122,7 +137,7 @@ function enterGame() {
 	animateOverlay = true;
 	if (st.player.dead) {
 		socket.emit("respawn");
-		playerClassIndex = currentClassID;
+		playerClassIndex = st.characterClasses.findIndex((c) => c.classN === st.loadout.class.classN);
 		updateGameLoop();
 	} else {
 		inMainMenu = false;
@@ -241,11 +256,7 @@ window.onload = async () => {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Logging in...";
 		} else {
-			loadSavedClass();
 		}
-		document.getElementById("texturePackButton")!.onclick = () => {
-			loadModPack((document.getElementById("textureModInput")! as HTMLInputElement).value, false);
-		};
 		document.getElementById("registerButton")!.onclick = () => {
 			socket.emit("dbReg", {
 				userName: userNameInput.value,
@@ -265,8 +276,6 @@ window.onload = async () => {
 			loginWrapper.style.display = "block";
 			loginMessage.textContent = "";
 			loggedIn = false;
-			resetHatList();
-			resetShirtList();
 			userName = logKey = "";
 			localStorage.setItem("logKey", "");
 			localStorage.setItem("userName", "");
@@ -553,7 +562,10 @@ function gameInput(event: MouseEvent) {
 	target.d = Math.sqrt(
 		(mouseY - (window.innerHeight / 2 - b / 2)) ** 2 + (mouseX - window.innerWidth / 2) ** 2,
 	);
-	target.d *= Math.min(st.maxScreenWidth / window.innerWidth, st.maxScreenHeight / window.innerHeight);
+	target.d *= Math.min(
+		st.maxScreenWidth / window.innerWidth,
+		st.maxScreenHeight / window.innerHeight,
+	);
 	target.f = Math.atan2(window.innerHeight / 2 - b / 2 - mouseY, window.innerWidth / 2 - mouseX);
 	target.f = utils.roundNumber(target.f, 2);
 	target.d = utils.roundNumber(target.d, 2);
@@ -707,27 +719,6 @@ mapCanvas.width = 200;
 mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
 
-Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
-	(elem) =>
-		elem.addEventListener("click", (event) => {
-			changeMenuTab(event, elem.attributes.getNamedItem("data-menu-tab")!.value);
-		}),
-);
-function changeMenuTab(event: MouseEvent, tabId: string) {
-	const tabContents = document.getElementsByClassName("tabcontent");
-	for (let i = 0; i < tabContents.length; i++) {
-		let tc = tabContents[i];
-		if (tc instanceof HTMLElement) {
-			tc.style.display = "none";
-		}
-	}
-	const tabLinks = document.getElementsByClassName("tablinks");
-	for (let i = 0; i < tabContents.length; i++) {
-		tabLinks[i].className = tabLinks[i].className.replace(" active", "");
-	}
-	document.getElementById(tabId)!.style.display = "block";
-	(event.currentTarget as HTMLElement).className += " active";
-}
 function kickPlayer(secondReason: string) {
 	if (disconnected || changingLobby) return;
 	hideStatTable();
@@ -744,53 +735,6 @@ function kickPlayer(secondReason: string) {
 	updateGameLoop();
 	stopAllSounds();
 }
-var classSelector = document.getElementById("classSelector")!;
-var spraySelector = document.getElementById("spraySelector")!;
-var hatSelector = document.getElementById("hatSelector")!;
-var lobbySelector = document.getElementById("lobbySelector")!;
-var camoSelector = document.getElementById("camoSelector")!;
-var shirtSelector = document.getElementById("shirtSelector")!;
-var lobbyCSelector = document.getElementById("lobbyCSelector")!;
-var charSelectorCont = document.getElementById("charSelectorCont")!;
-var lobbySelectorCont = document.getElementById("lobbySelectorCont")!;
-function showLobbySelector() {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	classSelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	lobbySelector.style.display = "block";
-}
-//@ts-expect-error
-window.showLobbySelector = showLobbySelector;
-function hideLobbySelector() {
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	lobbySelector.style.display = "none";
-}
-//@ts-expect-error
-window.hideLobbySelector = hideLobbySelector;
-function showLobbyCSelector() {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	classSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	lobbyCSelector.style.display = "block";
-}
-//@ts-expect-error
-window.showLobbyCSelector = showLobbyCSelector;
-function hideLobbyCSelector() {
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	lobbyCSelector.style.display = "none";
-}
-//@ts-expect-error
-window.hideLobbyCSelector = hideLobbyCSelector;
-var timeOutCheck = null;
-var tmpPingTimer = null;
 var pingText = document.getElementById("pingText")!;
 var fpsText = document.getElementById("fpsText")!;
 var pingStart = 0;
@@ -894,7 +838,6 @@ function setupSocket(sock: Socket) {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = a;
 		}
-		loadSavedClass();
 	});
 	sock.on("recovRes", (b, d) => {
 		loginMessage.style.display = "block";
@@ -1052,10 +995,10 @@ function setupSocket(sock: Socket) {
 	sock.on("upd", updateUserValue);
 	sock.on("vt", updateVoteStats);
 	sock.on("add", addUser);
-	sock.on("updHt", updateHatList);
-	sock.on("updShrt", updateShirtList);
-	sock.on("updCmo", updateCamosList);
-	sock.on("updSprs", updateSpraysList);
+	sock.on("updHt", (_len: number, data: any) => (st.cosmetics.hats = data));
+	sock.on("updShrt", (_len: number, data: any) => (st.cosmetics.shirts = data));
+	sock.on("updCmo", (_len: number, data: any) => (st.cosmetics.camos = data));
+	// sock.on("updSprs", updateSpraysList);
 	sock.on("crtSpr", createSpray);
 	sock.on("rem", removeUser);
 	sock.on("cht", messageFromServer);
@@ -1629,19 +1572,6 @@ function updateUiStats(player: Player) {
 		document.getElementById("healthValue")!.style.color = "#fff";
 	}
 }
-function getItemRarityColor(chance: number) {
-	if (chance <= 1) {
-		return "#ff8000";
-	} else if (chance <= 6) {
-		return "#a335ee";
-	} else if (chance <= 18) {
-		return "#0070dd";
-	} else if (chance <= 45) {
-		return "#1eff00";
-	} else {
-		return "#9d9d9d";
-	}
-}
 function updateUserValue(data: any) {
 	var updated = false;
 	const tmpUser = findUserByIndex(data.i);
@@ -1799,241 +1729,76 @@ function updatePlayerInfo(data: Partial<Player>) {
 	st.player.score = data.score!;
 	st.player.health = data.health!;
 }
-var currentHat = document.getElementById("currentHat")!;
-var hatList = document.getElementById("hatList")!;
-var hatHeader = document.getElementById("hatHeader")!;
-function updateHatList(totalCount: number, hats: any[]) {
-	hatHeader.textContent = `SELECT HAT: (${hats.length}/${totalCount})`;
-	let content: Node[] = [];
-	content.push(
-		<div class="hatSelectItem" id="hatItem-1" onClick={() => changeHat(-1)}>
-			Default
-		</div>,
-	);
-	for (const hat of hats) {
-		content.push(
-			<div
-				className="hatSelectItem"
-				id={`hatItem${hat.id}`}
-				style={{ color: getItemRarityColor(hat.chance) }}
-				onClick={() => changeHat(hat.id)}
-			>
-				{hat.name} x{parseInt(hat.count) + 1}
-				<div className="hoverTooltip">
-					<img className="itemDisplayImage" src={`/images/hats/${hat.id}/d.png`} />
-					<div
-						style={{ color: getItemRarityColor(hat.chance), fontSize: "16px", marginTop: "5px" }}
-					>
-						{hat.name}
-					</div>
-					<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
-						droprate {hat.chance}%
-					</div>
-					<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
-						<i>wearable</i>
-					</div>
-					<div style={{ fontSize: "12px", marginTop: "5px" }}>{hat.desc}</div>
-					{hat.creator !== "EatMyApples" && (
-						<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "5px" }}>
-							<i>Artist: {hat.creator}</i>
-						</div>
-					)}
-				</div>
-			</div>,
-		);
-	}
-	hatList.replaceChildren(...content);
-}
-function resetHatList() {
-	hatHeader.textContent = "SELECT HAT";
-	hatList.replaceChildren(
-		<div class="hatSelectItem" id="hatItem-1" onClick={() => changeHat(-1)}>
-			Default
-		</div>,
-	);
-	changeHat(-1);
-}
-document.getElementById("currentHat")!.addEventListener("click", showHatselector);
-function showHatselector() {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	classSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-	spraySelector.style.display = "none";
-	hatSelector.style.display = "block";
-}
-//@ts-expect-error
-window.changeHat = changeHat;
-function changeHat(a: number) {
-	if (!socket) return;
-	socket.emit("cHat", a);
-	localStorage.setItem("previousHat", a.toString());
-	currentHat.innerHTML = document.getElementById(`hatItem${a}`)!.innerHTML.replace(/ x\d/, "");
-	currentHat.style.color = document.getElementById(`hatItem${a}`)!.style.color;
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	classSelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	hatSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-}
-var currentShirt = document.getElementById("currentShirt")!;
-var shirtList = document.getElementById("shirtList")!;
-var shirtHeader = document.getElementById("shirtHeader")!;
-function updateShirtList(totalCount: number, shirts: any[]) {
-	shirtHeader.textContent = `SELECT SHIRT: (${shirts.length}/${totalCount})`;
-
-	let test: Node[] = [];
-	test.push(
-		<div class="hatSelectItem" id="shirtItem-1" onClick={() => changeShirt(-1)}>
-			Default
-		</div>,
-	);
-	for (const shirt of shirts) {
-		test.push(
-			<div
-				className="hatSelectItem"
-				id={`shirtItem${shirt.id}`}
-				style={{ color: getItemRarityColor(shirt.chance) }}
-				onClick={() => changeShirt(shirt.id)}
-			>
-				{shirt.name} x{parseInt(shirt.count) + 1}
-				<div className="hoverTooltip">
-					<img className="shirtDisplayImage" src={`/images/shirts/${shirt.id}/d.png`} />
-					<div
-						style={{ color: getItemRarityColor(shirt.chance), fontSize: "16px", marginTop: "5px" }}
-					>
-						{shirt.name}
-					</div>
-					<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
-						droprate {shirt.chance}%
-					</div>
-					<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
-						<i>shirt</i>
-					</div>
-					<div style={{ fontSize: "12px", marginTop: "5px" }}>{shirt.desc}</div>
-				</div>
-			</div>,
-		);
-	}
-	shirtList.replaceChildren(...test);
-}
-function resetShirtList() {
-	shirtHeader.textContent = "SELECT SHIRT";
-	shirtList.replaceChildren(
-		<div class="hatSelectItem" id="shirtItem-1" onClick={() => changeShirt(-1)}>
-			Default
-		</div>,
-	);
-	changeShirt(-1);
-}
-document.getElementById("currentShirt")!.addEventListener("click", showShirtselector);
-function showShirtselector() {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	camoSelector.style.display = "none";
-	classSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-	spraySelector.style.display = "none";
-	hatSelector.style.display = "none";
-	shirtSelector.style.display = "block";
-}
-//@ts-expect-error
-window.changeShirt = changeShirt;
-function changeShirt(shirtId: number) {
-	if (!socket) return;
-	socket.emit("cShirt", shirtId);
-	localStorage.setItem("previousShirt", shirtId.toString());
-	currentShirt.innerHTML = document
-		.getElementById(`shirtItem${shirtId}`)!
-		.innerHTML.replace(/ x\d/, "");
-	currentShirt.style.color = document.getElementById(`shirtItem${shirtId}`)!.style.color;
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	classSelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	hatSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-}
-var currentSpray = document.getElementById("currentSpray")!;
-var sprayList = document.getElementById("sprayList")!;
-function updateSpraysList(sprays: any[]) {
-	let listContent: Node[] = [];
-	for (let i = 0; i < sprays.length; ++i) {
-		listContent.push(
-			<div
-				class="hatSelectItem"
-				id={`sprayItem${i + 1}`}
-				onClick={() => changeSpray(i + 1, sprays[i].id)}
-			>
-				{sprays[i].name}
-				<div
-					id={`sprayHoverImage${i + 1}`}
-					class="hoverTooltip"
-					style={{ width: "90px", height: "90px" }}
-				></div>
-			</div>,
-		);
-	}
-	sprayList.replaceChildren(...listContent);
-	// cursed
-	if (localStorage.getItem("previousSpray")) {
-		previousSpray = Number.parseInt(localStorage.getItem("previousSpray") ?? "NaN");
-		if (Number.isNaN(previousSpray)) {
-			changeSpray(1, sprays[1].id);
-			return;
-		}
-		try {
-			changeSpray(previousSpray, sprays[previousSpray - 1].id);
-		} catch (_) {
-			changeSpray(1, sprays[1].id);
-		}
-	} else {
-		changeSpray(1, sprays[1].id);
-	}
-}
-document.getElementById("currentSpray")!.addEventListener("click", showSprayselector);
-function showSprayselector() {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	classSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	hatSelector.style.display = "none";
-	spraySelector.style.display = "block";
-}
-function changeSpray(id: number, sprayId: number) {
-	if (!socket) return;
-	socket.emit("cSpray", id);
-	localStorage.setItem("previousSpray", id.toString());
-	currentSpray.innerHTML = document.getElementById(`sprayItem${id}`)!.innerHTML.replace(/ x\d/, "");
-	currentSpray.style.color = document.getElementById(`sprayItem${id}`)!.style.color;
-	let hoverElem = document.getElementById(`sprayHoverImage${id}`);
-	hoverElem?.replaceChildren(
-		<img class="sprayDisplayImage" src={`/images/sprays/${sprayId}.png`} />,
-	);
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	classSelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	hatSelector.style.display = "none";
-	spraySelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-}
-//@ts-expect-error
-window.changeSpray = changeSpray;
+// var currentSpray = document.getElementById("currentSpray")!;
+// var sprayList = document.getElementById("sprayList")!;
+// function updateSpraysList(sprays: any[]) {
+// 	let listContent: Node[] = [];
+// 	for (let i = 0; i < sprays.length; ++i) {
+// 		listContent.push(
+// 			<div
+// 				class="hatSelectItem"
+// 				id={`sprayItem${i + 1}`}
+// 				onClick={() => changeSpray(i + 1, sprays[i].id)}
+// 			>
+// 				{sprays[i].name}
+// 				<div
+// 					id={`sprayHoverImage${i + 1}`}
+// 					class="hoverTooltip"
+// 					style={{ width: "90px", height: "90px" }}
+// 				></div>
+// 			</div>,
+// 		);
+// 	}
+// 	sprayList.replaceChildren(...listContent);
+// 	// cursed
+// 	if (localStorage.getItem("previousSpray")) {
+// 		previousSpray = Number.parseInt(localStorage.getItem("previousSpray") ?? "NaN");
+// 		if (Number.isNaN(previousSpray)) {
+// 			changeSpray(1, sprays[1].id);
+// 			return;
+// 		}
+// 		try {
+// 			changeSpray(previousSpray, sprays[previousSpray - 1].id);
+// 		} catch (_) {
+// 			changeSpray(1, sprays[1].id);
+// 		}
+// 	} else {
+// 		changeSpray(1, sprays[1].id);
+// 	}
+// }
+// document.getElementById("currentSpray")!.addEventListener("click", showSprayselector);
+// function showSprayselector() {
+// 	charSelectorCont.style.display = "none";
+// 	lobbySelectorCont.style.display = "none";
+// 	classSelector.style.display = "none";
+// 	lobbySelector.style.display = "none";
+// 	lobbyCSelector.style.display = "none";
+// 	camoSelector.style.display = "none";
+// 	shirtSelector.style.display = "none";
+// 	hatSelector.style.display = "none";
+// 	spraySelector.style.display = "block";
+// }
+// function changeSpray(id: number, sprayId: number) {
+// 	if (!socket) return;
+// 	socket.emit("cSpray", id);
+// 	localStorage.setItem("previousSpray", id.toString());
+// 	currentSpray.innerHTML = document.getElementById(`sprayItem${id}`)!.innerHTML.replace(/ x\d/, "");
+// 	currentSpray.style.color = document.getElementById(`sprayItem${id}`)!.style.color;
+// 	let hoverElem = document.getElementById(`sprayHoverImage${id}`);
+// 	hoverElem?.replaceChildren(
+// 		<img class="sprayDisplayImage" src={`/images/sprays/${sprayId}.png`} />,
+// 	);
+// 	charSelectorCont.style.display = "block";
+// 	lobbySelectorCont.style.display = "block";
+// 	classSelector.style.display = "none";
+// 	camoSelector.style.display = "none";
+// 	shirtSelector.style.display = "none";
+// 	hatSelector.style.display = "none";
+// 	spraySelector.style.display = "none";
+// 	lobbySelector.style.display = "none";
+// 	lobbyCSelector.style.display = "none";
+// }
+// window.changeSpray = changeSpray;
 function findUserByIndex(index: number): Player {
 	return players.find((obj) => obj.index === index) ?? null!;
 }
@@ -2896,140 +2661,8 @@ async function joinRoom(roomName: string) {
 	st.chatLines = [];
 }
 
-var currentClassID = 0;
-var currentClass = document.getElementById("currentClass")!;
-var classList = document.getElementById("classList")!;
-var characterWepnDisplay = document.getElementById("charWpn")!;
-var characterWepnDisplay2 = document.getElementById("charWpn2")!;
-function createClassList() {
-	let res: Node[] = [];
-	for (const [i, cl] of characterClasses.entries()) {
-		if (cl.classN === "???") continue;
-		res.push(
-			<div class="hatSelectItem" id={`classItem${i}`} onClick={() => pickedCharacter(i)}>
-				{cl.classN}
-			</div>,
-		);
-	}
-	classList.replaceChildren(...res);
-}
-createClassList();
-document.getElementById("currentClass")!.addEventListener("click", showClassselector);
-function showClassselector() {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	classSelector.style.display = "block";
-}
-function loadSavedClass() {
-	previousClass = Number.parseInt(localStorage.getItem("previousClass") ?? "0");
-	pickedCharacter(previousClass);
-}
-function pickedCharacter(classId: number) {
-	currentClassID = classId;
-	currentClass.textContent = document.getElementById(`classItem${classId}`)!.textContent;
-	currentClass.style.color = document.getElementById(`classItem${classId}`)!.style.color;
-	characterWepnDisplay.replaceChildren(
-		<>
-			<b>Primary:</b>
-			<div class="hatSelectItem" style="display:inline-block">
-				{characterClasses[classId].pWeapon}
-			</div>
-		</>,
-	);
-	characterWepnDisplay2.replaceChildren(
-		<>
-			<b>Secondary:</b>
-			<div class="hatSelectItem" style="display:inline-block">
-				{characterClasses[classId].sWeapon}
-			</div>
-		</>,
-	);
-	localStorage.setItem("previousClass", classId.toString());
-	if (loggedIn) {
-		for (const wepIdx of characterClasses[classId].weaponIndexes) {
-			let skinPref = localStorage.getItem(`wpnSkn${wepIdx}`);
-			if (skinPref) {
-				changeCamo(wepIdx, parseInt(skinPref), false);
-			}
-		}
-		if (localStorage.getItem("previousHat")) {
-			previousHat = Number.parseInt(localStorage.getItem("previousHat")!);
-			changeHat(previousHat);
-		}
-		if (localStorage.getItem("previousShirt")) {
-			previousShirt = Number.parseInt(localStorage.getItem("previousShirt")!);
-			changeShirt(previousShirt);
-		}
-	}
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	classSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-	hatSelector.style.display = "none";
-	spraySelector.style.display = "none";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-}
-var camoDataList: any[] | null = null;
-var maxCamos = 0;
-var camoList = document.getElementById("camoList")!;
-characterWepnDisplay.addEventListener("click", () => showWeaponSelector(0));
-characterWepnDisplay2.addEventListener("click", () => showWeaponSelector(1));
-function showWeaponSelector(wepType: 0 | 1) {
-	charSelectorCont.style.display = "none";
-	lobbySelectorCont.style.display = "none";
-	classSelector.style.display = "none";
-	camoSelector.style.display = "block";
-	let classWeapon = characterClasses[currentClassID].weaponIndexes[wepType];
-	let list: Node[] = [];
-	list.push(
-		<div class="hatSelectItem" onClick={() => changeCamo(classWeapon, 0, true)}>
-			Default
-		</div>,
-	);
-	if (/*loggedIn && */ camoDataList?.[classWeapon]) {
-		for (const camo of camoDataList[classWeapon]) {
-			list.push(
-				<div
-					class="hatSelectItem"
-					style={{ color: getItemRarityColor(camo.chance) }}
-					onClick={() => changeCamo(classWeapon, camo.id, true)}
-				>
-					{camo.name} x{parseInt(camo.count) + 1}
-				</div>,
-			);
-		}
-		document.getElementById("camoHeaderAmount")!.textContent =
-			`SELECT CAMO (${camoDataList[classWeapon].length + 1}/${maxCamos + 1})`;
-	} else {
-		document.getElementById("camoHeaderAmount")!.textContent = "SELECT CAMO";
-	}
-	camoList.replaceChildren(...list);
-}
 function getCamoURL(id: number) {
 	return `/images/camos/${id + 1}.png`;
-}
-function changeCamo(weaponId: number, camoId: number, save: boolean) {
-	if (!socket) return;
-	socket.emit("cCamo", {
-		weaponID: weaponId,
-		camoID: camoId,
-	});
-	if (!save) return;
-	localStorage.setItem(`wpnSkn${weaponId}`, camoId.toString());
-	charSelectorCont.style.display = "block";
-	lobbySelectorCont.style.display = "block";
-	camoSelector.style.display = "none";
-	shirtSelector.style.display = "none";
-	classSelector.style.display = "none";
-	hatSelector.style.display = "none";
-	lobbySelector.style.display = "none";
-	lobbyCSelector.style.display = "none";
-}
-function updateCamosList(max: number, data: any[]) {
-	camoDataList = data;
-	maxCamos = max;
 }
 var animLength = 3;
 var classSpriteSheets: {
@@ -3045,13 +2678,13 @@ var classSpriteSheets: {
 }[] = [];
 function loadPlayerSprites(base: string) {
 	classSpriteSheets = [];
-	loadPlayerSpriteArray(base, characterClasses);
+	loadPlayerSpriteArray(base, st.characterClasses);
 	loadPlayerSpriteArray(base, specialClasses);
 	resize();
 }
 function loadPlayerSpriteArray(
 	base: string,
-	classes: typeof characterClasses | typeof specialClasses,
+	classes: typeof st.characterClasses | typeof specialClasses,
 ) {
 	for (const { folderName, hasDown } of classes) {
 		let upSprites: Sprite[] = [];
@@ -3234,9 +2867,11 @@ async function loadModPack(url: string, isBaseAssets: boolean) {
 				} else if (entry.filename.includes("charinfo")) {
 					let split = data.replace(/(\r\n|\n|\r)/gm, "").split("|");
 					let tmp = split.map((s) => JSON.parse(s));
-					setCharacterClasses(tmp);
-					createClassList();
-					pickedCharacter(currentClassID);
+					st.characterClasses = tmp;
+					// hacky and may not work
+					st.loadout.class = st.characterClasses.find(
+						(c) => c.folderName === st.loadout.class.folderName,
+					)!;
 				}
 			} else if (basePath === "sprites") {
 				let data = await (entry as zip.FileEntry).getData(new zip.BlobWriter("image/png"));

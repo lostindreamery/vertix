@@ -5,7 +5,6 @@
 	const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
 	const refocusCanvas = () => tick().then(() => mainCanvas.focus());
 
-
 	let currentChatType = $state("ALL");
 	function changeChatType() {
 		// swap
