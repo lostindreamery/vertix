@@ -136,7 +136,7 @@
 	</div>
 </div>
 
-<div id="classSelector" style:display={currentScreen === "class" ? "block" : "none"}>
+<div style:display={currentScreen === "class" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT CLASS</h3>
 	<div id="classList">
 		{#each st.characterClasses.filter(c => c.classN !== "???") as cls}
@@ -146,11 +146,11 @@
 </div>
 
 <div
-	id="camoSelector"
+	class="cosmeticSelector"
 	style:display={currentScreen === "primaryCamo" || currentScreen === "secondaryCamo" ? "block" : "none"}
 >
 	<h3 class="menuHeaderTabbed">SELECT CAMO</h3>
-	<div id="camoList">
+	<div>
 		<div
 			class="hatSelectItem"
 			onclick={() => {
@@ -174,9 +174,9 @@
 	</div>
 </div>
 
-<div id="hatSelector" style:display={currentScreen === "hat" ? "block" : "none"}>
+<div class="cosmeticSelector" style:display={currentScreen === "hat" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT HAT</h3>
-	<div id="hatList">
+	<div>
 		{#if st.cosmetics.hats}
 			{#each st.cosmetics.hats as hat}
 				<div
@@ -195,7 +195,7 @@
 	</div>
 </div>
 
-<div id="shirtSelector" style:display={currentScreen === "shirt" ? "block" : "none"}>
+<div class="cosmeticSelector" style:display={currentScreen === "shirt" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT SHIRT</h3>
 	<div>
 		<div class="hatSelectItem" onclick={() => {st.loadout.shirt = null; currentScreen = "main"}}>Default</div>
@@ -213,7 +213,7 @@
 	</div>
 </div>
 
-<div id="spraySelector" style:display={currentScreen === "spray" ? "block" : "none"}>
+<div class="cosmeticSelector" style:display={currentScreen === "spray" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT SPRAY</h3>
 	<div>
 		<!-- tmp since we don't have spray data -->
@@ -324,14 +324,8 @@
         		createGameOpts.srvMap = { name, ...(await loadImageData(file)) };
 			}}
 		>
-		<div id="serverCreateMessage" class="lobbyKey" style="margin-bottom:8px;">Press start to start the Server.</div>
-		<button
-			type="button"
-			class="smallMenuButton"
-			onclick={() => st.socket?.emit("cSrv", createGameOpts)}
-		>
-			START
-		</button>
+		<div id="serverCreateMessage" class="selectable" style="margin-bottom:8px;">Press start to start the Server.</div>
+		<button type="button" class="smallMenuButton" onclick={() => st.socket?.emit("cSrv", createGameOpts)}>START</button>
 	</div>
 	<button
 		type="button"
@@ -361,5 +355,28 @@
 		Create a Server
 	</div>
 	<b>Current Server:</b>
-	<div class="lobbyKey" style="margin-bottom:8px;display:inline-block;">{st.room ?? "none"}</div>
+	<div class="selectable" style="margin-bottom:8px;display:inline-block;">{st.room ?? "none"}</div>
 </div>
+
+<style>
+	.cosmeticSelector {
+		max-height: 240px;
+		overflow-y: scroll;
+		overflow-x: hidden;
+	}
+
+	#classList {
+		max-height: 190px;
+		overflow-y: scroll;
+	}
+
+	#createServerContainer {
+		max-height: 190px;
+		overflow-y: scroll;
+	}
+	.selectable {
+		-webkit-user-select: text;
+		user-select: text;
+		pointer-events: all;
+	}
+</style>

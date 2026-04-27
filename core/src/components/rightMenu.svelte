@@ -29,16 +29,44 @@
 </ul>
 
 <!-- LOADOUT TAB -->
-<div id="loadoutTab" class="tabcontent" style:display={currentTab === "loadoutTab" ? "block" : "none"}>
-	<LoadoutTab />
-</div>
+<div class="tabcontent" style:display={currentTab === "loadoutTab" ? "block" : "none"}><LoadoutTab /></div>
 
 <!-- ACCOUNT TAB -->
-<div id="accountTab" class="tabcontent" style:display={currentTab === "accountTab" ? "block" : "none"}>
-	<AccountTab />
-</div>
+<div class="tabcontent" style:display={currentTab === "accountTab" ? "block" : "none"}><AccountTab /></div>
 
 <!-- MOD TAB -->
-<div id="modTab" class="tabcontent" style:display={currentTab === "modTab" ? "block" : "none"}>
-	<ModTab {loadModPack} />
-</div>
+<div class="tabcontent" style:display={currentTab === "modTab" ? "block" : "none"}><ModTab {loadModPack} /></div>
+
+<style>
+	ul.tab {
+		width: 100%;
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+	ul.tab li {
+		display: table-cell;
+	}
+
+	.tablinks {
+		cursor: pointer;
+		display: block;
+		color: black;
+		text-align: center;
+		padding: 11px;
+		text-decoration: none;
+		transition: 0.3s;
+		font-size: 16px;
+		background-color: #f2f2f2;
+	}
+	.tablinks:hover {
+		background-color: #e6e6e6;
+	}
+	.tabcontent {
+		width: 300px;
+		display: none;
+		padding-top: 12px;
+		border-top: none;
+	}
+</style>

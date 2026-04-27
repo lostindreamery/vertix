@@ -285,7 +285,9 @@ export class Room {
 				if (type === "TEAM" && this.game.mode.teams) {
 					for (let pl of this.game.players) {
 						if (pl.team === player.team && pl.socketId) {
-							this.io.to(pl.socketId).emit("cht", [player.index, "(TEAM) " + msg]);
+							this.io
+								.to(pl.socketId)
+								.emit("cht", [player.index, "(TEAM) " + msg]);
 						}
 					}
 				} else {

@@ -123,3 +123,37 @@
 		PROFILE
 	</button>
 </div>
+
+<style>
+	#loginWrapper {
+		width: 300px;
+	}
+
+	#loginMessage {
+		margin-top: 10px;
+	}
+
+	#accountStatWrapper {
+		max-height: 190px;
+		overflow-y: scroll;
+		line-height: 220%;
+	}
+
+	.serverRespMsg {
+		margin-top: 0px;
+	}
+
+	#registerButton {
+		margin-top: 10px;
+	}
+
+	#loginButton {
+		margin-top: 10px;
+		margin-left: 5px;
+	}
+
+	#recoverButton {
+		margin-top: 10px;
+		margin-left: 5px;
+	}
+</style>

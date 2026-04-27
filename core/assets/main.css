@@ -54,11 +54,6 @@ h3 {
 	margin-bottom: 3px;
 }
 
-select {
-	font-size: 12px;
-	color: rgba(0, 0, 0, 0.5);
-}
-
 canvas {
 	cursor:
 		url("./cursor_aim.png") 17 17,
@@ -85,12 +80,6 @@ div {
 	display: none;
 	background: #fff;
 	border: 1px solid;
-}
-
-.lobbyKey {
-	-webkit-user-select: text;
-	user-select: text;
-	pointer-events: all;
 }
 
 .mapVoteImage {
@@ -142,23 +131,6 @@ div {
 	width: 100%;
 	white-space: nowrap;
 	display: block;
-}
-
-#featuredModList {
-	margin-top: 7px;
-	overflow-y: scroll;
-	max-height: 102px;
-	margin-bottom: 10px;
-	cursor: pointer;
-}
-
-.modBtn:hover {
-	background: rgba(0, 0, 0, 0.1);
-	font-size: 14px;
-}
-
-.modBtn {
-	padding: 2px;
 }
 
 #statContainer2 {
@@ -253,7 +225,7 @@ div {
 	height: 10px;
 }
 
-.chatbox {
+#chatbox {
 	position: absolute;
 	bottom: 15px;
 	left: 10px;
@@ -453,30 +425,6 @@ div {
 	margin-bottom: 10px;
 }
 
-#loginWrapper {
-	width: 300px;
-}
-
-#accountStatWrapper {
-	max-height: 190px;
-	overflow-y: scroll;
-	line-height: 220%;
-}
-
-#classList {
-	max-height: 190px;
-	overflow-y: scroll;
-}
-
-#serverRespMsg {
-	margin-top: 0px;
-}
-
-#createServerContainer {
-	max-height: 190px;
-	overflow-y: scroll;
-}
-
 .menuTextInput {
 	width: 100%;
 	padding: 5px;
@@ -490,54 +438,6 @@ div {
 	font-size: 12px;
 }
 
-#textureModInput {
-	width: 70%;
-}
-
-#textureModInput:focus,
-#textureModInput.focus {
-	border: solid 1px #cccccc;
-	box-shadow: 0 0 3px 1px #dddddd;
-}
-
-#classSelect {
-	padding: 2px;
-	text-align: center;
-	font-size: 14px;
-	border: solid 1px #dcdcdc;
-	transition:
-		box-shadow 0.3s,
-		border 0.3s;
-	box-sizing: border-box;
-	border-radius: 1px;
-	margin-bottom: 4px;
-	outline: none;
-}
-
-#hatSelector {
-	max-height: 240px;
-	overflow-y: scroll;
-	overflow-x: hidden;
-}
-
-#camoSelector {
-	max-height: 240px;
-	overflow-y: scroll;
-	overflow-x: hidden;
-}
-
-#shirtSelector {
-	max-height: 240px;
-	overflow-y: scroll;
-	overflow-x: hidden;
-}
-
-#spraySelector {
-	max-height: 240px;
-	overflow-y: scroll;
-	overflow-x: hidden;
-}
-
 .hatSelectItem {
 	font-size: 12px;
 	padding: 5px;
@@ -549,13 +449,13 @@ div {
 	display: block;
 }
 
-.rewardText:hover > .hoverTooltip {
-	display: block;
-}
-
 .hatSelectItem:hover {
 	background: rgba(0, 0, 0, 0.1);
 	font-size: 14px;
+}
+
+.rewardText:hover > .hoverTooltip {
+	display: block;
 }
 
 /* button:disabled {
@@ -631,33 +531,6 @@ div {
 	margin-bottom: 10px;
 	font-size: 12px;
 	color: rgba(255, 255, 255, 1);
-}
-
-#registerButton {
-	margin-top: 10px;
-}
-
-#loginButton {
-	margin-top: 10px;
-	margin-left: 5px;
-}
-
-#recoverButton {
-	margin-top: 10px;
-	margin-left: 5px;
-}
-
-#texturePackButton {
-	margin-left: 5px;
-	width: 25%;
-}
-
-#texturePackButton:active,
-#texturePackButton:hover {
-	top: 1px;
-	background: #6fa9d6;
-	outline: none;
-	box-shadow: none;
 }
 
 .smallMenuButton:active,
@@ -1000,16 +873,6 @@ div {
 	text-align: center;
 }
 
-#modInfo {
-	margin-top: 5px;
-	max-height: 100px !important;
-	max-width: 300px !important;
-}
-
-#loginMessage {
-	margin-top: 10px;
-}
-
 #linkBoxLeft {
 	font-size: 14px;
 	color: #2e3031;
@@ -1022,40 +885,6 @@ div {
 	padding: 5px 10px;
 	box-sizing: border-box;
 	text-align: center;
-}
-
-ul.tab {
-	width: 100%;
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-}
-ul.tab li {
-	display: table-cell;
-}
-.tablinks {
-	cursor: pointer;
-	display: block;
-	color: black;
-	text-align: center;
-	padding: 11px;
-	text-decoration: none;
-	transition: 0.3s;
-	font-size: 16px;
-	background-color: #f2f2f2;
-}
-.tablinks:hover {
-	background-color: #e6e6e6;
-}
-.tablinks.active {
-	background-color: #d9d9d9;
-}
-.tabcontent {
-	width: 300px;
-	display: none;
-	padding-top: 12px;
-	border-top: none;
 }
 
 .playerStatClick {

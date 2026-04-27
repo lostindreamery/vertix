@@ -184,7 +184,6 @@ function startLogin() {
 	loginMessage.textContent = "Please Wait...";
 }
 
-
 window.onload = async () => {
 	if (st.mobile) {
 		document.getElementById("loadText")!.textContent = "MOBILE VERSION COMING SOON";

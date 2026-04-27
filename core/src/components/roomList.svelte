@@ -18,7 +18,7 @@
 	});
 </script>
 
-<div class="roomListHeader">
+<div id="roomListHeader">
 	<h3 class="menuHeader">ROOM BROWSER</h3>
 	<button class="smallMenuButton" onclick={() => refreshTick++}>REFRESH</button>
 </div>
@@ -37,7 +37,7 @@
 </div>
 
 <style>
-	.roomListHeader {
+	#roomListHeader {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
