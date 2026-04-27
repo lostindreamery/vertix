@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { gameModes } from "../../gamemodes.ts";
 	import { st } from "../../state.svelte.ts";
+	import type { GenData } from "../../types.ts";
 	import { getItemRarityColor, loadImageData } from "../../utils.ts";
 	import CosmeticTooltip from "./cosmeticTooltip.svelte";
 
@@ -71,7 +72,7 @@
 		srvHealthMult: 1,
 		srvSpeedMult: 1,
 		srvPass: "",
-		srvMap: null as { name: string; width: number; height: number; data: ImageDataArray } | null,
+		srvMap: null as (GenData & { name: string }) | null,
 		srvClnWr: false,
 		srvModes: [] as number[],
 	});

@@ -1,6 +1,6 @@
 import type { Projectile } from "./logic/projectile.ts";
 import { st } from "./state.svelte.ts";
-import type { Player, ShootEvent, Tile } from "./types.ts";
+import type { GenData, Player, ShootEvent, Tile } from "./types.ts";
 
 var bulletIndex = 0;
 export function getNextBullet(bullets: Projectile[]) {
@@ -395,7 +395,7 @@ export function getItemRarityColor(chance: number) {
 		return "#9d9d9d";
 	}
 }
-export async function loadImageData(file: File) {
+export async function loadImageData(file: File): Promise<GenData> {
 	const dataUrl = await new Promise<string>((resolve) => {
 		const reader = new FileReader();
 		reader.addEventListener("load", () => resolve(reader.result as string));
