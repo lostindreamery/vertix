@@ -10,4 +10,7 @@ export default {
 		// not ideal
 		warningFilter: (w) => !w.code.includes("a11y"),
 	},
+	vitePlugin: {
+		inspector: true,
+	},
 };
