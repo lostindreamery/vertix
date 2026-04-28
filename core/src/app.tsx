@@ -1,11 +1,11 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
-import ActionBar from "./components/actionBar.svelte";
-import Chatbox from "./components/chatbox.svelte";
-import RightMenu from "./components/rightMenu.svelte";
-import RoomList from "./components/roomList.svelte";
-import StartMenu from "./components/startMenu.svelte";
+import ActionBar from "./components/ActionBar.svelte";
+import Chatbox from "./components/Chatbox.svelte";
+import RightMenu from "./components/RightMenu.svelte";
+import RoomList from "./components/RoomList.svelte";
+import StartMenu from "./components/StartMenu.svelte";
 import { specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";

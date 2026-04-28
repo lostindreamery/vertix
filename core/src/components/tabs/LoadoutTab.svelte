@@ -3,7 +3,7 @@
 	import { st } from "../../state.svelte.ts";
 	import type { GenData } from "../../types.ts";
 	import { getItemRarityColor, loadImageData } from "../../utils.ts";
-	import CosmeticTooltip from "./cosmeticTooltip.svelte";
+	import CosmeticTooltip from "./CosmeticTooltip.svelte";
 
 	let currentScreen:
 		| "main"

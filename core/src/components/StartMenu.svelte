@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { st } from "../state.svelte";
-	import Controls from "./controls.svelte";
-	import Settings from "./settings.svelte";
+	import Controls from "./Controls.svelte";
+	import Settings from "./Settings.svelte";
 
 	interface Props {
 		startGame: () => Promise<void>;

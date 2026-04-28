@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AccountTab from "./tabs/accountTab.svelte";
-	import LoadoutTab from "./tabs/loadoutTab.svelte";
-	import ModTab from "./tabs/modTab.svelte";
+	import AccountTab from "./tabs/AccountTab.svelte";
+	import LoadoutTab from "./tabs/LoadoutTab.svelte";
+	import ModTab from "./tabs/ModTab.svelte";
 
 	interface Props {
 		loadModPack: (url: string, isBaseAssets: boolean) => Promise<false | undefined>;
