@@ -178,7 +178,7 @@
 <div class="cosmeticSelector" style:display={currentScreen === "hat" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT HAT</h3>
 	<div>
-		{#if st.cosmetics.hats}
+		<div class="hatSelectItem" onclick={() => {st.loadout.hat = null; currentScreen = "main"}}>Default</div>
 			{#each st.cosmetics.hats as hat}
 				<div
 					class="hatSelectItem"
@@ -190,9 +190,6 @@
 					<CosmeticTooltip type="hat" item={hat} />
 				</div>
 			{/each}
-		{:else}
-			<div class="hatSelectItem" onclick={() => {st.loadout.hat = null; currentScreen = "main"}}>Default</div>
-		{/if}
 	</div>
 </div>
 
