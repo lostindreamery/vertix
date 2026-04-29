@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { st } from "../state.svelte.ts";
+	import { getCurrentWeapon } from "../utils.ts";
 	import ActionBar from "./ActionBar.svelte";
 	import Chatbox from "./Chatbox.svelte";
 	import DropUpLink from "./DropUpLink.svelte";
@@ -13,9 +15,16 @@
 	<div id="statContainer">
 		<div id="health">
 			<span class="title" id="healthText">HEALTH </span>
-			<span class="title" id="healthValue">100</span>
+			<span class="title" id="healthValue" style:color={st.player.health <= 10 ? "#e06363" : "#fff"}>
+				{st.player.health}
+			</span>
 		</div>
-		<div id="ammo"><span class="title" id="ammoText">AMMO </span> <span class="title" id="ammoValue">0</span></div>
+		<div id="ammo">
+			<span class="title" id="ammoText">AMMO </span>
+			<span class="title" id="ammoValue">
+				{st.player.weapons?.length ? getCurrentWeapon(st.player).ammo.toString() : 0}
+			</span>
+		</div>
 	</div>
 	<div id="statContainer2">
 		<div id="map"><canvas id="mapc"></canvas></div>
@@ -50,7 +59,7 @@
 		<div id="scoreHolder">
 			<div id="score">
 				<span class="title" id="scoreText">SCORE </span>
-				<span class="title" id="scoreValue">0</span>
+				<span class="title" id="scoreValue">{st.player.score}</span>
 			</div>
 		</div>
 	</div>

@@ -910,7 +910,6 @@ function setupSocket(sock: Socket) {
 		} else {
 			players.push(st.player);
 		}
-		updateUiStats(st.player);
 		if (inMainMenu) {
 			loadingWrapper.style.display = "none";
 			inMainMenu = false;
@@ -976,7 +975,6 @@ function setupSocket(sock: Socket) {
 			b.health = a.h;
 			if (b.index == st.player.index) {
 				updatePlayerInfo(b);
-				updateUiStats(b);
 			}
 		}
 	});
@@ -994,7 +992,6 @@ function setupSocket(sock: Socket) {
 			b.weapons[a].reloadTime = 0;
 			b.weapons[a].ammo = b.weapons[a].maxAmmo;
 			window.setCooldownAnimation(a, b.weapons[a].reloadTime, false);
-			updateUiStats(b);
 		}
 	});
 	sock.on("3", (event) => {
@@ -1486,18 +1483,6 @@ function removeUser(userIndex: number) {
 		}
 	}
 }
-function updateUiStats(player: Player) {
-	document.getElementById("scoreValue")!.textContent = player.score.toString();
-	if (player.weapons.length > 0) {
-		document.getElementById("ammoValue")!.textContent = getCurrentWeapon(player).ammo.toString();
-	}
-	document.getElementById("healthValue")!.textContent = player.health.toString();
-	if (player.health <= 10) {
-		document.getElementById("healthValue")!.style.color = "#e06363";
-	} else {
-		document.getElementById("healthValue")!.style.color = "#fff";
-	}
-}
 function updateUserValue(data: any) {
 	var updated = false;
 	const tmpUser = findUserByIndex(data.i);
@@ -1541,7 +1526,6 @@ function updateUserValue(data: any) {
 	}
 	if (tmpUser.index == st.player.index) {
 		updatePlayerInfo(tmpUser);
-		updateUiStats(tmpUser);
 	}
 	if (updated) {
 		if (st.gameOver) {
@@ -2416,7 +2400,6 @@ function playerSwapWeapon(tmpPlayer: Player, change: number) {
 		tmpPlayer.currentWeapon = 0;
 	}
 	playerEquipWeapon(tmpPlayer, tmpPlayer.currentWeapon);
-	updateUiStats(tmpPlayer);
 	socket.emit("sw", tmpPlayer.currentWeapon);
 }
 function playerEquipWeapon(tmpPlayer: Player, weaponId: number) {
@@ -2464,7 +2447,6 @@ function shootBullet(source: Player) {
 	if (sourceWep.ammo <= 0) {
 		playerReload(source, true);
 	}
-	updateUiStats(source);
 }
 function playerReload(player: Player, shouldEmit: boolean) {
 	if (
