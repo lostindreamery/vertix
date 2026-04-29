@@ -3,11 +3,6 @@
 	import LoadoutTab from "./tabs/LoadoutTab.svelte";
 	import ModTab from "./tabs/ModTab.svelte";
 
-	interface Props {
-		loadModPack: (url: string, isBaseAssets: boolean) => Promise<false | undefined>;
-	}
-	const { loadModPack }: Props = $props();
-
 	let currentTab: "loadoutTab" | "accountTab" | "modTab" = $state("loadoutTab");
 </script>
 
@@ -35,7 +30,7 @@
 <div class="tabcontent" style:display={currentTab === "accountTab" ? "block" : "none"}><AccountTab /></div>
 
 <!-- MOD TAB -->
-<div class="tabcontent" style:display={currentTab === "modTab" ? "block" : "none"}><ModTab {loadModPack} /></div>
+<div class="tabcontent" style:display={currentTab === "modTab" ? "block" : "none"}><ModTab /></div>
 
 <style>
 	ul.tab {

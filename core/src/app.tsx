@@ -1,11 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
-import ActionBar from "./components/ActionBar.svelte";
-import Chatbox from "./components/Chatbox.svelte";
-import RightMenu from "./components/RightMenu.svelte";
-import RoomList from "./components/RoomList.svelte";
-import StartMenu from "./components/StartMenu.svelte";
+import App from "./components/App.svelte";
 import { specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
@@ -53,32 +49,13 @@ const {
 	getItemRarityColor,
 } = utils;
 
-mount(StartMenu, {
-	target: document.getElementById("startMenu")!,
-	props: {
-		startGame,
-	},
-});
-mount(RoomList, {
-	target: document.getElementById("roomWrapper")!,
-	props: { joinRoom },
-});
-mount(RightMenu, {
-	target: document.getElementById("rightMenu")!,
-	props: {
-		loadModPack,
-	},
-});
-const { setCooldownAnimation } = mount(ActionBar, {
-	target: document.getElementById("actionBar")!,
-});
-const { addChatLine } = mount(Chatbox, {
-	target: document.getElementById("chatbox")!,
+mount(App, {
+	target: document.querySelector("body")!,
 });
 flushSync();
 
 var playerClassIndex: number | undefined;
-var socket: Socket = undefined as any as Socket; // O_O
+var socket: Socket = null!; // O_O
 var reason: string | undefined;
 var currentFPS = 0;
 var fillCounter = 0;
@@ -108,6 +85,12 @@ var loggedIn = false;
 
 const loadingWrapper = document.getElementById("loadingWrapper")!;
 
+declare global {
+	interface Window {
+		startGame: typeof startGame;
+	}
+}
+window.startGame = startGame;
 async function startGame() {
 	if (!st.startingGame && !changingLobby) {
 		st.startingGame = true;
@@ -474,7 +457,6 @@ let flags: any[] = []; // todo
 let bullets: Projectile[] = [];
 
 var mapTileScale = 0;
-var leaderboard = [];
 const keys = {
 	u: false,
 	d: false,
@@ -484,9 +466,6 @@ const keys = {
 	s: false,
 	rl: false,
 };
-var reenviar = true;
-var directionLock = false;
-var directions = [];
 var mainCanvas = document.getElementById("cvs")! as HTMLCanvasElement;
 mainCanvas.width = window.innerWidth;
 mainCanvas.height = window.innerHeight;
@@ -645,26 +624,25 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
 			if (tmpChatUser.index === st.player.index) return;
-			addChatLine(tmpChatUser.name, a[1], tmpChatUser.index === st.player.index, tmpChatUser.team);
+			window.addChatLine(tmpChatUser.name, a[1], tmpChatUser.index === st.player.index, tmpChatUser.team);
 		} else if (a[0] === -1) {
-			addChatLine("", a[1], false, "system");
+			window.addChatLine("", a[1], false, "system");
 		} else {
-			addChatLine("", a[1], false, "notif");
+			window.addChatLine("", a[1], false, "notif");
 		}
 	} catch (b) {
 		console.log(b);
 	}
 }
-var context = mainCanvas.getContext("2d")!;
-var graph = context;
+const graph = mainCanvas.getContext("2d")!;
 window.graph = graph;
 declare global {
 	interface Window {
 		graph: CanvasRenderingContext2D;
 	}
 }
-var mapCanvas = document.getElementById("mapc")! as HTMLCanvasElement;
-var mapContext = mapCanvas.getContext("2d")!;
+const mapCanvas = document.getElementById("mapc")! as HTMLCanvasElement;
+const mapContext = mapCanvas.getContext("2d")!;
 mapCanvas.width = 200;
 mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
@@ -685,12 +663,10 @@ function kickPlayer(secondReason: string) {
 	updateGameLoop();
 	stopAllSounds();
 }
-var pingText = document.getElementById("pingText")!;
-var fpsText = document.getElementById("fpsText")!;
-var pingStart = 0;
+
+let pingStart = 0;
 function receivePing() {
-	var a = Date.now() - pingStart;
-	pingText.replaceChildren(<>PING {a}</>);
+	document.getElementById("pingText")!.replaceChildren(<>PING {Date.now() - pingStart}</>);
 }
 var pingInterval: ReturnType<typeof setInterval> | null = null;
 function setupSocket(sock: Socket) {
@@ -1012,7 +988,7 @@ function setupSocket(sock: Socket) {
       */
 			b.weapons[a].reloadTime = 0;
 			b.weapons[a].ammo = b.weapons[a].maxAmmo;
-			setCooldownAnimation(a, b.weapons[a].reloadTime, false);
+			window.setCooldownAnimation(a, b.weapons[a].reloadTime, false);
 			updateUiStats(b);
 		}
 	});
@@ -1143,9 +1119,6 @@ function setupSocket(sock: Socket) {
 	sock.on("8", (a) => {
 		document.getElementById("nextGameTimer")!.textContent = `${a}: UNTIL NEXT ROUND`;
 	});
-}
-function likePlayerStat(a: any) {
-	socket.emit("like", a);
 }
 function updateVoteStats(a: any) {
 	document.getElementById(`votesText${a.i}`)!.textContent = `${a.n}: ${a.v}`;
@@ -1450,17 +1423,17 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 			let btnText = document.createTextNode(" NICE");
 			btn.appendChild(btnText);
 			btn.setAttribute("type", "button");
-			let m = data[i];
+			let row = data[i];
 			btn.onclick = () => {
 				mainCanvas.focus();
-				likePlayerStat(m.pos);
+				socket.emit("like", row.pos);
 				for (let i = 0; i < buttonCount; ++i) {
 					document
 						.getElementById(`gameStatLikeButton${i}`)!
 						.setAttribute("class", "gameStatLikeButton");
 				}
-				if (currentLikeButton !== m.uID) {
-					currentLikeButton = m.uID ?? null;
+				if (currentLikeButton !== row.uID) {
+					currentLikeButton = row.uID ?? null;
 					btn.setAttribute("class", "gameStatLikeButtonA");
 				} else {
 					currentLikeButton = null;
@@ -1468,12 +1441,12 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 			};
 			btn.setAttribute("id", `gameStatLikeButton${buttonCount}`);
 			buttonCount++;
-			if (m.uID === currentLikeButton) {
+			if (row.uID === currentLikeButton) {
 				btn.setAttribute("class", "gameStatLikeButtonA");
 			} else {
 				btn.setAttribute("class", "gameStatLikeButton");
 			}
-			btn.style.display = m.pos === st.player.index ? "none" : "block";
+			btn.style.display = row.pos === st.player.index ? "none" : "block";
 			trow.appendChild(btn);
 			let tmpDiv = document.createElement("div");
 			tmpDiv.textContent = data[i].text.toString();
@@ -1888,7 +1861,7 @@ function updateGameLoop() {
 	fpsUpdateDelta += delta;
 	if (fpsUpdateDelta >= 1000) {
 		const average = fpsSamples.reduce((a, b) => a + b) / fpsSamples.length;
-		fpsText.textContent = `FPS ${Math.round(average)}`;
+		document.getElementById("fpsText")!.textContent = `FPS ${Math.round(average)}`;
 		fpsUpdateDelta = 0;
 		fpsSamples = [];
 	}
@@ -1899,23 +1872,18 @@ function updateGameLoop() {
 	var doJump = 0;
 	if (keys.u) {
 		verticalDT = -1;
-		// temp = 0;
 	}
 	if (keys.d) {
 		verticalDT = 1;
-		// temp = 0;
 	}
 	if (keys.r) {
 		horizontalDT = 1;
-		// temp = 0;
 	}
 	if (keys.l) {
 		horizontalDT = -1;
-		// temp = 0;
 	}
 	if (keys.s) {
 		doJump = 0;
-		// temp = 0;
 	}
 	var b = horizontalDT;
 	var d = verticalDT;
@@ -2062,7 +2030,7 @@ function updateGameLoop() {
 		}
 	}
 	if (st.settings.showTrippy) {
-		context.globalAlpha = 0.25;
+		graph.globalAlpha = 0.25;
 	}
 }
 function otherJump(userIdx: number) {
@@ -2504,7 +2472,7 @@ function playerReload(player: Player, shouldEmit: boolean) {
 		if (shouldEmit) {
 			socket.emit("r");
 		}
-		setCooldownAnimation(player.currentWeapon, getCurrentWeapon(player).reloadTime, true);
+		window.setCooldownAnimation(player.currentWeapon, getCurrentWeapon(player).reloadTime, true);
 	}
 }
 function findServerBullet(bulletIndex: number) {
@@ -2583,6 +2551,12 @@ function updateBullets(delta: number) {
 	}
 }
 
+declare global {
+	interface Window {
+		joinRoom: typeof joinRoom;
+	}
+}
+window.joinRoom = joinRoom;
 async function joinRoom(roomName: string) {
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
@@ -2684,8 +2658,7 @@ var wallSprite: Sprite | null = null;
 var darkFillerSprite: Sprite | null = null;
 var healthPackSprite: Sprite | null = null;
 var lootCrateSprite: Sprite | null = null;
-var weaponWidth = 27;
-var weaponHeight = 54;
+
 function loadDefaultSprites(base: string) {
 	cachedShadows = [];
 	flagSprites = [];
@@ -2764,7 +2737,11 @@ function setModInfoText(info: string) {
 	}
 }
 
-//@ts-expect-error
+declare global {
+	interface Window {
+		loadModPack: typeof loadModPack;
+	}
+}
 window.loadModPack = loadModPack;
 async function loadModPack(url: string, isBaseAssets: boolean) {
 	try {
@@ -2802,7 +2779,7 @@ async function loadModPack(url: string, isBaseAssets: boolean) {
 			let fileFormat = entry.filename.split(".")[entry.filename.split(".").length - 1];
 			let basePath = entry.filename.split("/")[0];
 			if (basePath === "scripts") {
-				let data = await (entry as zip.FileEntry).getData(new zip.TextWriter());
+				let data = await entry.getData(new zip.TextWriter());
 				if (entry.filename.includes("modinfo")) {
 					setModInfoText(data);
 				} else if (entry.filename.includes("cssmod")) {
@@ -2822,14 +2799,12 @@ async function loadModPack(url: string, isBaseAssets: boolean) {
 					)!;
 				}
 			} else if (basePath === "sprites") {
-				let data = await (entry as zip.FileEntry).getData(new zip.BlobWriter("image/png"));
+				let data = await entry.getData(new zip.BlobWriter("image/png"));
 				let imgAsDataURL = URL.createObjectURL(data);
 				localStorage.setItem(entry.filename, imgAsDataURL);
 			} else if (basePath === "sounds") {
 				entry.filename = entry.filename.replace(`.${fileFormat}`, "");
-				let data = await (entry as zip.FileEntry).getData(
-					new zip.BlobWriter(`audio/${fileFormat}`),
-				);
+				let data = await entry.getData(new zip.BlobWriter(`audio/${fileFormat}`));
 				let soundAsDataURL = URL.createObjectURL(data);
 				localStorage.setItem(`${entry.filename}data`, soundAsDataURL);
 				localStorage.setItem(`${entry.filename}format`, fileFormat);
@@ -3081,16 +3056,13 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 	}
 	return cachedWeaponSprites[tmpIndex];
 }
-var playerCanvas = document.createElement("canvas") as SpriteCanvas;
-var playerContext = playerCanvas.getContext("2d")!;
-var initPlayerCanv = false;
+const playerCanvas = document.createElement("canvas");
+playerCanvas.width = 300;
+playerCanvas.height = 500;
+const playerContext = playerCanvas.getContext("2d")!;
+playerContext.imageSmoothingEnabled = false;
+
 function drawGameObjects(delta: number) {
-	if (!initPlayerCanv) {
-		playerCanvas.width = Math.round(300);
-		playerCanvas.height = Math.round(500);
-		playerContext.imageSmoothingEnabled = false;
-		initPlayerCanv = true;
-	}
 	var e = null;
 	var f = null;
 	var d = null;
@@ -3378,45 +3350,45 @@ function drawPlayerNames() {
 		// h = graph.measureText(playerName);
 		let nameColor = plr.team !== st.player.team ? "#d95151" : "#5151d9";
 		if (st.settings.showNames) {
-			let renderedName = renderShadedAnimText(playerName, d * textSizeMult, "#ffffff", 5, "");
-			if (renderedName != undefined) {
+			const renderedName = renderShadedAnimText(playerName, d * textSizeMult, "#ffffff", 5, "");
+			graph.drawImage(
+				renderedName,
+				shapeX - renderedName.width / 2,
+				shapeY - plr.height * 1.4 - renderedName.height / 2,
+				renderedName.width,
+				renderedName.height,
+			);
+			if (rankText) {
+				const renderedRank = renderShadedAnimText(
+					rankText,
+					d * 1.6 * textSizeMult,
+					"#ffffff",
+					6,
+					"",
+				);
 				graph.drawImage(
-					renderedName,
-					shapeX - renderedName.width / 2,
-					shapeY - plr.height * 1.4 - renderedName.height / 2,
-					renderedName.width,
-					renderedName.height,
+					renderedRank,
+					shapeX - renderedName.width / 2 - renderedRank.width - textSizeMult * 5,
+					shapeY - plr.height * 1.4 - (renderedRank.height - renderedName.height / 2),
+					renderedRank.width,
+					renderedRank.height,
 				);
 			}
-			if (rankText != "") {
-				let renderedRank = renderShadedAnimText(rankText, d * 1.6 * textSizeMult, "#ffffff", 6, "");
-				if (renderedRank != undefined) {
-					graph.drawImage(
-						renderedRank,
-						shapeX - renderedName.width / 2 - renderedRank.width - textSizeMult * 5,
-						shapeY - plr.height * 1.4 - (renderedRank.height - renderedName.height / 2),
-						renderedRank.width,
-						renderedRank.height,
-					);
-				}
-			}
 			if (plr.account?.clan) {
-				let renderedClan = renderShadedAnimText(
+				const renderedClan = renderShadedAnimText(
 					` [${plr.account?.clan}]`,
 					d * textSizeMult,
 					nameColor,
 					5,
 					"",
 				);
-				if (renderedClan != undefined) {
-					graph.drawImage(
-						renderedClan,
-						shapeX + renderedName.width / 2,
-						shapeY - plr.height * 1.4 - renderedName.height / 2,
-						renderedClan.width,
-						renderedName.height,
-					);
-				}
+				graph.drawImage(
+					renderedClan,
+					shapeX + renderedName.width / 2,
+					shapeY - plr.height * 1.4 - renderedName.height / 2,
+					renderedClan.width,
+					renderedName.height,
+				);
 			}
 		}
 		graph.fillStyle = nameColor;

@@ -1,8 +1,4 @@
 <script lang="ts">
-	interface Props {
-		loadModPack: (url: string, isBaseAssets: boolean) => Promise<false | undefined>;
-	}
-	const { loadModPack }: Props = $props();
 
 	let textureModInput: HTMLInputElement;
 </script>
@@ -20,7 +16,7 @@
         <div class="modBtn" onclick="loadModPack('mods/mario/vertixmod.zip', false)"> Mario Mod Pack (5 mb)</div>
         <div class="modBtn" onclick="loadModPack('mods/nuclear-throne/vertixmod.zip', false)">Nuclear Throne</div>
     -->
-	<div class="modBtn" onclick={() => loadModPack('13xlc5n3ipudqsn', false)}>Sonic Mod Pack</div>
+	<div class="modBtn" onclick={() => window.loadModPack('13xlc5n3ipudqsn', false)}>Sonic Mod Pack</div>
 </div>
 <div>
 	<input
@@ -36,7 +32,7 @@
 		type="button"
 		id="texturePackButton"
 		class="smallMenuButton"
-		onclick={() => loadModPack(textureModInput.value, false)}
+		onclick={() => window.loadModPack(textureModInput.value, false)}
 	>
 		LOAD
 	</button>

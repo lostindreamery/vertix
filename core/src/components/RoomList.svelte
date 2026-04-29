@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { st } from "../state.svelte.ts";
 
-	interface Props {
-		joinRoom: (roomName: string) => void;
-	}
-	const { joinRoom }: Props = $props();
-
 	let refreshTick = $state(0);
 
 	const rooms = $derived.by(async () => {
@@ -28,7 +23,7 @@
 			Loading...
 		{/snippet}
 		{#each await rooms as room}
-			<div class="roomSelectItem" onclick={() => joinRoom(room.n)}>
+			<div class="roomSelectItem" onclick={() => window.joinRoom(room.n)}>
 				<b>{`${room.m}_${room.n}`}</b>
 				<b>{`${room.lb}% - ${room.pl}/${room.mxpl}`}</b>
 			</div>

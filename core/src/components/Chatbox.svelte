@@ -1,4 +1,4 @@
-<script lang="ts">
+<script module lang="ts">
 	import { tick } from "svelte";
 	import { st } from "../state.svelte.ts";
 
@@ -26,6 +26,13 @@
 			refocusCanvas();
 		}
 	}
+
+	declare global {
+		interface Window {
+			addChatLine: typeof addChatLine;
+		}
+	}
+	window.addChatLine = addChatLine;
 	export function addChatLine(author: string, text: string, fromSelf: boolean, type: string) {
 		const source =
 			type === "system" || type === "notif" ? type : fromSelf ? "me" : st.player.team === type ? "blue" : "red";

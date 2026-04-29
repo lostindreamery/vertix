@@ -1,8 +1,14 @@
-<script lang="ts">
+<script module lang="ts">
 	import { st } from "../state.svelte.ts";
 
 	const cooldownMap: Record<number, HTMLElement> = {};
 
+	declare global {
+		interface Window {
+			setCooldownAnimation: typeof setCooldownAnimation;
+		}
+	}
+	window.setCooldownAnimation = setCooldownAnimation;
 	export function setCooldownAnimation(weaponIdx: number, time: number, play: boolean) {
 		const tmpDiv = cooldownMap[weaponIdx];
 		if (play) {

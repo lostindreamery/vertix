@@ -3,11 +3,6 @@
 	import Controls from "./Controls.svelte";
 	import Settings from "./Settings.svelte";
 
-	interface Props {
-		startGame: () => Promise<void>;
-	}
-	const { startGame }: Props = $props();
-
 	let accordionState: "settings" | "controls" | null = $state(null);
 	function accordionClick(elem: Exclude<typeof accordionState, null>) {
 		if (elem === accordionState) {
@@ -26,10 +21,10 @@
 	id="playerNameInput"
 	maxlength="15"
 	bind:value={st.playerName}
-	onkeydown={(e) => {if (e.code === "Enter") startGame()}}
+	onkeydown={(e) => {if (e.code === "Enter") window.startGame()}}
 >
 <br>
-<button type="button" id="startButton" onclick={() => startGame()}>ENTER GAME</button>
+<button type="button" id="startButton" onclick={() => window.startGame()}>ENTER GAME</button>
 
 <button type="button" id="leaderButton" onclick={() => window.open("/leaderboards.html", "_blank")}>
 	LEADERBOARDS
