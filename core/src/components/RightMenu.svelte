@@ -58,6 +58,9 @@
 	.tablinks:hover {
 		background-color: #e6e6e6;
 	}
+	.tablinks.active {
+		background-color: #d9d9d9;
+	}
 	.tabcontent {
 		width: 300px;
 		display: none;
