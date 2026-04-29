@@ -1,19 +1,14 @@
 <script lang="ts">
-    import ActionBar from "./ActionBar.svelte";
-    import Chatbox from "./Chatbox.svelte";
-    import RightMenu from "./RightMenu.svelte";
-    import RoomList from "./RoomList.svelte";
-    import StartMenu from "./StartMenu.svelte";
-
+	import ActionBar from "./ActionBar.svelte";
+	import Chatbox from "./Chatbox.svelte";
+	import RightMenu from "./RightMenu.svelte";
+	import RoomList from "./RoomList.svelte";
+	import StartMenu from "./StartMenu.svelte";
 </script>
 <div id="mobileMessage"></div>
 <div id="gameAreaWrapper">
-	<div id="chatbox">
-		<Chatbox />
-	</div>
-	<div id="actionBar">
-		<ActionBar />
-	</div>
+	<div id="chatbox"><Chatbox /></div>
+	<div id="actionBar"><ActionBar /></div>
 	<div id="statContainer">
 		<div id="health">
 			<span class="title" id="healthText">HEALTH </span>
@@ -84,17 +79,11 @@
 
 <div id="startMenuWrapper">
 	<div id="mainTitleText">VERTIX ONLINE</div>
-	<div id="roomWrapper">
-		<RoomList />
-	</div>
-	<div id="startMenu">
-		<StartMenu />
-	</div>
+	<div id="roomWrapper"><RoomList /></div>
+	<div id="startMenu"><StartMenu /></div>
 
 	<!-- RIGHT MENU -->
-	<div id="rightMenu">
-        <RightMenu />
-    </div>
+	<div id="rightMenu"><RightMenu /></div>
 </div>
 <div id="linkBoxRight">
 	<div class="dropUpLink">

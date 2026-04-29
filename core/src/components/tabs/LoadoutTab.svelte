@@ -177,17 +177,17 @@
 	<h3 class="menuHeaderTabbed">SELECT HAT</h3>
 	<div>
 		<div class="hatSelectItem" onclick={() => {st.loadout.hat = null; currentScreen = "main"}}>Default</div>
-			{#each st.cosmetics.hats as hat}
-				<div
-					class="hatSelectItem"
-					style:color={getItemRarityColor(hat.chance)}
-					onclick={() => {st.loadout.hat = hat; currentScreen = "main"}}
-				>
-					{hat.name}
-					x{hat.count + 1}
-					<CosmeticTooltip type="hat" item={hat} />
-				</div>
-			{/each}
+		{#each st.cosmetics.hats as hat}
+			<div
+				class="hatSelectItem"
+				style:color={getItemRarityColor(hat.chance)}
+				onclick={() => {st.loadout.hat = hat; currentScreen = "main"}}
+			>
+				{hat.name}
+				x{hat.count + 1}
+				<CosmeticTooltip type="hat" item={hat} />
+			</div>
+		{/each}
 	</div>
 </div>
 

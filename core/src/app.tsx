@@ -624,7 +624,12 @@ function messageFromServer(a: [userIdx: number, userMsg: string]) {
 		let tmpChatUser = findUserByIndex(a[0]);
 		if (tmpChatUser != null) {
 			if (tmpChatUser.index === st.player.index) return;
-			window.addChatLine(tmpChatUser.name, a[1], tmpChatUser.index === st.player.index, tmpChatUser.team);
+			window.addChatLine(
+				tmpChatUser.name,
+				a[1],
+				tmpChatUser.index === st.player.index,
+				tmpChatUser.team,
+			);
 		} else if (a[0] === -1) {
 			window.addChatLine("", a[1], false, "system");
 		} else {
