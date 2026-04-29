@@ -98,41 +98,6 @@ div {
 	vertical-align: middle;
 }
 
-.dropUpLink {
-	position: relative;
-	display: inline-block;
-	color: #5151d9;
-}
-.dropUpLink .dropdown {
-	position: absolute;
-	padding: 5px;
-	margin: 0px 0px 10px 0px;
-	list-style-type: none;
-	background-color: #fff;
-	border-radius: 1px 1px 1px 1px;
-}
-
-[popover] {
-	position-area: top;
-	border: none;
-}
-
-[popovertarget] {
-	background: none;
-	color: inherit;
-	border: none;
-	padding: 0;
-	font: inherit;
-	outline: inherit;
-	cursor: pointer;
-}
-
-.dropUpLink .dropdown li a {
-	width: 100%;
-	white-space: nowrap;
-	display: block;
-}
-
 #statContainer2 {
 	top: 10px;
 	left: 10px;

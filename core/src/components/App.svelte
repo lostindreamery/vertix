@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ActionBar from "./ActionBar.svelte";
 	import Chatbox from "./Chatbox.svelte";
+	import DropUpLink from "./DropUpLink.svelte";
 	import RightMenu from "./RightMenu.svelte";
 	import RoomList from "./RoomList.svelte";
 	import StartMenu from "./StartMenu.svelte";
@@ -86,81 +87,66 @@
 	<div id="rightMenu"><RightMenu /></div>
 </div>
 <div id="linkBoxRight">
-	<div class="dropUpLink">
-		<button popovertarget="di3">MODS</button>
-		<ul id="di3" class="dropdown" popover="hint">
-			<li>
-				<a
-					target="_blank"
-					href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/43ol5a/texture_mods_please_post_all_texture_mods_here/"
-				>
-					FIND A MOD
-				</a>
-			</li>
-			<li>
-				<a
-					target="_blank"
-					href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/444pzc/guide_how_to_make_a_mod/"
-				>
-					MAKE A MOD
-				</a>
-			</li>
-		</ul>
-	</div>
+	<DropUpLink title="MODS">
+		<li>
+			<a
+				target="_blank"
+				href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/43ol5a/texture_mods_please_post_all_texture_mods_here/"
+			>
+				FIND A MOD
+			</a>
+		</li>
+		<li>
+			<a
+				target="_blank"
+				href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/444pzc/guide_how_to_make_a_mod/"
+			>
+				MAKE A MOD
+			</a>
+		</li>
+	</DropUpLink>
 	|
-	<div class="dropUpLink">
-		<button popovertarget="di4">COMMUNITY</button>
-		<ul id="di4" class="dropdown" popover="hint">
-			<li><a target="_blank" href="">FORUM</a></li>
-			<li><a target="_blank" href="">FACEBOOK</a></li>
-			<li><a target="_blank" href="">DISCORD</a></li>
-			<li><a target="_blank" href="">YOUTUBE</a></li>
-		</ul>
-	</div>
+	<DropUpLink title="COMMUNITY">
+		<li><a target="_blank" href="">FORUM</a></li>
+		<li><a target="_blank" href="">FACEBOOK</a></li>
+		<li><a target="_blank" href="">DISCORD</a></li>
+		<li><a target="_blank" href="">YOUTUBE</a></li>
+	</DropUpLink>
 	|
-	<div class="dropUpLink">
-		<button popovertarget="di5">OTHER</button>
-		<ul id="di5" class="dropdown" popover="hint">
-			<li>
-				<a
-					target="_blank"
-					href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index"
-				>
-					WIKI
-				</a>
-			</li>
-			<li><a target="_blank" href="./terms.txt">TERMS OF USE</a></li>
-			<li><a target="_blank" href="./privacy.txt">PRIVACY POLICY</a></li>
-			<li><a target="_blank" href="./versions.txt">VERSION HISTORY</a></li>
-		</ul>
-	</div>
+	<DropUpLink title="OTHER">
+		<li>
+			<a
+				target="_blank"
+				href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index"
+			>
+				WIKI
+			</a>
+		</li>
+		<li><a target="_blank" href="./terms.txt">TERMS OF USE</a></li>
+		<li><a target="_blank" href="./privacy.txt">PRIVACY POLICY</a></li>
+		<li><a target="_blank" href="./versions.txt">VERSION HISTORY</a></li>
+	</DropUpLink>
 	| <a target="_blank" href="./versions.txt">V3.8 (CHANGELOG)</a>
 </div>
 <div id="linkBoxLeft">
-	THANKS FOR PLAYING! |<!-- Donations -->
-	<div class="dropUpLink">
-		<button popovertarget="di1">DONATE</button>
-		<ul id="di1" class="dropdown" style="width:200px" popover="hint">
-			<div style="color: rgba(0, 0, 0, 0.6);">
-				PLEASE CONSIDER DONATING TO ONE OF
-				<a target="_blank" href="./donate.html">THESE</a>
-				CHARITIES.
-			</div>
-		</ul>
-	</div>
+	THANKS FOR PLAYING! |
+	<DropUpLink title="DONATE">
+		<div style="width: 200px; color: rgba(0, 0, 0, 0.6);">
+			PLEASE CONSIDER DONATING TO ONE OF
+			<a target="_blank" href="./donate.html">THESE</a>
+			CHARITIES.
+		</div>
+	</DropUpLink>
 	|
-	<div class="dropUpLink">
-		<button popovertarget="di2">SHARE</button>
-		<ul id="di2" class="dropdown" popover="hint">
-			<li><a target="_blank" href="https://www.facebook.com/sharer.php?u=https://vertix.io"> FACEBOOK </a></li>
-			<li>
-				<a
-					target="_blank"
-					href="https://twitter.com/share?url=https://vertix.io&amp;text=Check out&amp;hashtags=vertix.io"
-				>
-					TWITTER
-				</a>
-			</li>
-		</ul>
-	</div>
+	<DropUpLink title="SHARE">
+		<li><a target="_blank" href="https://www.facebook.com/sharer.php?u=https://vertix.io"> FACEBOOK </a></li>
+		<li>
+			<a
+				target="_blank"
+				href="https://twitter.com/share?url=https://vertix.io&amp;text=Check out&amp;hashtags=vertix.io"
+			>
+				TWITTER
+			</a>
+		</li>
+	</DropUpLink>
 </div>
