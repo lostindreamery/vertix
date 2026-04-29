@@ -154,9 +154,7 @@
 	<div>
 		<div
 			class="hatSelectItem"
-			onclick={() => {
-				st.loadout[currentScreen as "primaryCamo" | "secondaryCamo"] = null
-			}}
+			onclick={() => {st.loadout[currentScreen as "primaryCamo" | "secondaryCamo"] = null; currentScreen = "main"}}
 		>
 			Default
 		</div>
