@@ -2494,12 +2494,18 @@ declare global {
 		joinRoom: typeof joinRoom;
 	}
 }
+// so we don't take over and break the back and forward buttons
+// window.addEventListener("popstate", () => {
+// 	location.reload();
+// });
+
 window.joinRoom = joinRoom;
 async function joinRoom(roomName: string) {
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
 	if (room === st.player.room) return;
 	if (changingLobby) return;
+	// history.pushState(room, "", `${location.origin}/?${room}`);
 	changingLobby = true;
 	const s = io(`http://${ip}:${port}/${room}`, {
 		reconnection: true,
