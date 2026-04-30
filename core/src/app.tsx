@@ -103,7 +103,6 @@ async function startGame() {
 		}
 	}
 }
-var devTest = false;
 function enterGame() {
 	startSoundTrack(2);
 	document.getElementById("startMenuWrapper")!.style.display = "none";
@@ -165,8 +164,6 @@ window.onload = async () => {
 		document.getElementById("loadText")!.textContent = "MOBILE VERSION COMING SOON";
 		return;
 	}
-	document.documentElement.style.overflow = "hidden";
-	document.getElementById("gameAreaWrapper")!.style.opacity = "1";
 	drawMenuBackground();
 	hideUI(true);
 	resize();
@@ -175,11 +172,11 @@ window.onload = async () => {
 		loadingWrapper.style.display = "none";
 	});
 
-	const roomName = window.location.pathname.split("/")[1] || "";
+	const roomName = location.search.substring(1) || "";
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
 	if (!socket) {
-		socket = io(`http://${devTest ? "localhost" : ip}:${port}/${room}`, {
+		socket = io(`http://${ip}:${port}/${room}`, {
 			reconnection: true,
 			transports: ["websocket"],
 			forceNew: false,
@@ -348,43 +345,6 @@ function updateAccountPage(a: Account) {
 		clanSignUp.style.display = "block";
 		clanStats.style.display = "none";
 		clanHeader.textContent = "Clans";
-	}
-}
-function updateClanPage(clanData: any) {
-	document.getElementById("clanStatRank")!.replaceChildren(
-		<>
-			<b>Rank: </b>
-			{clanData.level}
-		</>,
-	);
-	document.getElementById("clanStatKD")!.replaceChildren(
-		<>
-			<b>Avg KD: </b>
-			{clanData.kd}
-		</>,
-	);
-	document.getElementById("clanStatFounder")!.replaceChildren(
-		<>
-			<b>Founder: </b>
-			{clanData.founder}
-		</>,
-	);
-	document.getElementById("clanStatMembers")!.replaceChildren(
-		<>
-			<b>Roster:</b>
-			{clanData.members}
-		</>,
-	);
-	let chatURL = clanData.chatURL;
-	if (chatURL !== "") {
-		if (!chatURL.match(/^https?:\/\//i)) {
-			chatURL = `http://${clanData}`;
-		}
-		clanChatLink.replaceChildren(
-			<a target="_blank" href={chatURL} rel="noopener">
-				Clan Chat
-			</a>,
-		);
 	}
 }
 function showUserStatPage(userName: string) {
@@ -811,8 +771,8 @@ function setupSocket(sock: Socket) {
 			editProfileMessage.textContent = a;
 		}
 	});
-	sock.on("dbClanStats", (a) => {
-		updateClanPage(a);
+	sock.on("dbClanStats", (clanData) => {
+		st.clanData = clanData;
 	});
 	sock.on("updAccStat", (a) => {
 		updateAccountPage(a);

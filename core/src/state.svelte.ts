@@ -24,6 +24,7 @@ export const st = $state({
 		weapons: [],
 	} as any as Player,
 	loggedIn: false,
+	clanData: {} as Record<string, string | number>,
 	playerName: "", // content of the player name input box
 	loadout: {
 		class: characterClasses[0] as (typeof characterClasses)[number],

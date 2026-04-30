@@ -62,15 +62,20 @@
 			<div id="clanDBMessage" class="serverRespMsg">Join or Create a Clan.</div>
 		</div>
 		<div id="clanStats" style="display:none;">
-			<div id="clanStatFounder"><b>Founder: </b>...</div>
-			<div id="clanStatRank"><b>Level: </b>...</div>
-			<div id="clanStatKD"><b>Avg KD: </b>...</div>
+			<div id="clanStatFounder"><b>Founder: </b>{st.clanData.founder ?? "..."}</div>
+			<div id="clanStatRank"><b>Rank: </b>{st.clanData.rank ?? "..."}</div>
+			<div id="clanStatKD"><b>Avg KD: </b>{st.clanData.kd ?? "..."}</div>
 			<div id="clanStatMembers">
 				<b>Roster: </b>
 				<br>
-				...
+				{st.clanData.members ?? "..."}
 			</div>
-			<div id="clanChatLink" style="margin-top:5px;"></div>
+			<div id="clanChatLink" style="margin-top:5px;">
+				{#if st.clanData.chatURL && typeof st.clanData.chatURL === "string"}
+					{@const chatURL = st.clanData.chatURL.startsWith("http") ? st.clanData.chatURL : `https://${st.clanData.chatURL}`}
+					<a target="_blank" href={chatURL} rel="noopener"> Clan Chat </a>
+				{/if}
+			</div>
 			<div id="clanAdminPanel" style="display:none;margin-top:10px;">
 				<input class="menuTextInput" placeholder="Clan Chat URL" id="clanChatInput" maxlength="50" style="width:95%;">
 				<button type="button" id="setChatClanButton" class="smallMenuButton" style="margin-top:10px;">UPDATE</button>
