@@ -23,6 +23,7 @@ export const st = $state({
 		dead: true,
 		weapons: [],
 	} as any as Player,
+	loggedIn: false,
 	playerName: "", // content of the player name input box
 	loadout: {
 		class: characterClasses[0] as (typeof characterClasses)[number],

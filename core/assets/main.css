@@ -89,7 +89,6 @@ div {
 	width: 50px;
 	vertical-align: middle;
 	image-rendering: pixelated;
-	filter: blur(0);
 }
 
 .modeVoteText {
@@ -526,7 +525,6 @@ div {
 	left: 50%;
 	margin-right: -50%;
 	transform: translate(-50%, -50%) scale(1);
-	filter: blur(0);
 }
 
 #voteModeContainer {
@@ -670,7 +668,6 @@ div {
 	width: 100%;
 	height: 100%;
 	position: absolute;
-	filter: blur(0);
 }
 #loadText {
 	color: #fff;
@@ -691,7 +688,6 @@ div {
 	padding: 5px;
 	opacity: 0;
 	display: inline-block;
-	filter: blur(0);
 }
 
 @keyframes lol {
@@ -730,7 +726,6 @@ div {
 	width: 100%;
 	height: 100%;
 	position: absolute;
-	filter: blur(0);
 }
 
 #startMenuWrapper {
@@ -742,7 +737,6 @@ div {
 	left: 50%;
 	margin-right: -50%;
 	transform: translate(-50%, -50%) scale(1);
-	filter: blur(0);
 }
 
 #mobileMessage {

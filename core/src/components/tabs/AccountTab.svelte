@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { st } from "../../state.svelte.ts";
 </script>
 <!-- NOT LOGGED IN -->
-<div id="loginWrapper">
+<div style:width="300px" style:display={st.loggedIn ? "none" : null}>
 	<h3 class="menuHeaderTabbed">LOGIN &amp; REGISTER</h3>
 	<input
 		type="text"
@@ -40,18 +41,18 @@
 	</div>
 </div>
 <!-- LOGGED IN -->
-<div id="loggedInWrapper" style="display:none;">
+<div style:display={st.loggedIn ? null : "none"}>
 	<div id="accountStatWrapper">
 		<h3 class="menuHeaderTabbed">YOUR STATS</h3>
 		<div id="rankProgressCont">
-			<div id="rankProgress"></div>
+			<div id="rankProgress" style:width={`${st.player.account?.rankPercent ?? 0}%`}></div>
 		</div>
-		<div id="accStatRank"><b>Rank: </b>...</div>
-		<div id="accStatWorldRank"><b>World Rank: </b>...</div>
-		<div id="accStatLikes"><b>Likes: </b>...</div>
-		<div id="accStatKills"><b>Kills: </b>...</div>
-		<div id="accStatDeaths"><b>Deaths: </b>...</div>
-		<div id="accStatKD"><b>KD: </b>...</div>
+		<div><b>Rank: </b>{st.player.account?.rank ?? "..."}</div>
+		<div><b>World Rank: </b>{st.player.account?.worldRank ?? "..."}</div>
+		<div><b>Likes: </b>{st.player.account?.likes ?? "..."}</div>
+		<div><b>Kills: </b>{st.player.account?.kills ?? "..."}</div>
+		<div><b>Deaths: </b>{st.player.account?.deaths ?? "..."}</div>
+		<div><b>KD: </b>{st.player.account?.kd ?? "..."}</div>
 		<h3 id="clanHeader">CLANS</h3>
 		<div id="clanSignUp" style="display:none;">
 			<input class="menuTextInput" placeholder="Clan Name" id="clanNameInput" maxlength="4" style="width:70%;">
@@ -116,19 +117,15 @@
 	</button>
 	<button
 		type="button"
-		id="profileButton"
 		class="smallMenuButton"
-		style="margin-top:10px; margin-bottom:0px; margin-left:5px; "
+		style="margin-top:10px; margin-bottom:0px; margin-left:5px;"
+		onclick={() => window.open(`/profile.html?${st.player.account.user_name}`, "_blank")}
 	>
 		PROFILE
 	</button>
 </div>
 
 <style>
-	#loginWrapper {
-		width: 300px;
-	}
-
 	#loginMessage {
 		margin-top: 10px;
 	}

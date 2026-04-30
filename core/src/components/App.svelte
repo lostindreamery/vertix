@@ -58,7 +58,7 @@
 		<div id="status"><span class="title">LEADERBOARD</span></div>
 		<div id="scoreHolder">
 			<div id="score">
-				<span class="title" id="scoreText">SCORE </span>
+				<span class="title" style="font-size: 18px">SCORE </span>
 				<span class="title" id="scoreValue">{st.player.score}</span>
 			</div>
 		</div>

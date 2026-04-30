@@ -75,13 +75,8 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 	alert("tried to open google play");
 	// openGooglePlay(false);
 }
-// var previousClass = 0;
-// var previousHat = 0;
-// var previousShirt = 0;
-// var previousSpray = 0;
 var changingLobby = false;
 var inMainMenu = true;
-var loggedIn = false;
 
 const loadingWrapper = document.getElementById("loadingWrapper")!;
 
@@ -142,8 +137,6 @@ var leaveClanButton = document.getElementById("leaveClanButton")!;
 var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
 var clanChatLink = document.getElementById("clanChatLink")!;
-var loginWrapper = document.getElementById("loginWrapper")!;
-var loggedInWrapper = document.getElementById("loggedInWrapper")!;
 var loginMessage = document.getElementById("loginMessage")!;
 var userNameInput = document.getElementById("usernameInput")! as HTMLInputElement;
 var userEmailInput = document.getElementById("emailInput")! as HTMLInputElement;
@@ -195,9 +188,9 @@ window.onload = async () => {
 		setupSocket(socket);
 	}
 	socket.once("connect", () => {
-		var logKey = localStorage.getItem("logKey");
-		var userName = localStorage.getItem("userName");
-		if (logKey && logKey !== "" && userName && userName !== "") {
+		let logKey = localStorage.getItem("logKey");
+		let userName = localStorage.getItem("userName");
+		if (logKey && userName) {
 			socket.emit("dbLogin", {
 				lgKey: logKey,
 				userName: userName,
@@ -205,7 +198,6 @@ window.onload = async () => {
 			});
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Logging in...";
-		} else {
 		}
 		document.getElementById("registerButton")!.onclick = () => {
 			socket.emit("dbReg", {
@@ -222,10 +214,8 @@ window.onload = async () => {
 			startLogin();
 		};
 		document.getElementById("logoutButton")!.onclick = () => {
-			loggedInWrapper.style.display = "none";
-			loginWrapper.style.display = "block";
 			loginMessage.textContent = "";
-			loggedIn = false;
+			st.loggedIn = false;
 			userName = logKey = "";
 			localStorage.setItem("logKey", "");
 			localStorage.setItem("userName", "");
@@ -330,43 +320,6 @@ var youtubeChannelInput = document.getElementById("youtubeChannelInput")! as HTM
 var editProfileMessage = document.getElementById("editProfileMessage")!;
 function updateAccountPage(a: Account) {
 	st.player.account = a;
-	document.getElementById("accStatRank")!.replaceChildren(
-		<>
-			<b>Rank: </b>
-			{a.rank}
-		</>,
-	);
-	document.getElementById("rankProgress")!.style.width = `${a.rankPercent}%`;
-	document.getElementById("accStatKills")!.replaceChildren(
-		<>
-			<b>Kills: </b>
-			{a.kills}
-		</>,
-	);
-	document.getElementById("accStatDeaths")!.replaceChildren(
-		<>
-			<b>Deaths: </b>
-			{a.deaths}
-		</>,
-	);
-	document.getElementById("accStatKD")!.replaceChildren(
-		<>
-			<b>KD: </b>
-			{a.kd}
-		</>,
-	);
-	document.getElementById("accStatWorldRank")!.replaceChildren(
-		<>
-			<b>World Rank: </b>
-			{a.worldRank}
-		</>,
-	);
-	document.getElementById("accStatLikes")!.replaceChildren(
-		<>
-			<b>Likes: </b>
-			{a.likes}
-		</>,
-	);
 	document.getElementById("profileButton")!.onclick = () => {
 		showUserStatPage(st.player.account.user_name);
 	};
@@ -752,12 +705,10 @@ function setupSocket(sock: Socket) {
 		if (d) {
 			loginMessage.style.display = "none";
 			loginMessage.textContent = "";
-			loginWrapper.style.display = "none";
-			loggedInWrapper.style.display = "block";
 			st.playerName = a.text;
 			localStorage.setItem("logKey", a.logKey);
 			localStorage.setItem("userName", a.text);
-			loggedIn = true;
+			st.loggedIn = true;
 			st.player.loggedIn = true;
 			const user = findUserByIndex(st.player.index);
 			if (user) {
