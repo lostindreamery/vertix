@@ -534,68 +534,69 @@ export class Room {
 	checkSpecialTiles(player: Player) {
 		for (const [i, pkup] of this.game.pickups.entries()) {
 			if (
-				pkup.active &&
-				dotInRect(player.x, player.y, pkup.x, pkup.y, 64, 64)
+				!pkup.active ||
+				!dotInRect(player.x, player.y, pkup.x, pkup.y, 64, 64)
+			)
+				continue;
+
+			if (
+				pkup.type === "healthpack" &&
+				player.health < player.maxHealth &&
+				!player.isBoss
 			) {
-				if (
-					pkup.type === "healthpack" &&
-					player.health < player.maxHealth &&
-					!player.isBoss
-				) {
-					player.totalHealing += player.maxHealth - player.health;
-					this.io.emit("upd", {
-						i: player.index,
-						hea: player.totalHealing,
-					});
-					player.health = player.maxHealth;
-					this.io.emit("1", {
-						gID: player.index,
-						h: player.health,
-					});
-				} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
-					player.score += 50;
-					this.io.emit("upd", {
-						i: player.index,
-						s: player.score,
-					});
-					this.updateScore(50, player);
-				} else {
-					return;
-				}
-				pkup.active = false;
-				this.io.emit("4", pkup, i, 0);
-				setTimeout(() => {
-					pkup.active = true;
-					this.io.emit("4", pkup, i, 0);
-				}, 15000);
+				player.totalHealing += player.maxHealth - player.health;
+				this.io.emit("upd", {
+					i: player.index,
+					hea: player.totalHealing,
+				});
+				player.health = player.maxHealth;
+				this.io.emit("1", {
+					gID: player.index,
+					h: player.health,
+				});
+			} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
+				player.score += 50;
+				this.io.emit("upd", {
+					i: player.index,
+					s: player.score,
+				});
+				this.updateScore(50, player);
+			} else {
+				return;
 			}
+			pkup.active = false;
+			this.io.emit("4", pkup, i, 0);
+			setTimeout(() => {
+				pkup.active = true;
+				this.io.emit("4", pkup, i, 0);
+			}, 15000);
 		}
 		if (this.game.mode.code === "hp" || this.game.mode.code === "zmtch") {
 			for (const tl of this.game.scoreTiles) {
 				if (
-					dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) &&
-					tl.objTeam !== player.team
-				) {
-					if (player.scoreCountdown <= 0) {
-						player.scoreCountdown = 1000;
-						const scored = this.game.mode.code === "hp" ? 10 : 100;
-						let tprt: ZoneEvent = { indx: player.index, scor: scored };
-						if (this.game.mode.code === "zmtch") {
-							const spawn = this.game.getSpawn(player);
-							player.x = tprt.newX = spawn.x;
-							player.y = tprt.newY = spawn.y;
-							player.totalGoals += 1;
-						}
-						this.io.emit("tprt", tprt);
-						player.score += scored;
-						this.io.emit("upd", {
-							i: player.index,
-							s: player.score,
-							goa: player.totalGoals,
-						});
-						this.updateScore(scored, player);
-					}
+					!dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) ||
+					tl.objTeam === player.team ||
+					player.scoreCountdown > 0
+				)
+					continue;
+
+				player.scoreCountdown = 1000;
+				const scored = this.game.mode.code === "hp" ? 10 : 100;
+				let tprt: ZoneEvent = { indx: player.index, scor: scored };
+				if (this.game.mode.code === "zmtch") {
+					const spawn = this.game.getSpawn(player);
+					player.x = tprt.newX = spawn.x;
+					player.y = tprt.newY = spawn.y;
+					player.totalGoals += 1;
 				}
+				this.io.emit("tprt", tprt);
+				player.score += scored;
+				this.io.emit("upd", {
+					i: player.index,
+					s: player.score,
+					goa: player.totalGoals,
+				});
+				this.updateScore(scored, player);
 			}
 			if (player.scoreCountdown >= 0) {
 				player.scoreCountdown -= player.delta;
