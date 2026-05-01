@@ -1,9 +1,5 @@
 somewhat of a mess
 
-to run: `pnpm i`, `pnpm dev`, http://localhost:5173.
-
-to format & lint: `pnpm biome check --write --reporter=summary`
-
 ### Todo
 
 - input validation
@@ -12,9 +8,9 @@ to format & lint: `pnpm biome check --write --reporter=summary`
 - room stuff
   - clearer side effects
   - way to cleanly open and close custom rooms
-- svelte
-  - main menu accordion
-  - side tabs
+- finish moving all ui logic to svelte components, remove jsx-dom
+  - the largest part remaining is the leaderboard/game over menu
+- simplify `setupSocket` logic (can we keep the same `io` instance and the same event handlers when reconnecting/switching rooms?)
 
 ## How to install and play locally
 
