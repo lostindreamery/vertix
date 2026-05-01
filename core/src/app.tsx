@@ -533,23 +533,19 @@ function keyUp(event: KeyboardEvent) {
 	}
 }
 function messageFromServer(a: [userIdx: number, userMsg: string]) {
-	try {
-		let tmpChatUser = findUserByIndex(a[0]);
-		if (tmpChatUser != null) {
-			if (tmpChatUser.index === st.player.index) return;
-			window.addChatLine(
-				tmpChatUser.name,
-				a[1],
-				tmpChatUser.index === st.player.index,
-				tmpChatUser.team,
-			);
-		} else if (a[0] === -1) {
-			window.addChatLine("", a[1], false, "system");
-		} else {
-			window.addChatLine("", a[1], false, "notif");
-		}
-	} catch (b) {
-		console.log(b);
+	let tmpChatUser = findUserByIndex(a[0]);
+	if (tmpChatUser != null) {
+		if (tmpChatUser.index === st.player.index) return;
+		window.addChatLine(
+			tmpChatUser.name,
+			a[1],
+			tmpChatUser.index === st.player.index,
+			tmpChatUser.team,
+		);
+	} else if (a[0] === -1) {
+		window.addChatLine("", a[1], false, "system");
+	} else {
+		window.addChatLine("", a[1], false, "notif");
 	}
 }
 const graph = mainCanvas.getContext("2d")!;
@@ -1020,14 +1016,10 @@ function setupSocket(sock: Socket) {
 		}
 	});
 	sock.on("7", (winner, userList, modeVoteData, isFading) => {
-		try {
-			st.gameOver = true;
-			document.getElementById("startMenuWrapper")!.style.display = "none";
-			showStatTable(userList, modeVoteData, winner, false, isFading, true);
-			startSoundTrack(1);
-		} catch (h) {
-			console.log(h);
-		}
+		st.gameOver = true;
+		document.getElementById("startMenuWrapper")!.style.display = "none";
+		showStatTable(userList, modeVoteData, winner, false, isFading, true);
+		startSoundTrack(1);
 	});
 	sock.on("8", (a) => {
 		document.getElementById("nextGameTimer")!.textContent = `${a}: UNTIL NEXT ROUND`;
@@ -2043,24 +2035,20 @@ resize();
 var grd: CanvasGradient | null = null;
 function drawEdgeShader() {
 	if (!graph) return;
-	try {
-		if (grd == null) {
-			grd = graph.createRadialGradient(
-				st.player.x - st.startX,
-				st.player.y - st.startY,
-				0,
-				st.player.x - st.startX,
-				st.player.y - st.startY,
-				st.maxScreenWidth / 2,
-			);
-			grd.addColorStop(0, "rgba(0,0,0,0.0)");
-			grd.addColorStop(1, "rgba(0,0,0,0.4");
-		}
-		graph.fillStyle = grd;
-		graph.fillRect(0, 0, st.maxScreenWidth, st.maxScreenHeight);
-	} catch (err) {
-		console.error(err);
+	if (grd == null) {
+		grd = graph.createRadialGradient(
+			st.player.x - st.startX,
+			st.player.y - st.startY,
+			0,
+			st.player.x - st.startX,
+			st.player.y - st.startY,
+			st.maxScreenWidth / 2,
+		);
+		grd.addColorStop(0, "rgba(0,0,0,0.0)");
+		grd.addColorStop(1, "rgba(0,0,0,0.4");
 	}
+	graph.fillStyle = grd;
+	graph.fillRect(0, 0, st.maxScreenWidth, st.maxScreenHeight);
 }
 
 function drawGameLights(delta: number) {
@@ -2273,13 +2261,10 @@ function getSprite(fileName: string) {
 		b.isLoaded = false;
 		console.error(`File not Found: ${fileName}.png`);
 	};
-	try {
-		let tmpPicture = localStorage.getItem(`${fileName}.png`);
-		b.src = tmpPicture ? tmpPicture : "";
-		b.crossOrigin = "anonymous";
-	} catch (d) {
-		console.log(d);
-	}
+	let tmpPicture = localStorage.getItem(`${fileName}.png`);
+	b.src = tmpPicture ? tmpPicture : "";
+	b.crossOrigin = "anonymous";
+
 	spriteIndex++;
 	return b;
 }
