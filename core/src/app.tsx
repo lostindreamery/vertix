@@ -54,17 +54,14 @@ mount(App, {
 });
 flushSync();
 
-var playerClassIndex: number | undefined;
 var socket: Socket = null!; // O_O
 var reason: string | undefined;
-var currentFPS = 0;
 var fillCounter = 0;
 var currentLikeButton: number | null = null;
 var delta = 0;
 var currentTime = Date.now();
 var oldTime = Date.now();
 var count = -1;
-var clientPrediction = true;
 var inputNumber = 0;
 var thisInput: InputSendData[] = [];
 
@@ -114,7 +111,6 @@ function enterGame() {
 	animateOverlay = true;
 	if (st.player.dead) {
 		socket.emit("respawn");
-		playerClassIndex = st.characterClasses.findIndex((c) => c.classN === st.loadout.class.classN);
 		updateGameLoop();
 	} else {
 		inMainMenu = false;
@@ -620,9 +616,10 @@ function setupSocket(sock: Socket) {
 		st.player.room = b.room;
 		st.room = st.player.room;
 		st.player.name = st.playerName;
-		st.player.classIndex = playerClassIndex!;
+		st.player.classIndex = b.classIndex = st.characterClasses.findIndex(
+			(c) => c.folderName === st.loadout.class.folderName,
+		);
 		b.name = st.player.name;
-		b.classIndex = playerClassIndex;
 		sock.emit("gotit", b, d, Date.now(), false);
 		st.player.dead = true;
 		if (d) {
@@ -1542,76 +1539,6 @@ function updatePlayerInfo(data: Partial<Player>) {
 	st.player.score = data.score!;
 	st.player.health = data.health!;
 }
-// var currentSpray = document.getElementById("currentSpray")!;
-// var sprayList = document.getElementById("sprayList")!;
-// function updateSpraysList(sprays: any[]) {
-// 	let listContent: Node[] = [];
-// 	for (let i = 0; i < sprays.length; ++i) {
-// 		listContent.push(
-// 			<div
-// 				class="hatSelectItem"
-// 				id={`sprayItem${i + 1}`}
-// 				onClick={() => changeSpray(i + 1, sprays[i].id)}
-// 			>
-// 				{sprays[i].name}
-// 				<div
-// 					id={`sprayHoverImage${i + 1}`}
-// 					class="hoverTooltip"
-// 					style={{ width: "90px", height: "90px" }}
-// 				></div>
-// 			</div>,
-// 		);
-// 	}
-// 	sprayList.replaceChildren(...listContent);
-// 	// cursed
-// 	if (localStorage.getItem("previousSpray")) {
-// 		previousSpray = Number.parseInt(localStorage.getItem("previousSpray") ?? "NaN");
-// 		if (Number.isNaN(previousSpray)) {
-// 			changeSpray(1, sprays[1].id);
-// 			return;
-// 		}
-// 		try {
-// 			changeSpray(previousSpray, sprays[previousSpray - 1].id);
-// 		} catch (_) {
-// 			changeSpray(1, sprays[1].id);
-// 		}
-// 	} else {
-// 		changeSpray(1, sprays[1].id);
-// 	}
-// }
-// document.getElementById("currentSpray")!.addEventListener("click", showSprayselector);
-// function showSprayselector() {
-// 	charSelectorCont.style.display = "none";
-// 	lobbySelectorCont.style.display = "none";
-// 	classSelector.style.display = "none";
-// 	lobbySelector.style.display = "none";
-// 	lobbyCSelector.style.display = "none";
-// 	camoSelector.style.display = "none";
-// 	shirtSelector.style.display = "none";
-// 	hatSelector.style.display = "none";
-// 	spraySelector.style.display = "block";
-// }
-// function changeSpray(id: number, sprayId: number) {
-// 	if (!socket) return;
-// 	socket.emit("cSpray", id);
-// 	localStorage.setItem("previousSpray", id.toString());
-// 	currentSpray.innerHTML = document.getElementById(`sprayItem${id}`)!.innerHTML.replace(/ x\d/, "");
-// 	currentSpray.style.color = document.getElementById(`sprayItem${id}`)!.style.color;
-// 	let hoverElem = document.getElementById(`sprayHoverImage${id}`);
-// 	hoverElem?.replaceChildren(
-// 		<img class="sprayDisplayImage" src={`/images/sprays/${sprayId}.png`} />,
-// 	);
-// 	charSelectorCont.style.display = "block";
-// 	lobbySelectorCont.style.display = "block";
-// 	classSelector.style.display = "none";
-// 	camoSelector.style.display = "none";
-// 	shirtSelector.style.display = "none";
-// 	hatSelector.style.display = "none";
-// 	spraySelector.style.display = "none";
-// 	lobbySelector.style.display = "none";
-// 	lobbyCSelector.style.display = "none";
-// }
-// window.changeSpray = changeSpray;
 function findUserByIndex(index: number): Player {
 	return players.find((obj) => obj.index === index) ?? null!;
 }
@@ -1742,6 +1669,7 @@ function hideUI(hideChatbox: boolean) {
 // 	socket?.emit("5", 0);
 // 	tabbed = 1;
 // });
+let currentFPS = 0;
 let fpsUpdateDelta = 0;
 let fpsSamples: number[] = [];
 function updateGameLoop() {
@@ -1784,6 +1712,7 @@ function updateGameLoop() {
 		b /= e;
 		d /= e;
 	}
+	const clientPrediction = true;
 	if (clientPrediction) {
 		for (const plr of players) {
 			if (plr.index === st.player.index) {
