@@ -1562,7 +1562,7 @@ function sortUsersByScore(a: Player, b: Player) {
 		return 0;
 	}
 }
-function sortUsersByPosition(a: (typeof players)[number], b: (typeof players)[number]) {
+function sortUsersByPosition(a: Player, b: Player) {
 	if (a.y < b.y) {
 		return -1;
 	} else if (a.y > b.y) {
@@ -1840,15 +1840,13 @@ function updateGameLoop() {
 				? renderShadedAnimText(reason, st.viewMult * 48, "#ffffff", 6, "")
 				: renderShadedAnimText("You were kicked", st.viewMult * 48, "#ffffff", 6, "")
 			: renderShadedAnimText("Disconnected", st.viewMult * 48, "#ffffff", 6, "");
-		if (renderedReason) {
-			graph.drawImage(
-				renderedReason,
-				st.maxScreenWidth / 2 - renderedReason.width / 2,
-				st.maxScreenHeight / 2 - renderedReason.height / 2,
-				renderedReason.width,
-				renderedReason.height,
-			);
-		}
+		graph.drawImage(
+			renderedReason,
+			st.maxScreenWidth / 2 - renderedReason.width / 2,
+			st.maxScreenHeight / 2 - renderedReason.height / 2,
+			renderedReason.width,
+			renderedReason.height,
+		);
 	}
 	if (st.settings.showTrippy) {
 		graph.globalAlpha = 0.25;
@@ -1867,10 +1865,10 @@ function playerJump(plr: Player) {
 		plr.jumpY = plr.jumpDelta;
 	}
 }
-var overlayMaxAlpha = 0.5;
+const overlayMaxAlpha = 0.5;
 var overlayAlpha = overlayMaxAlpha;
-var overlayFadeUp = 0.01;
-var overlayFadeDown = 0.04;
+const overlayFadeUp = 0.01;
+const overlayFadeDown = 0.04;
 var animateOverlay = true;
 function drawOverlay(ctx: CanvasRenderingContext2D, fadeUp: boolean, fadeDown: boolean) {
 	if (animateOverlay) {
@@ -2400,11 +2398,6 @@ async function joinRoom(roomName: string) {
 	socket.disconnect();
 	st.chatLines = [];
 }
-
-function getCamoURL(id: number) {
-	return `/images/camos/${id + 1}.png`;
-}
-var animLength = 3;
 var classSpriteSheets: {
 	upSprites: Sprite[];
 	downSprites: Sprite[];
@@ -2435,6 +2428,7 @@ function loadPlayerSpriteArray(
 		downSprites.push(getSprite(`${base}characters/${folderName}/down`));
 		leftSprites.push(getSprite(`${base}characters/${folderName}/left`));
 		rightSprites.push(getSprite(`${base}characters/${folderName}/left`));
+		const animLength = 3;
 		for (let i = 0; i < animLength; ++i) {
 			let tmpIndex = i;
 			upSprites.push(getSprite(`${base}characters/${folderName}/up${tmpIndex + 1}`));
@@ -2869,7 +2863,7 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 				ctx.drawImage(img.flip ? flipSprite(img, true) : img, 0, 0, img.width, img.height);
 				cachedWeaponSprites[img.tmpInx!] = canvas;
 			};
-			img.src = getCamoURL(camo);
+			img.src = `/images/camos/${camo + 1}.png`;
 		}
 	}
 	return cachedWeaponSprites[tmpIndex];
