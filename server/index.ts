@@ -15,7 +15,8 @@ const io = new Server({
 	},
 });
 
-let rooms: Room[] = [];
+const rooms: Room[] = [];
+
 for (let i = 0; i < 9; i++) {
 	let room = new Room(io, `DEV${i}`);
 	rooms.push(room);
@@ -36,17 +37,17 @@ for (let i = 0; i < 9; i++) {
 io.listen(1119);
 
 const app = new Hono();
+
 app.use(
 	cors({
 		origin: ["http://localhost:4173", "http://localhost:5173"],
 	}),
 );
+
 app.get("/getIP", (c) => {
-	let room: Room;
+	let room: Room = rooms[0];
 	if (c.req.query("room") !== "") {
-		room = rooms.find((r) => r.name === c.req.query("room")) || rooms[0];
-	} else {
-		room = rooms[0];
+		room = rooms.find((r) => r.name === c.req.query("room")) ?? room;
 	}
 	return c.json({
 		ip: "localhost",
@@ -55,6 +56,7 @@ app.get("/getIP", (c) => {
 		room: room.name,
 	});
 });
+
 app.get("/getRooms", (c) => {
 	const list = rooms.map((r) => ({
 		n: r.name,

@@ -23,7 +23,11 @@
 			Loading...
 		{/snippet}
 		{#each await rooms as room}
-			<div class="roomSelectItem" onclick={() => window.joinRoom(room.n)}>
+			<div
+				class="roomSelectItem"
+				class:roomSelectItemSelected={st.room === room.n}
+				onclick={() => window.joinRoom(room.n)}
+			>
 				<b>{`${room.m}_${room.n}`}</b>
 				<b>{`${room.lb}% - ${room.pl}/${room.mxpl}`}</b>
 			</div>
@@ -62,7 +66,8 @@
 		width: 100%;
 		box-sizing: border-box;
 	}
-	.roomSelectItem:hover {
+	.roomSelectItem:hover,
+	.roomSelectItemSelected {
 		background: rgba(0, 0, 0, 0.1);
 		font-size: 14px;
 	}

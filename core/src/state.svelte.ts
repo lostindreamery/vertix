@@ -60,6 +60,7 @@ export const st = $state({
 	doSounds: false,
 	kicked: false,
 	startingGame: false,
+	changingLobby: false,
 	gameStart: false,
 	gameOver: false,
 	mobile: false,

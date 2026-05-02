@@ -72,7 +72,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 	alert("tried to open google play");
 	// openGooglePlay(false);
 }
-var changingLobby = false;
 var inMainMenu = true;
 
 const loadingWrapper = document.getElementById("loadingWrapper")!;
@@ -84,7 +83,7 @@ declare global {
 }
 window.startGame = startGame;
 async function startGame() {
-	if (!st.startingGame && !changingLobby) {
+	if (!st.startingGame && !st.changingLobby) {
 		st.startingGame = true;
 		st.playerName = st.playerName.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 
@@ -138,7 +137,6 @@ var userEmailInput = document.getElementById("emailInput")! as HTMLInputElement;
 var userPassInput = document.getElementById("passwordInput")! as HTMLInputElement;
 var loginUserNm = "";
 var loginUserPs = "";
-var lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
@@ -258,52 +256,6 @@ window.onload = async () => {
 			});
 			clanChtMessage.style.display = "inline-block";
 			clanChtMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("joinLobbyButton")!.onclick = () => {
-			if (changingLobby) return;
-			if (!lobbyInput.value.split("/")[0].trim()) {
-				lobbyMessage.style.display = "block";
-				lobbyMessage.textContent = "Please enter a valid IP";
-				return;
-			}
-			lobbyMessage.style.display = "block";
-			lobbyMessage.textContent = "Please wait...";
-			changingLobby = true;
-			const s = io(`http://${lobbyInput.value.split("/")[0]}:${port}`, {
-				reconnection: true,
-				forceNew: true,
-			});
-			s.once("connect", () => {
-				s.emit("create", {
-					room: lobbyInput.value.split("/")[1],
-					servPass: lobbyPass.value,
-					lgKey: logKey,
-					userName: userName,
-				});
-				s.once("lobbyRes", (a, d) => {
-					lobbyMessage.textContent = a.resp || a;
-					if (d) {
-						socket.removeListener("disconnect");
-						socket.once("disconnect", () => {
-							socket.close();
-							changingLobby = false;
-							socket = s;
-							st.socket = s;
-							setupSocket(socket);
-						});
-						socket.disconnect();
-					} else {
-						changingLobby = false;
-						s.disconnect();
-						s.close();
-					}
-				});
-			});
-			s.on("connect_error", (_) => {
-				lobbyMessage.textContent = "No Server Found.";
-				changingLobby = false;
-				s.close();
-			});
 		};
 	});
 };
@@ -558,7 +510,7 @@ mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
 
 function kickPlayer(secondReason: string) {
-	if (disconnected || changingLobby) return;
+	if (disconnected || st.changingLobby) return;
 	hideStatTable();
 	hideUI(true);
 	hideMenuUI();
@@ -2372,13 +2324,18 @@ declare global {
 // });
 
 window.joinRoom = joinRoom;
-async function joinRoom(roomName: string) {
+async function joinRoom(roomName: string): Promise<boolean> {
+	if (st.changingLobby) return false;
+	// history.pushState(room, "", `${location.origin}/?${room}`);
+	st.changingLobby = true;
+
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
-	if (room === st.player.room) return;
-	if (changingLobby) return;
-	// history.pushState(room, "", `${location.origin}/?${room}`);
-	changingLobby = true;
+	if (room === st.player.room || room !== roomName) {
+		st.changingLobby = false;
+		return false;
+	}
+
 	const s = io(`http://${ip}:${port}/${room}`, {
 		reconnection: true,
 		forceNew: true,
@@ -2390,13 +2347,15 @@ async function joinRoom(roomName: string) {
 	socket.removeListener("disconnect");
 	socket.once("disconnect", () => {
 		socket.close();
-		changingLobby = false;
+		st.changingLobby = false;
 		socket = s;
 		st.socket = socket;
 		setupSocket(socket);
 	});
 	socket.disconnect();
 	st.chatLines = [];
+
+	return true;
 }
 var classSpriteSheets: {
 	upSprites: Sprite[];

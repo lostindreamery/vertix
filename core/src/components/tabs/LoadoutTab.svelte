@@ -16,6 +16,8 @@
 		| "joinServer"
 		| "createServer" = $state("main");
 
+	let lobbyMessage = $state("Ask the host for the address.");
+
 	// sync preferences to localStorage
 	function savePref(key: string, value: string | undefined) {
 		console.debug(`saving ${value} to ${key}`);
@@ -67,6 +69,12 @@
 		st.socket?.emit("cSpray", st.loadout.spray ?? 1);
 	});
 
+	// Reset join server message on room switch.
+	$effect(() => {
+		st.room;
+		lobbyMessage = "Ask the host for the address.";
+	});
+
 	const createGameOpts = $state({
 		srvPlayers: 6,
 		srvHealthMult: 1,
@@ -76,6 +84,26 @@
 		srvClnWr: false,
 		srvModes: [] as number[],
 	});
+
+	/**
+	 * Initiates room join process through the "JOIN SERVER" menu.
+	 */
+	async function tryJoinRoom() {
+		const lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
+		if (st.changingLobby || st.room === lobbyInput.value) {
+			return;
+		} else if (!lobbyInput.value) {
+			lobbyMessage = "Please enter a valid IP.";
+			return;
+		}
+
+		lobbyMessage = "Please wait...";
+		const successfullyStartedJoin = await window.joinRoom(lobbyInput.value);
+
+		if (!successfullyStartedJoin) {
+			lobbyMessage = "No Server Found.";
+		}
+	}
 </script>
 <div style:display={currentScreen === "main" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed2">LOADOUT</h3>
@@ -228,8 +256,14 @@
 		maxlength="10"
 		style="margin-top:10px;margin-bottom:8px;"
 	>
-	<div id="lobbyMessage" style="margin-left:4px;">Ask the host for the address.</div>
-	<button type="button" id="joinLobbyButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+	<div id="lobbyMessage" style="margin-left:4px;">{lobbyMessage}</div>
+	<button
+		type="button"
+		id="joinLobbyButton"
+		class="smallMenuButton"
+		style="margin-left:5px;margin-top:10px;"
+		onclick={tryJoinRoom}
+	>
 		JOIN
 	</button>
 	<button
