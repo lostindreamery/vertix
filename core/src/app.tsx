@@ -133,27 +133,10 @@ var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
 var clanChatLink = document.getElementById("clanChatLink")!;
 var loginMessage = document.getElementById("loginMessage")!;
-var userNameInput = document.getElementById("usernameInput")! as HTMLInputElement;
-var userEmailInput = document.getElementById("emailInput")! as HTMLInputElement;
-var userPassInput = document.getElementById("passwordInput")! as HTMLInputElement;
-var loginUserNm = "";
-var loginUserPs = "";
 var lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
-
-function startLogin() {
-	if (!socket) return;
-	socket.emit("dbLogin", {
-		userName: userNameInput.value,
-		userPass: userPassInput.value,
-	});
-	loginUserNm = userNameInput.value;
-	loginUserPs = userPassInput.value;
-	loginMessage.style.display = "block";
-	loginMessage.textContent = "Please Wait...";
-}
 
 window.onload = async () => {
 	if (st.mobile) {
@@ -192,35 +175,6 @@ window.onload = async () => {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Logging in...";
 		}
-		document.getElementById("registerButton")!.onclick = () => {
-			socket.emit("dbReg", {
-				userName: userNameInput.value,
-				userEmail: userEmailInput.value,
-				userPass: userPassInput.value,
-			});
-			loginUserNm = userNameInput.value;
-			loginUserPs = userPassInput.value;
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Registering...";
-		};
-		document.getElementById("loginButton")!.onclick = () => {
-			startLogin();
-		};
-		document.getElementById("logoutButton")!.onclick = () => {
-			loginMessage.textContent = "";
-			st.loggedIn = false;
-			userName = logKey = "";
-			localStorage.setItem("logKey", "");
-			localStorage.setItem("userName", "");
-			socket.emit("dbLogout");
-		};
-		document.getElementById("recoverButton")!.onclick = () => {
-			socket.emit("dbRecov", {
-				userMail: userEmailInput.value,
-			});
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Please Wait...";
-		};
 		document.getElementById("createClanButton")!.onclick = () => {
 			socket.emit("dbClanCreate", {
 				clanName: (document.getElementById("clanNameInput")! as HTMLInputElement).value,
@@ -249,9 +203,6 @@ window.onload = async () => {
 			clanInvMessage.style.display = "block";
 			clanInvMessage.textContent = "Please Wait...";
 		};
-		leaveClanButton.onclick = () => {
-			socket.emit("dbClanLeave");
-		};
 		document.getElementById("setChatClanButton")!.onclick = () => {
 			socket.emit("dbClanChatURL", {
 				chUrl: (document.getElementById("clanChatInput")! as HTMLInputElement).value,
@@ -277,8 +228,8 @@ window.onload = async () => {
 				s.emit("create", {
 					room: lobbyInput.value.split("/")[1],
 					servPass: lobbyPass.value,
-					lgKey: logKey,
-					userName: userName,
+					lgKey: st.loggedIn ? logKey : "",
+					userName: st.loggedIn ? userName : "",
 				});
 				s.once("lobbyRes", (a, d) => {
 					lobbyMessage.textContent = a.resp || a;
@@ -1247,7 +1198,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 					<div className="hoverTooltip">
 						{info.type === "hat" ? (
 							<>
-								<img className="itemDisplayImage" src={`/images/hats/${info.id}/d.png`} />
+								<img className="hatDisplayImage" src={`/images/hats/${info.id}/d.png`} />
 								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
 									{info.name}
 								</div>

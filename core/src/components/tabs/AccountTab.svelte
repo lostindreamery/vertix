@@ -1,5 +1,47 @@
 <script lang="ts">
 	import { st } from "../../state.svelte.ts";
+
+	let username = $state("");
+	let email = $state("");
+	let password = $state("");
+
+	let loginMessage: HTMLElement;
+	let clanDBMessage: HTMLElement;
+
+	function startLogin() {
+		if (!st.socket) return;
+		st.socket.emit("dbLogin", {
+			userName: username,
+			userPass: password,
+		});
+		loginMessage.style.display = "block";
+		loginMessage.textContent = "Please Wait...";
+	}
+	function startRegister() {
+		if (!st.socket) return;
+		st.socket.emit("dbReg", {
+			userName: username,
+			userEmail: email,
+			userPass: password,
+		});
+		loginMessage.style.display = "block";
+		loginMessage.textContent = "Registering...";
+	}
+	function startRecover() {
+		if (!st.socket) return;
+		st.socket.emit("dbRecov", {
+			userMail: email,
+		});
+		loginMessage.style.display = "block";
+		loginMessage.textContent = "Please Wait...";
+	}
+	function logout() {
+		loginMessage.textContent = "";
+		st.loggedIn = false;
+		localStorage.setItem("logKey", "");
+		localStorage.setItem("userName", "");
+		st.socket?.emit("dbLogout");
+	}
 </script>
 <!-- NOT LOGGED IN -->
 <div style:width="300px" style:display={st.loggedIn ? "none" : null}>
@@ -11,6 +53,7 @@
 		placeholder="Username"
 		id="usernameInput"
 		maxlength="15"
+		bind:value={username}
 	>
 	<input
 		type="text"
@@ -19,12 +62,20 @@
 		placeholder="Email (Registration Only)"
 		id="emailInput"
 		maxlength="40"
+		bind:value={email}
 	>
-	<input type="password" class="menuTextInput" placeholder="Password" id="passwordInput" maxlength="15">
-	<div id="loginMessage" style="display:none;"></div>
-	<button type="button" id="registerButton" class="smallMenuButton">REGISTER</button>
-	<button type="button" id="loginButton" class="smallMenuButton">LOGIN</button>
-	<button type="button" id="recoverButton" class="smallMenuButton">RECOVER</button>
+	<input
+		type="password"
+		class="menuTextInput"
+		placeholder="Password"
+		id="passwordInput"
+		maxlength="15"
+		bind:value={password}
+	>
+	<div id="loginMessage" bind:this={loginMessage} style="display:none;"></div>
+	<button type="button" id="registerButton" onclick={startRegister} class="smallMenuButton">REGISTER</button>
+	<button type="button" id="loginButton" onclick={startLogin} class="smallMenuButton">LOGIN</button>
+	<button type="button" id="recoverButton" onclick={startRecover} class="smallMenuButton">RECOVER</button>
 	<div id="recoverForm" style="display:none;">
 		<input class="menuTextInput" placeholder="Enter Key" id="chngPassKey" maxlength="4" style="width:100%;">
 		<input
@@ -59,7 +110,7 @@
 			<button type="button" id="createClanButton" class="smallMenuButton" style="margin-left:5px;">CREATE</button>
 			<input class="menuTextInput" placeholder="Clan Name" id="clanKeyInput" maxlength="4" style="width:78%;">
 			<button type="button" id="joinClanButton" class="smallMenuButton" style="margin-left:5px;">JOIN</button>
-			<div id="clanDBMessage" class="serverRespMsg">Join or Create a Clan.</div>
+			<div id="clanDBMessage" bind:this={clanDBMessage} class="serverRespMsg">Join or Create a Clan.</div>
 		</div>
 		<div id="clanStats" style="display:none;">
 			<div id="clanStatFounder"><b>Founder: </b>{st.clanData.founder ?? "..."}</div>
@@ -109,12 +160,19 @@
 			<div id="editProfileMessage" class="serverRespMsg">Edit Profile Info.</div>
 		</div>
 	</div>
-	<button type="button" id="logoutButton" class="smallMenuButton" style="margin-top:10px; margin-bottom:0px;">
+	<button
+		type="button"
+		id="logoutButton"
+		onclick={logout}
+		class="smallMenuButton"
+		style="margin-top:10px; margin-bottom:0px;"
+	>
 		LOGOUT
 	</button>
 	<button
 		type="button"
 		id="leaveClanButton"
+		onclick={() => st.socket?.emit("dbClanLeave")}
 		class="smallMenuButton"
 		style="margin-top:10px; margin-left:5px; margin-bottom:0px; display:none;"
 	>
