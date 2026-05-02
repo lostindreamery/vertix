@@ -385,7 +385,9 @@
 		Create a Server
 	</div>
 	<b>Current Server:</b>
-	<div class="selectable" style="margin-bottom:8px;display:inline-block;">{st.room ?? "none"}</div>
+	<div class="selectable" style="margin-bottom:8px;display:inline-block;">
+		{st.room && !st.changingLobby ? st.room : "Loading..."}
+	</div>
 </div>
 
 <style>

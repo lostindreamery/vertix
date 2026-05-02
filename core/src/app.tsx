@@ -1,6 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
+import { TeamColors } from "./colors.ts";
 import App from "./components/App.svelte";
 import { specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
@@ -502,6 +503,7 @@ function setupSocket(sock: Socket) {
 	}, 2000);
 	sock.on("yourRoom", (roomName) => {
 		st.room = roomName;
+		st.changingLobby = false;
 	});
 	sock.on("connect_failed", () => {
 		kickPlayer("Connection failed. Please check your internet connection.");
@@ -759,7 +761,7 @@ function setupSocket(sock: Socket) {
 			b.onScreen &&
 			a.amount < 0
 		) {
-			startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#d95151", e / 10);
+			startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, TeamColors.Red, e / 10);
 		}
 		if (a.bi != null) {
 			let svb = findServerBullet(a.bi);
@@ -827,7 +829,7 @@ function setupSocket(sock: Socket) {
 					2000,
 					true,
 					"#ffffff",
-					"#5151d9",
+					TeamColors.Blue,
 					true,
 					1.25,
 				);
@@ -862,7 +864,16 @@ function setupSocket(sock: Socket) {
 			if (event.ast) {
 				killMsg = "Kill Assist";
 			}
-			startBigAnimText(killMsg, `${event.sS} POINTS`, 2000, true, "#ffffff", "#5151d9", true, 1.25);
+			startBigAnimText(
+				killMsg,
+				`${event.sS} POINTS`,
+				2000,
+				true,
+				"#ffffff",
+				TeamColors.Blue,
+				true,
+				1.25,
+			);
 		}
 		if (event.gID === st.player.index) {
 			hideStatTable();
@@ -914,7 +925,7 @@ function setupSocket(sock: Socket) {
 						2000,
 						true,
 						"#ffffff",
-						"#5151d9",
+						TeamColors.Blue,
 						true,
 						1.3,
 					);
@@ -935,7 +946,7 @@ function setupSocket(sock: Socket) {
 	});
 	sock.on("6", (a, d, e) => {
 		if (!st.player.dead) {
-			startBigAnimText(a, d, 2000, true, "#ffffff", "#5151d9", true, e);
+			startBigAnimText(a, d, 2000, true, "#ffffff", TeamColors.Blue, true, e);
 		}
 	});
 	sock.on("7", (winner, userList, modeVoteData, isFading) => {
@@ -979,13 +990,22 @@ function showStatTable(
 			let isWinner = st.player.team === winner || st.player.id === winner;
 			if (!isFading) {
 				if (isWinner) {
-					startBigAnimText("Victory", "Well Played!", 2500, true, "#5151d9", "#ffffff", false, 2);
+					startBigAnimText(
+						"Victory",
+						"Well Played!",
+						2500,
+						true,
+						TeamColors.Blue,
+						"#ffffff",
+						false,
+						2,
+					);
 					document.getElementById("winningTeamText")!.textContent = "VICTORY";
-					document.getElementById("winningTeamText")!.style.color = "#5151d9";
+					document.getElementById("winningTeamText")!.style.color = TeamColors.Blue;
 				} else if (st.player.team != "") {
-					startBigAnimText("Defeat", "Bad Luck!", 2500, true, "#d95151", "#ffffff", false, 2);
+					startBigAnimText("Defeat", "Bad Luck!", 2500, true, TeamColors.Red, "#ffffff", false, 2);
 					document.getElementById("winningTeamText")!.textContent = "DEFEAT";
-					document.getElementById("winningTeamText")!.style.color = "#d95151";
+					document.getElementById("winningTeamText")!.style.color = TeamColors.Red;
 				}
 			}
 			if (modeVoteData != null) {
@@ -1072,8 +1092,8 @@ function showStatTable(
 						user.index === st.player.index
 							? "#fff"
 							: user.team !== st.player.team
-								? "#d95151"
-								: "#5151d9",
+								? TeamColors.Red
+								: TeamColors.Blue,
 					userInfo: findUserByIndex(user.index),
 				},
 				{
@@ -1971,7 +1991,7 @@ function getCachedMiniMap() {
 		finalCtx.globalAlpha = 1;
 		for (const tile of st.gameMap.tiles) {
 			if (!tile.hardPoint) continue;
-			finalCtx.fillStyle = tile.objTeam === st.player.team ? "#5151d9" : "#d95151";
+			finalCtx.fillStyle = tile.objTeam === st.player.team ? TeamColors.Blue : TeamColors.Red;
 			finalCtx.fillRect(
 				(tile.x / gameWidth) * mapScale,
 				(tile.y / gameHeight) * mapScale,
@@ -1996,7 +2016,7 @@ function drawMiniMap() {
 			(plr.index === st.player.index || plr.team === st.player.team || plr.isBoss)
 		) {
 			mapContext.fillStyle =
-				plr.index === st.player.index ? "#fff" : plr.isBoss ? "#db4fcd" : "#5151d9";
+				plr.index === st.player.index ? "#fff" : plr.isBoss ? "#db4fcd" : TeamColors.Blue;
 			mapContext.beginPath();
 			mapContext.arc(
 				(plr.x / gameWidth) * mapScale,
@@ -2323,7 +2343,6 @@ async function joinRoom(roomName: string): Promise<boolean> {
 	socket.removeListener("disconnect");
 	socket.once("disconnect", () => {
 		socket.close();
-		st.changingLobby = false;
 		socket = s;
 		st.socket = socket;
 		setupSocket(socket);
@@ -3095,7 +3114,7 @@ function drawPlayerNames() {
 		let playerName = plr.name;
 		let rankText = plr.loggedIn ? plr.account.rank : "";
 		// h = graph.measureText(playerName);
-		let nameColor = plr.team !== st.player.team ? "#d95151" : "#5151d9";
+		let nameColor = plr.team !== st.player.team ? TeamColors.Red : TeamColors.Blue;
 		if (st.settings.showNames) {
 			const renderedName = renderShadedAnimText(playerName, d * textSizeMult, "#ffffff", 5, "");
 			graph.drawImage(

@@ -19,7 +19,7 @@
 	.dropUpLink {
 		position: relative;
 		display: inline-block;
-		color: #5151d9;
+		color: var(--blue);
 	}
 	.dropUpLink .dropdown {
 		position: absolute;
