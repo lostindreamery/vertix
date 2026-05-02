@@ -544,12 +544,13 @@ export class Room {
 				player.health < player.maxHealth &&
 				!player.isBoss
 			) {
-				player.totalHealing += player.maxHealth - player.health;
+				const healing = Math.min(100, player.maxHealth - player.health);
+				player.totalHealing += healing;
 				this.io.emit("upd", {
 					i: player.index,
 					hea: player.totalHealing,
 				});
-				player.health = player.maxHealth;
+				player.health += healing;
 				this.io.emit("1", {
 					gID: player.index,
 					h: player.health,

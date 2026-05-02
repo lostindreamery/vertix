@@ -800,12 +800,15 @@ function setupSocket(sock: Socket) {
 		) {
 			screenShake(e / 2, a.dir);
 		}
-		if (a.dID != null && a.dID == st.player.index && b != null && e > 0 && b.onScreen) {
-			if (a.amount < 0) {
-				startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#d95151", e / 10);
-			} else {
-				startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#5ed951", e / 10);
-			}
+		if (
+			a.dID != null &&
+			a.dID == st.player.index &&
+			b != null &&
+			e > 0 &&
+			b.onScreen &&
+			a.amount < 0
+		) {
+			startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#d95151", e / 10);
 		}
 		if (a.bi != null) {
 			let svb = findServerBullet(a.bi);
@@ -828,8 +831,19 @@ function setupSocket(sock: Socket) {
 			}
 		}
 		if (b != null) {
+			const healthDiff = a.h - b.health;
 			b.health = a.h;
 			if (b.index == st.player.index) {
+				if (healthDiff > 0) {
+					// (Is the font size supposed to adjust based on amount of health lost/gained?)
+					startMovingAnimText(
+						`${healthDiff}`,
+						b.x - b.width / 2,
+						b.y - b.height,
+						"#5ed951",
+						healthDiff / 10,
+					);
+				}
 				updatePlayerInfo(b);
 			}
 		}
@@ -959,7 +973,7 @@ function setupSocket(sock: Socket) {
 					break;
 				default:
 					break;
-				}
+			}
 		} else {
 			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
 			showNotification(`${user.name} scored`);
