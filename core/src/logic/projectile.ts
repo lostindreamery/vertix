@@ -4,6 +4,14 @@ import type { Player, Tile } from "../types.ts";
 import { dotInRect, getDistance, randomInt } from "../utils.ts";
 import { createLiquid, particleCone, stillDustParticle } from "../visual/particle.ts";
 
+const EXPLOSIVE_CLUTTER_INDEX = 2;
+const EXPLOSIVE_HIT_DAMAGE = 92;
+const EXPLOSIVE_BLAST_RADIUS = 150;
+const BOUNCE_SPEED_RETENTION = 0.65;
+const LINE_INTERSECTION_EPSILON = 1e-7;
+const COLLISION_ADJUST_ATTEMPTS = 100;
+const COLLISION_ADJUST_STEP = 2;
+
 export class Projectile {
 	width = 0;
 	height = 0;
@@ -46,7 +54,7 @@ export class Projectile {
 				lifetime = 0;
 				this.startTime = currentTime;
 			}
-			for (let g = 0; g < this.updateAccuracy; ++g) {
+			for (let updateStep = 0; updateStep < this.updateAccuracy; ++updateStep) {
 				let vel = this.speed * delta;
 				if (this.active) {
 					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
@@ -74,9 +82,9 @@ export class Projectile {
 								this.bounceDir(this.cEndY <= clt.y - clt.h || this.cEndY >= clt.y - this.yOffset);
 							} else {
 								this.active = false;
-								if (clt.i === 2) {
-									this.dmg = 92;
-									this.blastRadius = 150;
+								if (clt.i === EXPLOSIVE_CLUTTER_INDEX) {
+									this.dmg = EXPLOSIVE_HIT_DAMAGE;
+									this.blastRadius = EXPLOSIVE_BLAST_RADIUS;
 									this.explodeOnDeath = true;
 									this.selfDamage = true;
 									this.lastHit.push(i);
@@ -193,15 +201,15 @@ export class Projectile {
 		this.active = true;
 		if (typeof window !== "undefined") playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	}
-	canSeeObject(a: any, b: number) {
-		let f = Math.abs(this.cEndX - a.x);
-		let h = Math.abs(this.cEndY - a.y);
-		return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
+	canSeeObject(target: any, size: number) {
+		const xDistance = Math.abs(this.cEndX - target.x);
+		const yDistance = Math.abs(this.cEndY - target.y);
+		return xDistance <= (size + this.height) * 2 && yDistance <= (size + this.height) * 2;
 	}
 	deactivate() {
 		this.active = false;
 	}
-	hitSomething(a: boolean, b: number) {
+	hitSomething(flipY: boolean, spriteType: number) {
 		if (this.spriteIndex !== 2 && typeof window !== "undefined") {
 			particleCone(
 				10,
@@ -211,87 +219,93 @@ export class Projectile {
 				Math.PI / randomInt(5, 7),
 				0.5,
 				16,
-				b,
-				a,
+				spriteType,
+				flipY,
 			);
 		}
 	}
-	bounceDir(a: boolean) {
-		this.dir = a ? Math.PI * 2 - this.dir : Math.PI - this.dir;
+	bounceDir(flipY: boolean) {
+		this.dir = flipY ? Math.PI * 2 - this.dir : Math.PI - this.dir;
 		this.active = true;
-		this.speed *= 0.65;
+		this.speed *= BOUNCE_SPEED_RETENTION;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
 	}
-	lineInRect(a: number, b: number, d: number, e: number, f: boolean) {
-		var g = this.x;
-		var h = this.y;
-		var k = g;
-		var l = this.cEndX;
-		if (k > l) {
-			k = this.cEndX;
-			l = g;
+	lineInRect(
+		rectX: number,
+		rectY: number,
+		rectWidth: number,
+		rectHeight: number,
+		shouldAdjustOnCollision: boolean,
+	) {
+		let lineStartX = this.x;
+		let lineStartY = this.y;
+		let minX = lineStartX;
+		let maxX = this.cEndX;
+		if (minX > maxX) {
+			minX = this.cEndX;
+			maxX = lineStartX;
 		}
-		if (l > a + d) {
-			l = a + d;
+		if (maxX > rectX + rectWidth) {
+			maxX = rectX + rectWidth;
 		}
-		if (k < a) {
-			k = a;
+		if (minX < rectX) {
+			minX = rectX;
 		}
-		if (k > l) {
+		if (minX > maxX) {
 			return false;
 		}
-		var m = h;
-		var p = this.cEndY;
-		var q = this.cEndX - g;
-		if (Math.abs(q) > 1e-7) {
-			p = (this.cEndY - h) / q;
-			g = h - p * g;
-			m = p * k + g;
-			p = p * l + g;
+		let minY = lineStartY;
+		let maxY = this.cEndY;
+		let lineDeltaX = this.cEndX - lineStartX;
+		if (Math.abs(lineDeltaX) > LINE_INTERSECTION_EPSILON) {
+			maxY = (this.cEndY - lineStartY) / lineDeltaX;
+			lineStartX = lineStartY - maxY * lineStartX;
+			minY = maxY * minX + lineStartX;
+			maxY = maxY * maxX + lineStartX;
 		}
-		if (m > p) {
-			k = p;
-			p = m;
-			m = k;
+		if (minY > maxY) {
+			minX = maxY;
+			maxY = minY;
+			minY = minX;
 		}
-		if (p > b + e) {
-			p = b + e;
+		if (maxY > rectY + rectHeight) {
+			maxY = rectY + rectHeight;
 		}
-		if (m < b) {
-			m = b;
+		if (minY < rectY) {
+			minY = rectY;
 		}
-		if (m > p) {
+		if (minY > maxY) {
 			return false;
 		}
-		if (f) {
-			this.adjustOnCollision(a, b, d, e);
+		if (shouldAdjustOnCollision) {
+			this.adjustOnCollision(rectX, rectY, rectWidth, rectHeight);
 		}
 		return true;
 	}
-	adjustOnCollision(a: number, b: number, d: number, e: number) {
-		let h = this.cEndX,
-			g = this.cEndY;
-		for (let i = 100; i > 0; ) {
-			i--;
-			if (dotInRect(h, g, a, b, d, e)) {
-				i = 0;
+	adjustOnCollision(rectX: number, rectY: number, rectWidth: number, rectHeight: number) {
+		let collisionX = this.cEndX;
+		let collisionY = this.cEndY;
+		const reverseDirection = this.dir + Math.PI;
+		const stepX = Math.cos(reverseDirection) * COLLISION_ADJUST_STEP;
+		const stepY = Math.sin(reverseDirection) * COLLISION_ADJUST_STEP;
+		for (let attempts = COLLISION_ADJUST_ATTEMPTS; attempts > 0; attempts--) {
+			if (dotInRect(collisionX, collisionY, rectX, rectY, rectWidth, rectHeight)) {
+				break;
+			}
+			collisionX += stepX;
+			collisionY += stepY;
+		}
+		for (let attempts = COLLISION_ADJUST_ATTEMPTS; attempts > 0; attempts--) {
+			if (dotInRect(collisionX, collisionY, rectX, rectY, rectWidth, rectHeight)) {
+				collisionX += stepX;
+				collisionY += stepY;
 			} else {
-				h += Math.cos(this.dir + Math.PI) * 2;
-				g += Math.sin(this.dir + Math.PI) * 2;
+				break;
 			}
 		}
-		for (let i = 100; i > 0; ) {
-			i--;
-			if (dotInRect(h, g, a, b, d, e)) {
-				h += Math.cos(this.dir + Math.PI) * 2;
-				g += Math.sin(this.dir + Math.PI) * 2;
-			} else {
-				i = 0;
-			}
-		}
-		this.cEndX = h;
-		this.cEndY = g;
+		this.cEndX = collisionX;
+		this.cEndY = collisionY;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
 	}

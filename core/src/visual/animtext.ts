@@ -6,6 +6,10 @@ const bigTextSize = (st.maxScreenHeight / 7.7) * textSizeMult;
 const medTextSize = bigTextSize * 0.85;
 const textGap = bigTextSize * 1.2;
 const bigTextY = st.maxScreenHeight / 4.3;
+const NOTIFICATION_FADE_SPEED = 0.003;
+const NOTIFICATION_FADE_DELAY = 800;
+const ANIM_TEXT_FADE_SPEED = 0.0025;
+const MOVING_TEXT_FADE_DELAY = 350;
 
 export class AnimText {
 	text = "";
@@ -96,8 +100,8 @@ export function showNotification(text: string) {
 	notifications[notificationIndex].text = text;
 	notifications[notificationIndex].alpha = 1;
 	notifications[notificationIndex].x = st.maxScreenWidth / 2;
-	notifications[notificationIndex].fadeSpeed = 0.003;
-	notifications[notificationIndex].fadeDelay = 800;
+	notifications[notificationIndex].fadeSpeed = NOTIFICATION_FADE_SPEED;
+	notifications[notificationIndex].fadeDelay = NOTIFICATION_FADE_DELAY;
 	notifications[notificationIndex].fontSize = notificationsSize * st.viewMult;
 	notifications[notificationIndex].scale = 1;
 	notifications[notificationIndex].scaleSpeed = 0.005;
@@ -223,7 +227,7 @@ export function startBigAnimText(
 				y: bigTextY,
 				xSpeed: 0,
 				ySpeed: -0.1,
-				fadeSpeed: 0.0025,
+				fadeSpeed: ANIM_TEXT_FADE_SPEED,
 				fontSize: bigTextSize * fontSizeMult,
 				scaleSpeed: doScale ? 0.005 : 0,
 				useStart: false,
@@ -246,7 +250,7 @@ export function startBigAnimText(
 				y: bigTextY + textGap * st.viewMult * fontSizeMult,
 				xSpeed: 0,
 				ySpeed: -0.04,
-				fadeSpeed: 0.0025,
+				fadeSpeed: ANIM_TEXT_FADE_SPEED,
 				fontSize: (medTextSize / 2) * fontSizeMult,
 				scaleSpeed: doScale ? 0.003 : 0,
 				useStart: false,
@@ -278,11 +282,11 @@ export function startMovingAnimText(
 			y: y,
 			xSpeed: 0,
 			ySpeed: -0.15,
-			fadeSpeed: 0.0025,
+			fadeSpeed: ANIM_TEXT_FADE_SPEED,
 			fontSize: st.maxScreenHeight / 26 + extraFontSize,
 			scaleSpeed: 0.005,
 			useStart: true,
-			fadeDelay: 350,
+			fadeDelay: MOVING_TEXT_FADE_DELAY,
 			removable: false,
 			moveDelay: 0,
 			alpha: 1,

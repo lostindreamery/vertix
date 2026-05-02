@@ -132,26 +132,9 @@ var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
 var clanChatLink = document.getElementById("clanChatLink")!;
 var loginMessage = document.getElementById("loginMessage")!;
-var userNameInput = document.getElementById("usernameInput")! as HTMLInputElement;
-var userEmailInput = document.getElementById("emailInput")! as HTMLInputElement;
-var userPassInput = document.getElementById("passwordInput")! as HTMLInputElement;
-var loginUserNm = "";
-var loginUserPs = "";
 var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
-
-function startLogin() {
-	if (!socket) return;
-	socket.emit("dbLogin", {
-		userName: userNameInput.value,
-		userPass: userPassInput.value,
-	});
-	loginUserNm = userNameInput.value;
-	loginUserPs = userPassInput.value;
-	loginMessage.style.display = "block";
-	loginMessage.textContent = "Please Wait...";
-}
 
 window.onload = async () => {
 	if (st.mobile) {
@@ -190,35 +173,6 @@ window.onload = async () => {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Logging in...";
 		}
-		document.getElementById("registerButton")!.onclick = () => {
-			socket.emit("dbReg", {
-				userName: userNameInput.value,
-				userEmail: userEmailInput.value,
-				userPass: userPassInput.value,
-			});
-			loginUserNm = userNameInput.value;
-			loginUserPs = userPassInput.value;
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Registering...";
-		};
-		document.getElementById("loginButton")!.onclick = () => {
-			startLogin();
-		};
-		document.getElementById("logoutButton")!.onclick = () => {
-			loginMessage.textContent = "";
-			st.loggedIn = false;
-			userName = logKey = "";
-			localStorage.setItem("logKey", "");
-			localStorage.setItem("userName", "");
-			socket.emit("dbLogout");
-		};
-		document.getElementById("recoverButton")!.onclick = () => {
-			socket.emit("dbRecov", {
-				userMail: userEmailInput.value,
-			});
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Please Wait...";
-		};
 		document.getElementById("createClanButton")!.onclick = () => {
 			socket.emit("dbClanCreate", {
 				clanName: (document.getElementById("clanNameInput")! as HTMLInputElement).value,
@@ -246,9 +200,6 @@ window.onload = async () => {
 			});
 			clanInvMessage.style.display = "block";
 			clanInvMessage.textContent = "Please Wait...";
-		};
-		leaveClanButton.onclick = () => {
-			socket.emit("dbClanLeave");
 		};
 		document.getElementById("setChatClanButton")!.onclick = () => {
 			socket.emit("dbClanChatURL", {
@@ -1222,7 +1173,7 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 					<div className="hoverTooltip">
 						{info.type === "hat" ? (
 							<>
-								<img className="itemDisplayImage" src={`/images/hats/${info.id}/d.png`} />
+								<img className="hatDisplayImage" src={`/images/hats/${info.id}/d.png`} />
 								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
 									{info.name}
 								</div>
@@ -1701,14 +1652,15 @@ function updateGameLoop() {
 				plr.x = Math.round(plr.x);
 				plr.y = Math.round(plr.y);
 				plr.angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
-				if (getCurrentWeapon(plr)) {
-					let f = Math.round((plr.angle % 360) / 90) * 90;
-					if (f === 0 || f === 360) {
-						getCurrentWeapon(plr).front = true;
-					} else if (f === 180) {
-						getCurrentWeapon(plr).front = false;
+				const currentWeapon = getCurrentWeapon(plr);
+				if (currentWeapon) {
+					const snappedAngle = Math.round((plr.angle % 360) / 90) * 90;
+					if (snappedAngle === 0 || snappedAngle === 360) {
+						currentWeapon.front = true;
+					} else if (snappedAngle === 180) {
+						currentWeapon.front = false;
 					} else {
-						getCurrentWeapon(plr).front = true;
+						currentWeapon.front = true;
 					}
 				}
 				if (plr.jumpCountdown > 0) {
@@ -1731,7 +1683,7 @@ function updateGameLoop() {
 				}
 				plr.jumpY = Math.round(plr.jumpY);
 			}
-			if (plr.index == st.player.index && !st.gameOver) {
+			if (plr.index === st.player.index && !st.gameOver) {
 				let sendData = {
 					hdt: b,
 					vdt: d,
@@ -1751,7 +1703,8 @@ function updateGameLoop() {
 					playerReload(plr, true);
 				}
 				if (keys.lm && !st.gameOver && st.player.weapons.length > 0) {
-					if (currentTime - getCurrentWeapon(plr).lastShot >= getCurrentWeapon(plr).fireRate) {
+					const weapon = getCurrentWeapon(plr);
+					if (weapon && currentTime - weapon.lastShot >= weapon.fireRate) {
 						shootBullet(plr);
 					}
 				}
@@ -1759,25 +1712,25 @@ function updateGameLoop() {
 			if (st.gameOver) {
 				plr.animIndex = 0;
 			} else {
-				let f = Math.abs(b) + Math.abs(d);
-				if (plr.index != st.player.index) {
-					f = Math.abs(plr.xSpeed!) + Math.abs(plr.ySpeed!);
+				let movementDelta = Math.abs(b) + Math.abs(d);
+				if (plr.index !== st.player.index) {
+					movementDelta = Math.abs(plr.xSpeed!) + Math.abs(plr.ySpeed!);
 				}
-				if (f > 0) {
+				if (movementDelta > 0) {
 					plr.frameCountdown -= delta / 4;
 					if (plr.frameCountdown <= 0) {
 						plr.animIndex++;
-						if (plr.jumpY == 0 && plr.onScreen && !plr.dead) {
+						if (plr.jumpY === 0 && plr.onScreen && !plr.dead) {
 							stillDustParticle(plr.x, plr.y, false);
 						}
 						if (plr.animIndex >= 3) {
 							plr.animIndex = 1;
-						} else if (plr.animIndex == 2 && plr.jumpY <= 0) {
+						} else if (plr.animIndex === 2 && plr.jumpY <= 0) {
 							playSound("step1", plr.x, plr.y);
 						}
 						plr.frameCountdown = 40;
 					}
-				} else if (plr.animIndex != 0) {
+				} else if (plr.animIndex !== 0) {
 					plr.animIndex = 0;
 				}
 				if (plr.jumpY > 0) {
