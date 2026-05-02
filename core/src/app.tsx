@@ -941,16 +941,25 @@ function setupSocket(sock: Socket) {
 		if (a.indx === st.player.index) {
 			st.player.x = a.newX;
 			st.player.y = a.newY;
-			startBigAnimText(
-				"ZONE ENTERED",
-				`+${a.scor} POINTS`,
-				2000,
-				true,
-				"#ffffff",
-				"#5151d9",
-				true,
-				1.3,
-			);
+			switch (st.gameMap.gameMode.code) {
+				case "zmtch":
+					startBigAnimText(
+						"ZONE ENTERED",
+						`+${a.score} POINTS`,
+						2000,
+						true,
+						"#ffffff",
+						"#5151d9",
+						true,
+						1.3,
+					);
+					break;
+				case "hp":
+					showNotification(`+${a.score}`);
+					break;
+				default:
+					break;
+				}
 		} else {
 			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
 			showNotification(`${user.name} scored`);

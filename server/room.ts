@@ -582,7 +582,7 @@ export class Room {
 
 				player.scoreCountdown = 1000;
 				const scored = this.game.mode.code === "hp" ? 10 : 100;
-				let tprt: ZoneEvent = { indx: player.index, scor: scored };
+				let tprt: ZoneEvent = { indx: player.index, score: scored };
 				if (this.game.mode.code === "zmtch") {
 					const spawn = this.game.getSpawn(player);
 					player.x = tprt.newX = spawn.x;

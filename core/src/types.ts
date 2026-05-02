@@ -223,7 +223,7 @@ export type ShootEvent = {
 
 export type ZoneEvent = {
 	indx: number;
-	scor: number;
+	score: number;
 	newX?: number;
 	newY?: number;
 };
