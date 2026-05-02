@@ -1677,14 +1677,15 @@ function updateGameLoop() {
 				plr.x = Math.round(plr.x);
 				plr.y = Math.round(plr.y);
 				plr.angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
-				if (getCurrentWeapon(plr)) {
-					let f = Math.round((plr.angle % 360) / 90) * 90;
-					if (f === 0 || f === 360) {
-						getCurrentWeapon(plr).front = true;
-					} else if (f === 180) {
-						getCurrentWeapon(plr).front = false;
+				const currentWeapon = getCurrentWeapon(plr);
+				if (currentWeapon) {
+					const snappedAngle = Math.round((plr.angle % 360) / 90) * 90;
+					if (snappedAngle === 0 || snappedAngle === 360) {
+						currentWeapon.front = true;
+					} else if (snappedAngle === 180) {
+						currentWeapon.front = false;
 					} else {
-						getCurrentWeapon(plr).front = true;
+						currentWeapon.front = true;
 					}
 				}
 				if (plr.jumpCountdown > 0) {
@@ -1707,7 +1708,7 @@ function updateGameLoop() {
 				}
 				plr.jumpY = Math.round(plr.jumpY);
 			}
-			if (plr.index == st.player.index && !st.gameOver) {
+			if (plr.index === st.player.index && !st.gameOver) {
 				let sendData = {
 					hdt: b,
 					vdt: d,
@@ -1727,7 +1728,8 @@ function updateGameLoop() {
 					playerReload(plr, true);
 				}
 				if (keys.lm && !st.gameOver && st.player.weapons.length > 0) {
-					if (currentTime - getCurrentWeapon(plr).lastShot >= getCurrentWeapon(plr).fireRate) {
+					const weapon = getCurrentWeapon(plr);
+					if (weapon && currentTime - weapon.lastShot >= weapon.fireRate) {
 						shootBullet(plr);
 					}
 				}
@@ -1735,25 +1737,25 @@ function updateGameLoop() {
 			if (st.gameOver) {
 				plr.animIndex = 0;
 			} else {
-				let f = Math.abs(b) + Math.abs(d);
-				if (plr.index != st.player.index) {
-					f = Math.abs(plr.xSpeed!) + Math.abs(plr.ySpeed!);
+				let movementDelta = Math.abs(b) + Math.abs(d);
+				if (plr.index !== st.player.index) {
+					movementDelta = Math.abs(plr.xSpeed!) + Math.abs(plr.ySpeed!);
 				}
-				if (f > 0) {
+				if (movementDelta > 0) {
 					plr.frameCountdown -= delta / 4;
 					if (plr.frameCountdown <= 0) {
 						plr.animIndex++;
-						if (plr.jumpY == 0 && plr.onScreen && !plr.dead) {
+						if (plr.jumpY === 0 && plr.onScreen && !plr.dead) {
 							stillDustParticle(plr.x, plr.y, false);
 						}
 						if (plr.animIndex >= 3) {
 							plr.animIndex = 1;
-						} else if (plr.animIndex == 2 && plr.jumpY <= 0) {
+						} else if (plr.animIndex === 2 && plr.jumpY <= 0) {
 							playSound("step1", plr.x, plr.y);
 						}
 						plr.frameCountdown = 40;
 					}
-				} else if (plr.animIndex != 0) {
+				} else if (plr.animIndex !== 0) {
 					plr.animIndex = 0;
 				}
 				if (plr.jumpY > 0) {
