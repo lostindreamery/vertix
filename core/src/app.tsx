@@ -2320,7 +2320,7 @@ declare global {
 // });
 
 window.joinRoom = joinRoom;
-async function joinRoom(roomName: string): Promise<boolean> {
+async function joinRoom(roomName: string) {
 	if (st.changingLobby) return false;
 	// history.pushState(room, "", `${location.origin}/?${room}`);
 	st.changingLobby = true;
