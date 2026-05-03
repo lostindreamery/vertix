@@ -420,3 +420,8 @@ export async function loadImageData(file: File): Promise<GenData> {
 		data: ctx.getImageData(0, 0, img.width, img.height).data,
 	};
 }
+
+export const TeamColors = {
+	Red: "#d95151",
+	Blue: "#5151d9",
+};
